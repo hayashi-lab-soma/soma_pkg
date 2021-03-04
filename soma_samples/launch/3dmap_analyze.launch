@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- arguments -->
-	<arg name="pcd_file" default="$(find soma_smpls)/data/Mirais-3DMap-2021-02.pcd" />
+	<arg name="pcd_file" default="$(find soma_samples)/data/Mirais-3DMap-2021-02.pcd" />
 	<arg name="pcd_pub_interval" default="1.0" />
 	<arg name="pcd_frame_id" default="map" />
 	<!--  -->
@@ -11,7 +11,7 @@
 	<!--  -->
 	<!-- PCD publish -->
 	<!-- publish topic: /raw_points -->
-	<include file="$(find soma_smpls)/launch/pcd_publish.launch">
+	<include file="$(find soma_samples)/launch/pcd_publish.launch">
 		<arg name="file" value="$(arg pcd_file)" />
 		<arg name="interval" value="$(arg pcd_pub_interval)" />
 		<arg name="frame_id" value="$(arg pcd_frame_id)" />
@@ -22,7 +22,7 @@
 	<!--  -->
 	<!-- launch prefiltering nodelets, height clip, common filter -->
 	<!-- publish topic: /filtered_points -->
-	<include file="$(find soma_smpls)/launch/prefiltering.launch">
+	<include file="$(find soma_samples)/launch/prefiltering.launch">
 		<arg name="input_topic" value="/raw_points" />
 		<arg name="frame_id" value="$(arg pcd_frame_id)" />
 		<arg name="nodelet_manager" value="$(arg nodelet_manager)" />
@@ -61,5 +61,5 @@
 	<!--  -->
 	<!--  -->
 	<!--  -->
-	<node if="$(arg gui)" name="visualizer" pkg="rviz" type="rviz" args="-d $(find soma_smpls)/rviz/3dmap_analyze.rviz" />
+	<node if="$(arg gui)" name="visualizer" pkg="rviz" type="rviz" args="-d $(find soma_samples)/rviz/3dmap_analyze.rviz" />
 </launch>
