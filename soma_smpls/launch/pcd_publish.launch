@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="file" default="" />
+	<arg name="interval" default="1.0" />
+	<arg name="frame_id" default="base_link" />
+	<!-- run pcd publihser node -->
+	<node name="pcd_publisher" pkg="pcl_ros" type="pcd_to_pointcloud" args="$(arg file) $(arg interval)">
+		<param name="frame_id" value="$(arg frame_id)" />
+		<remap from="cloud_pcd" to="raw_points" />
+	</node>
+</launch>

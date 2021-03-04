@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="nodelet_manager" default="test_manager" />
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" output="screen" args="manager" />
+	<node name="sample_nodelet" pkg="nodelet" type="nodelet" output="screen" args="load soma_smpls/nodelet_temp $(arg nodelet_manager)" />
+</launch>

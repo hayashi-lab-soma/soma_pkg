@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="input_topic" default="/points" />
+	<arg name="frame_id" default="base_link" />
+	<arg name="nodelet_manager" default="" doc="" />
+	<!-- filtering parameters -->
+	<arg name="height_min" default="0.0" doc="" />
+	<arg name="height_max" default="100.0" doc="" />
+	<arg name="distance_near" default="0.1" doc="" />
+	<arg name="distance_far" default="100.0" doc="" />
+	<arg name="downsample_resolution" default="0.1" doc="" />
+	<arg name="statistical_mean_k" default="30" doc="" />
+	<arg name="statistical_stddev" default="1.0" doc="" />
+	<!--  -->
+	<!-- Height clipping (z-axis) -->
+	<node name="height_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg input_topic)" />
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="$(arg height_min)" />
+		<param name="filter_limit_max" value="$(arg height_max)" />
+	</node>
+	<!-- distance, voxel, statistical filteres -->
+	<node name="common_filter" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)">
+		<remap from="velodyne_points" to="height_clip/output" />
+		<param name="base_link_frame" value="$(arg frame_id)" />
+		<!-- distance filter -->
+		<param name="use_distance_filter" value="true" />
+		<param name="distance_near_thresh" value="$(arg distance_near)" />
+		<param name="distance_far_thresh" value="$(arg distance_far)" />
+		<!-- NONE, VOXELGRID, or APPROX_VOXELGRID -->
+		<param name="downsample_method" value="VOXELGRID" />
+		<param name="downsample_resolution" value="$(arg downsample_resolution)" />
+		<!-- NONE, RADIUS, or STATISTICAL -->
+		<param name="outlier_removal_method" value="STATISTICAL" />
+		<param name="statistical_mean_k" value="$(arg statistical_mean_k)" />
+		<param name="statistical_stddev" value="$(arg statistical_stddev)" />
+		<param name="radius_radius" value="0.5" />
+		<param name="radius_min_neighbors" value="2" />
+	</node>
+	<!--  -->
+</launch>

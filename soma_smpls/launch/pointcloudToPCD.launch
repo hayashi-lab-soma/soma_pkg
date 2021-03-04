@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="pointcloud2pcd" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl_utils/PointCloudToPCD nodelet_manager">
+		<remap from="~input" to="/velodyne_points" />
+		<param name="prefix" value="/home/hayashi/Documents/tominaga/velodyne_points_" />
+		<param name="fixed_frame" value="velodyne" />
+		<param name="duration" value="2.0" />
+	</node>
+</launch>

@@ -1,0 +1,28 @@
+dictitems:
+  filter_field_name: z
+  filter_limit_max: 100.0
+  filter_limit_min: 0.4
+  filter_limit_negative: false
+  groups:
+    dictitems:
+      filter_field_name: z
+      filter_limit_max: 100.0
+      filter_limit_min: 0.4
+      filter_limit_negative: false
+      groups:
+        state: []
+      id: 0
+      input_frame: map
+      keep_organized: false
+      name: Default
+      output_frame: map
+      parameters:
+        state: []
+      parent: 0
+      state: true
+      type: ''
+    state: []
+  input_frame: map
+  keep_organized: false
+  output_frame: map
+state: []

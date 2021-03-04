@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="local_costmap" pkg="soma_smpls" type="sample_local_costmap" output="screen">
+		<rosparam command="load" file="$(find soma_mse)/config/local_costmap.yaml"/>
+	</node>
+</launch>
