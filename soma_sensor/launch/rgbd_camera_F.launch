@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- rgbd camera node launch-->
+  <include file="$(find soma_sensor)/launch/rgbd_camera.launch">
+    <arg name="base_link" value="soma_link"/>
+    <arg name="camera_name" value="camera_F"/>
+    <arg name="serial_no" value="939622073512"/>
+    <arg name="use_center_frame" value="false"/>
+    <arg name="pan_angle" value="0"/>
+    <arg name="tilt_angle" value="15"/>
+    <arg name="role_angle" value="0"/>
+    <arg name="tx" default="0.85"/>
+    <arg name="ty" default="0.0"/>
+    <arg name="tz" default="0.8"/>
+  </include>
+
+</launch>
+
