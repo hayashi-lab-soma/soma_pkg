@@ -1,7 +1,7 @@
-# soma_ros_pkg
-林研究室 林業用ロボット"SOMA"のROSパッケージ
+# soma_pkg
+林研究室 林業用ロボット"SOMA"のROSベースパッケージ
 
-![SOMA 3D Model](soma_ros/images/ATV_3D_Model.png "SOMA")
+![SOMA 3D Model](./images/ATV_3D_Model.png "SOMA")
 
 ## 外部パッケージ要求(Requirement)  
 * velodyne : velodyne社製LiDARを扱うパッケージ  
@@ -15,51 +15,12 @@
 
 * hdl_graph_slam : LiDARに対応した３次元slamパッケージ  
 
-## 外部パッケージ導入(Installation)
-* __velodyne__  
-http://wiki.ros.org/velodyne  
 
-for kinetic  
-```
-sudo apt install ros-kinetic-velodyne
-```
-for melodic  
-```
-sudo apt install ros-melodic-velodyne
-```
 
-* __realsense-ros__  
-https://github.com/IntelRealSense/realsense-ros#installation-instructions  
 
-for kinetic  
-```
-sudo apt install ros-kinetic-realsense2-camera
-```
-for melodic  
-```
-sudo apt install ros-melodic-realsense2-camera
-```
 
-* __nmea_navsat_driver__  
-http://wiki.ros.org/nmea_navsat_driver  
 
-```
-sudo apt install ros-kinetic-nmea-navsat-driver
-```
-```
-sudo apt install ros-melodic-nmea-navsat-driver
-```
 
-* __xsens_driver__  
-http://wiki.ros.org/xsens_driver  
-
-catkin_wsにソースコードをダウンロードしてcatkin_makeする  
-```
-cd catkin_ws/src
-git clone https://github.com/ethz-asl/ethzasl_xsens_driver
-cd ~/catkin_ws
-catkin_make
-```
 
 * __costmap_2d__  
 ```
@@ -140,30 +101,4 @@ soma_ros_pkg:
 ## 実行方法等(How to run)
 __センサノード起動__
 
-__LiDAR (VLP-16)__
-```
-roslaunch soma_sensor lidar.launch
-```
 
-__RGB-Dカメラ__
-* 単体起動  
-シリアル番号の指定なし
-```
-roslaunch soma_sensor rgbd_camera.launch 
-```
-* 前方・後方カメラ起動  
-launchファイル内でシリアル番号指定
-```
-roslaunch soma_sensor rgbd_camera_F.launch
-roslaunch soma_sensor rgbd_camera_B.launch
-```
-
-__IMU (姿勢検出)__
-```
-roslaunch soma_sensor imu.launch
-```
-
-__GPS (USB serial communication)__
-```
-roslaunch soma_sensor gps.launch
-```
