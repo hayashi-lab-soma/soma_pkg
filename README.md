@@ -4,23 +4,12 @@
 ![SOMA 3D Model](./images/ATV_3D_Model.png "SOMA")
 
 ## 外部パッケージ要求(Requirement)  
-* velodyne : velodyne社製LiDARを扱うパッケージ  
-* realsense-ros : R200,D435,D435iを扱うパッケージ  
-* xsens_driver : xsensのIMUを扱うパッケージ  
-* nmea_navsat_driver : USB接続のGPSを扱うパッケージ  
 * costmap_2d : 二次元コストマップを扱うパッケージ
 * dwa_local_planner : DWAによる局所動作計画を行なうためのパッケージ
 * navfn : ナビゲーション用の基礎パッケージ
 * jsk_rviz_plugins : rvizに対応した便利なGUIプラグイン集
 
 * hdl_graph_slam : LiDARに対応した３次元slamパッケージ  
-
-
-
-
-
-
-
 
 * __costmap_2d__  
 ```
@@ -97,8 +86,3 @@ soma_ros_pkg:
 * soma_ros:
 * soma_smpls:  
 動作チェック用，お試し用の置き場所
-
-## 実行方法等(How to run)
-__センサノード起動__
-
-
