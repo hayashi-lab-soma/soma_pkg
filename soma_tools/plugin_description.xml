@@ -1,0 +1,7 @@
+<library path="lib/libsoma_tools">
+	<class name="soma_tools/twist_panel" type="soma_tools::TwistPanel" base_class_type="rviz::Panel">
+		<description>
+			twist panel
+		</description>
+	</class>
+</library>

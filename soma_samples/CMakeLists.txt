@@ -151,9 +151,6 @@ add_library(${PROJECT_NAME}
 add_executable(show_navsatfix_msgs
   src/show_navsatfix_msgs.cpp
 )
-add_executable(show_imu_data_msgs
-  src/show_imu_data_msgs.cpp
-)
 add_executable(cloud_tf4ros
   src/cloud_tf4ros.cpp
 )
@@ -182,9 +179,6 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 target_link_libraries(show_navsatfix_msgs
-   ${catkin_LIBRARIES}
-)
-target_link_libraries(show_imu_data_msgs
    ${catkin_LIBRARIES}
 )
 target_link_libraries(cloud_tf4ros
