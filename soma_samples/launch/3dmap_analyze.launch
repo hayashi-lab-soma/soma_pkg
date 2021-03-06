@@ -33,10 +33,10 @@
 		<arg name="distance_far" value="25.0" />
 		<arg name="downsample_resolution" value="0.1" />
 		<arg name="statistical_mean_k" value="50" />
-		<arg name="statistical_stddev" value="0.5" />
+		<arg name="statistical_stddev" value="0.01" />
 	</include>
 	<!--  -->
-	<!--  -->
+	<!-- Run point cloud segmentation nodes -->
 	<!--
 	<node name="to_color" pkg="nodelet" type="nodelet" args="load jsk_pcl_utils/PointCloudXYZToXYZRGB $(arg nodelet_manager)">
 	<remap from="~input" to="filtered_points" />

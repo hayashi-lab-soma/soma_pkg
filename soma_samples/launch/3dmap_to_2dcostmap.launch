@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="pcd_file" default="$(find soma_samples)/data/Mirais-3DMap-2021-02-mod.pcd" />
+	<arg name="pcd_pub_interval" default="1.0" />
+	<arg name="pcd_frame_id" default="map" />
+	<arg name="use_cloud_filter" default="true" doc="" />
+	<!--  -->
+	<arg name="nodelet_manager" default="points_manager" doc="" />
+	<!--  -->
+	<arg name="gui" default="true" doc="" />
+	<!--  -->
+	<!--
+	Run PCD publisher
+	publish topic: /raw_points
+	-->
+	<include file="$(find soma_samples)/launch/pcd_publish.launch">
+		<arg name="file" value="$(arg pcd_file)" />
+		<arg name="interval" value="$(arg pcd_pub_interval)" />
+		<arg name="frame_id" value="$(arg pcd_frame_id)" />
+	</include>
+	<!-- Run nodelet manager -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" output="screen" />
+	<!--  -->
+	<!--
+	Launch prefiltering nodelets, height clip, common filter
+	publish topic: /filtered_points
+	-->
+	<include if="$(arg use_cloud_filter)" file="$(find soma_samples)/launch/prefiltering.launch">
+		<arg name="input_topic" value="/raw_points" />
+		<arg name="frame_id" value="$(arg pcd_frame_id)" />
+		<arg name="nodelet_manager" value="$(arg nodelet_manager)" />
+		<!-- filtering parameters -->
+		<arg name="height_min" value="0.4" />
+		<arg name="height_max" value="1.5" />
+		<arg name="distance_near" value="0.01" />
+		<arg name="distance_far" value="100.0" />
+		<arg name="downsample_resolution" value="0.1" />
+		<arg name="statistical_mean_k" value="30" />
+		<arg name="statistical_stddev" value="0.1" />
+	</include>
+	<!--  -->
+	<!--
+	Run octomap_server
+	to make the 2D costmap
+	-->
+	<node name="octomap_server" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
+		<remap if="$(arg use_cloud_filter)" from="cloud_in" to="/filtered_points" />
+		<remap unless="$(arg use_cloud_filter)" from="cloud_in" to="/raw_points" />
+		<param name="frame_id" value="$(arg pcd_frame_id)" />
+		<param name="resolution" value="0.1" />
+	</node>
+	<!--  -->
+	<node if="$(arg gui)" name="visualizer" pkg="rviz" type="rviz" args="-d $(find soma_samples)/rviz/3dmap_to_2dcostmap.rviz" />
+</launch>
