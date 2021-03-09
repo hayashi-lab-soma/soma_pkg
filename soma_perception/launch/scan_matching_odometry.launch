@@ -1,4 +1,8 @@
 <?xml version="1.0"?>
+<!--
+Launch "scan matching odometry nodes" in HDL Graph SLAM
+To estimate odometry
+-->
 <launch>
 	<!-- arguments -->
 	<arg name="use_nodelet_manager" default="false" doc="" />
