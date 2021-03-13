@@ -43,9 +43,6 @@ include_directories(
 add_library(${PROJECT_NAME}
     src/diameter_estimation_nodelet.cpp
     src/plane_segmentation_nodelet.cpp
-    src/sample_segmentation_nodelet.cpp
-    src/floor_detection_nodelet.cpp
-    src/octree_voxel_grid_nodelet.cpp
     src/mlp_prefiltering_nodelet.cpp
     )
 
