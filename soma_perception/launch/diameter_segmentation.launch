@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <arg name="camera_name" default="camera_F"/>
+  <arg name="frame_id" default="soma_link"/>
+  <arg name="input_points" default="/$(arg camera_name)/depth_registered/points"/>
+  <arg name="prefiltered_points" default="/$(arg camera_name)/prefiltered"/>
+  <!-- <arg name="input_imu" default="/imu/data"/> -->
+
+  <!-- launch the nodelet manager -->
+  <arg name="nodelet_manager_name" default="soma_vision_manager"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" />
+
+
+
+  <node pkg="nodelet" type="nodelet" name="pt_z_filter" args="load pcl/PassThrough $(arg nodelet_manager_name)">
+    <remap from="~input" to="/$(arg input_points)"/>
+    <!-- <param name="input_frame" value="$(arg camera_name)_color_optical_frame"/> -->
+    <param name="input_frame" value="$(arg frame_id)"/>
+    <param name="filter_field_name" value="z"/>
+    <param name="filter_limit_min" value="-0.1"/>
+    <param name="filter_limit_max" value="1.5"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="pt_y_filter" args="load pcl/PassThrough $(arg nodelet_manager_name)">
+    <remap from="~input" to="/pt_z_filter/output"/>
+    <!-- <param name="input_frame" value="$(arg camera_name)_color_optical_frame"/> -->
+    <param name="input_frame" value="$(arg frame_id)"/>
+    <param name="filter_field_name" value="y"/>
+    <param name="filter_limit_min" value="-0.5"/>
+    <param name="filter_limit_max" value="0.5"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough $(arg nodelet_manager_name)">
+    <remap from="~input" to="/pt_y_filter/output"/>
+    <!-- <param name="input_frame" value="$(arg camera_name)_color_optical_frame"/> -->
+    <param name="input_frame" value="$(arg frame_id)"/>
+    <param name="filter_field_name" value="x"/>
+    <param name="filter_limit_min" value="0.0"/>
+    <param name="filter_limit_max" value="1.5"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="downsample" args="load pcl/VoxelGrid $(arg nodelet_manager_name)">
+    <remap from="~input" to="/pt_x_filter/output"/>
+    <param name="input_frame" value="$(arg frame_id)"/>
+    <param name="leaf_size" value="0.01"/>
+    <param name="filter_limit_min" value="-10"/>
+    <param name="filter_limit_max" value="10"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+
+  <!-- launch Plane Segmentation nodelet -->
+  <node pkg="nodelet" type="nodelet" name="diameter_estimation"
+        args="load soma_perception/DiameterEstimationNodelet $(arg nodelet_manager_name)">
+    <param name="base_link" value="$(arg frame_id)"/>
+    <param name="normal_distance_weight" value="0.7" />
+    <param name="max_iterations" value="10" />
+    <param name="distance_thres" value="0.1" />
+    <param name="radius_min" value="0" />
+    <param name="radius_max" value="0.5" />
+
+    <remap from="input_points" to="/downsample/output"/>
+  </node>
+</launch>
