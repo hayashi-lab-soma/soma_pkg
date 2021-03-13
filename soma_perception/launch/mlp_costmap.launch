@@ -1,0 +1,12 @@
+<launch>
+
+	<!-- <node pkg="tf" type="static_transform_publisher"
+	name="tfBase2foot_print" args="0 0 -0.2 0 0 0 foot_print soma_link 10"/> -->
+
+  <param name="/use_sim_time" value="true" />
+
+  <node pkg="soma_smpls" type="costmap_example" name="costmap_test" output="screen">
+    <rosparam command="load" file="$(find soma_perception)/config/mlp_costmap.yaml"/>
+  </node>
+
+</launch>

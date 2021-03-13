@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <!-- <arg name="camera_name" default="camera_L"/>
+  <arg name="frame_id" default="soma_link"/>
+  <arg name="input_points" default="/$(arg camera_name)/prefiltered"/> -->
+
+  <!-- <arg name="input_points" default="/$(arg camera_name)/depth_registered/points"/> -->
+  <!-- <arg name="input_imu" default="/imu/data"/> -->
+
+
+
+  <!-- <arg name="file_name" value="/home/soma/10_0.05_6_2.pcd"/> -->
+  <!-- <arg name="file_name" value="/home/soma/Documents/tomokawa/dataset/20210120_right/raw/1611116571.263151804.pcd"/>
+  <arg name="rate" value="0.1"/>
+  <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pcd_to_pointcloud" args="$(arg file_name) $(arg rate)" output="screen">
+      <param name="frame_id" value="map" />
+  </node> -->
+
+
+
+
+
+  <!-- launch the nodelet manager -->
+  <arg name="nodelet_manager_name" default="soma_vision_manager"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" />
+
+  <node name="depth_image_creator"
+        pkg="nodelet" type="nodelet"
+        args="load jsk_pcl/DepthImageCreator $(arg nodelet_manager_name)">
+    <!-- <remap from="~input" to="/camera_F/depth_registered/points" /> -->
+    <remap from="~input" to="/camera_F/prefiltered" />
+    <remap from="~info" to="/camera_F/color/camera_info" />
+    <rosparam>
+      use_approximate: true
+      max_queue_size: 100
+      max_pub_queue_size: 1
+      max_sub_queue_size: 1
+      organize_cloud: true
+    </rosparam>
+  </node>
+
+
+  <node pkg="nodelet" type="nodelet" name="jsk_plane_seg" 
+    args="load jsk_pcl/OrganizedMultiPlaneSegmentation $(arg nodelet_manager_name)">
+    <remap from="~input" to="/depth_image_creator/output_cloud" />
+    <!-- <remap from="~input" to="/camera_F/depth_registered/points" /> -->
+    <param name="~estimate_normal" value="True" />
+    <param name="~publish_normal" value="True"/>
+  </node>
+ 
+</launch>
