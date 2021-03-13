@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<!-- 2020.9.28 tominaga
+  平面・斜面検出ノードのデバッグができるようにテストフラグ"test"を追加
+  test == true でpcdファイルをPointCloud2にしてパブリッシュするノードが動く
+  test == false はリアルタイムでセンサと連携するモード
+  "pcdfile"変数にpcdファイルまでの絶対パスを入れてroslaunchしてください
+-->
+
+<launch>
+  <arg name="camera_name" default="camera_F"/>
+  <arg name="frame_id" default="soma_link"/>
+  <!-- <arg name="input_points" default="/$(arg camera_name)/prefiltered"/> -->
+  <arg name="input_points" default="/$(arg camera_name)/depth_registered/points"/>
+  <arg name="input_imu" default="/imu/data"/>
+
+  <!-- launch the nodelet manager -->
+  <arg name="nodelet_manager_name" default="soma_vision_manager"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" />
+
+
+
+  <!-- launch Plane Segmentation nodelet -->
+    <!-- <node pkg="nodelet" type="nodelet" name="segmenatation"
+          args="load soma_perception/SampleSegmentationNodelet $(arg nodelet_manager_name)">
+      <remap from="input_points" to="/$(arg camera_name)/prefiltered"/>
+      <param name="base_link" value="$(arg frame_id)"/>
+      <param name="number_of_neighbours" value="10"/>
+      <param name="smoothThreshold" value="6.0"/>
+      <param name="curvatureThreshold" value="5.0"/>
+      <param name="output_dirpath" value="/home/soma/Documents/tomokawa/pcd/20201218_rgs/2/" />
+      <param name="export_switch" value="false" />
+    </node> -->
+
+    <node pkg="nodelet" type="nodelet" name="normal_estimation"
+          args="load jsk_pcl/NormalEstimationOMP $(arg nodelet_manager_name)">
+      <remap from="~input" to="/cloud_pcd"/>
+    </node>
+    
+
+    <node pkg="nodelet" type="nodelet" name="segmenatation"
+          args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg nodelet_manager_name)">
+      <remap from="~input" to="/cloud_pcd"/>
+      <remap from="~input_normal" to="/normal_estimation/output"/>
+      <param name="min_size" value="500" />
+      <param name="max_size" value="50000" />
+      <param name="~max_curvature" value="0.3"/>
+    </node>
+
+ 
+</launch>

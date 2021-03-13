@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <!-- frag for input test data -->
+  <arg name="test" default="false"/>
+  <arg name="rviz_switch" default="false"/>
+  <arg name="pcdfile" default="/home/soma1/catkin_ws/src/soma_ros_pkg/soma_ros/data/outside_tf.pcd"/>
+
+  <arg name="camera_name" default="camera_F"/>
+  <arg name="frame_id" default="soma_link"/>
+  <arg name="input_points" default="/$(arg camera_name)/depth_registered/points"/>
+  <!-- <arg name="input_imu" default="/imu/data"/> -->
+
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="Base2FootPrint" args="0 0 -0.23 0 0 0 $(arg frame_id) foot_print" /> -->
+	
+
+  <!-- launch the nodelet manager -->
+  <arg name="nodelet_manager_name" default="soma_vision_manager"/>
+  <node pkg="nodelet" type="nodelet" name="$(arg nodelet_manager_name)" args="manager" output="screen" />
+
+  <!-- passthrough z_axis -->
+  <node pkg="nodelet" type="nodelet" name="plane_z_filter" args="load pcl/PassThrough $(arg nodelet_manager_name)">
+    <remap from="~input" to="/$(arg input_points)"/>
+    <param name="input_frame" value="$(arg camera_name)_color_optical_frame"/>
+    <param name="filter_field_name" value="y"/>
+    <param name="filter_limit_min" value="-0.1"/>
+    <param name="filter_limit_max" value="15.0"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+  
+  <!-- downsample_voxel_grid -->
+  <node pkg="nodelet" type="nodelet" name="downsample" args="load pcl/VoxelGrid $(arg nodelet_manager_name)">
+    <remap from="~input" to="/plane_z_filter/output"/>
+    <param name="input_frame" value="$(arg frame_id)"/>
+    <param name="leaf_size" value="0.06"/>
+    <param name="filter_limit_min" value="-10"/>
+    <param name="filter_limit_max" value="10"/>
+    <param name="filter_limit_negative" value="false"/>
+  </node>
+
+  <!-- launch Plane Segmentation nodelet -->
+  <node pkg="nodelet" type="nodelet" name="mlp_prefiltering"
+        args="load soma_perception/MlpPrefilteringNodelet $(arg nodelet_manager_name)">
+    <param name="base_link" value="$(arg frame_id)"/>
+    <param name="search_radius" value="0.5" />
+
+    <remap from="input_points" to="/downsample/output"/>
+  </node>
+
+
+  <group if="$(arg test)">
+    
+    <!-- pcd to pointcloud2 -->
+    <node pkg="pcl_ros" type="pcd_to_pointcloud" name="pcd2PC2" args="$(arg pcdfile) 0.1">
+      <param name="~frame_id" value="camera_link"/>
+
+      <!-- remap publish topic name -->
+      <remap from="cloud_pcd" to="$(arg input_points)"/>
+    </node>
+
+    <!-- transform parameter and node -->
+    <arg name="rot_x" value="$(eval 180.0/180.0*3.1415)"/>
+    <arg name="rot_y" value="$(eval 90.0/180.0*3.1415)"/>
+    <arg name="rot_z" value="$(eval -90.0/180.0*3.1415)"/>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="Cam2Base"
+    args="0 0 0.5 $(arg rot_x) 0 $(arg rot_z) $(arg frame_id) camera_link" />
+  
+  </group>
+</launch>

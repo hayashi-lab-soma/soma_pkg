@@ -1,0 +1,44 @@
+<library path="lib/libsoma_perception">
+	<class name="soma_perception/DiameterEstimationNodelet"
+		type="soma_perception::DiameterEstimationNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+
+	<class name="soma_perception/PlaneSegmentationNodelet"
+		type="soma_perception::PlaneSegmentationNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/SampleSegmentationNodelet"
+		type="soma_perception::SampleSegmentationNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/FloorDetectionNodelet"
+		type="soma_perception::FloorDetectionNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/PrefilteringNodelet"
+		type="soma_perception::PrefilteringNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/OctreeVoxelGridNodelet"
+		type="soma_perception::OctreeVoxelGridNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/MlpPrefilteringNodelet"
+		type="soma_perception::MlpPrefilteringNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+
+</library>
