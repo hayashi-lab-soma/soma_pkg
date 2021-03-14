@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="input_points" default="/hdl_graph_slam/map_points" />
+	<arg name="frame_id" default="map" />
+	<arg name="nodelet_manager" default="manager" doc="" />
+	<arg name="x_min" default="-1.0" doc="" />
+	<arg name="x_max" default="30.0" doc="" />
+	<!--  -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" />
+	<!--  -->
+	<node name="x_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg input_points)" />
+		<remap from="~output" to="/filtered_map_points" />
+		<param name="filter_field_name" value="x" />
+		<param name="filter_limit_min" value="$(arg x_min)" />
+		<param name="filter_limit_max" value="$(arg x_max)" />
+	</node>
+	<!-- to pcd file -->
+	<include file="$(find soma_samples)/launch/pointcloudToPCD.launch">
+		<arg name="input" value="/filtered_map_points" doc="" />
+		<arg name="frame_id" value="map" />
+		<arg name="prefix" value="/mnt/d/bagfiles/hdl_graph_slam_exp/map_pcds/" />
+		<arg name="duration" value="30.0" />
+	</include>
+</launch>

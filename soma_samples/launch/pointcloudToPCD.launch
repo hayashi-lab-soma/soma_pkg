@@ -1,9 +1,13 @@
 <?xml version="1.0"?>
 <launch>
+	<arg name="input" default="/velodyne_points" doc="" />
+	<arg name="prefix" default="/home/hayashi/Documents/tominaga/" doc="" />
+	<arg name="frame_id" default="velodyne" doc="" />
+	<arg name="duration" default="1.0" doc="" />
 	<node name="pointcloud2pcd" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl_utils/PointCloudToPCD nodelet_manager">
-		<remap from="~input" to="/velodyne_points" />
-		<param name="prefix" value="/home/hayashi/Documents/tominaga/velodyne_points_" />
-		<param name="fixed_frame" value="velodyne" />
-		<param name="duration" value="2.0" />
+		<remap from="~input" to="$(arg input)" />
+		<param name="prefix" value="$(arg prefix)" />
+		<param name="fixed_frame" value="$(arg frame_id)" />
+		<param name="duration" value="$(arg duration)" />
 	</node>
 </launch>
