@@ -1,0 +1,20 @@
+<library path="lib/libsoma_perception">
+	<class name="soma_perception/DiameterEstimationNodelet"
+		type="soma_perception::DiameterEstimationNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+
+	<class name="soma_perception/PlaneSegmentationNodelet"
+		type="soma_perception::PlaneSegmentationNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+	
+	<class name="soma_perception/MlpPrefilteringNodelet"
+		type="soma_perception::MlpPrefilteringNodelet"
+		base_class_type="nodelet::Nodelet">
+		<description></description>
+	</class>
+
+</library>
