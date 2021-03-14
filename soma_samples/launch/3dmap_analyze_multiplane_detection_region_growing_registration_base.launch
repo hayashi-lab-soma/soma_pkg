@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="pcd_file" default="$(find soma_samples)/data/Mirais-3DMap-2021-02.pcd" />
+	<arg name="pcd_pub_interval" default="5.0" />
+	<arg name="pcd_frame_id" default="map" />
+	<!--  -->
+	<arg name="nodelet_manager" default="cloud_manager" />
+	<!--  -->
+	<arg name="gui" default="true" doc="" />
+	<!--  -->
+	<!-- PCD publish -->
+	<!-- publish topic: /raw_points -->
+	<include file="$(find soma_samples)/launch/pcd_publish.launch">
+		<arg name="file" value="$(arg pcd_file)" />
+		<arg name="interval" value="$(arg pcd_pub_interval)" />
+		<arg name="frame_id" value="$(arg pcd_frame_id)" />
+	</include>
+	<!--  -->
+	<!-- run nodelet manager -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" output="screen" />
+	<!--  -->
+	<!--
+	launch prefiltering nodelets, height clip, common filter
+	publish: /filtered_points
+	-->
+	<include file="$(find soma_samples)/launch/prefiltering.launch">
+		<arg name="input_topic" value="/raw_points" />
+		<arg name="frame_id" value="$(arg pcd_frame_id)" />
+		<arg name="nodelet_manager" value="$(arg nodelet_manager)" />
+		<!-- filtering parameters -->
+		<arg name="height_min" value="-0.3" />
+		<arg name="height_max" value="2.5" />
+		<arg name="distance_near" value="0.01" />
+		<arg name="distance_far" value="23.0" />
+		<arg name="downsample_resolution" value="0.01" />
+		<arg name="statistical_mean_k" value="10" />
+		<arg name="statistical_stddev" value="0.01" />
+	</include>
+	<!--  -->
+	<!--
+	Normal estimation (OMP)
+	publish: /filtered_points_with_normal
+	-->
+	<node name="normal_est" pkg="nodelet" type="nodelet" args="load jsk_pcl/NormalEstimationOMP $(arg nodelet_manager)">
+		<remap from="~input" to="/filtered_points" />
+		<remap from="~output" to="/normals" />
+		<remap from="~output_with_xyz" to="/filtered_points_with_normal" />
+	</node>
+	<!--  -->
+	<!--
+	Convert XYZ to XYZRGB points
+	publish: /filtered_points_with_rgb
+	-->
+	<node name="to_xyzrgb" pkg="nodelet" type="nodelet" args="load jsk_pcl_utils/PointCloudXYZToXYZRGB $(arg nodelet_manager)">
+		<remap from="~input" to="/filtered_points" />
+		<remap from="~output" to="/filtered_points_with_rgb" />
+	</node>
+	<!--  -->
+	<!--
+	Region Growing Mutiple Plane Segmentation
+	publish:
+	-->
+	<node name="segmentation" pkg="nodelet" type="nodelet" args="load jsk_pcl/RegionGrowingMultiplePlaneSegmentation $(arg nodelet_manager)">
+		<remap from="~input" to="/filtered_points_with_rgb" />
+		<remap from="~input_normal" to="/normals" />
+		<param name="angular_threshold" value="3.15"/>
+		<param name="distance_threshold" value="5.0" />
+		<param name="max_curvature" value="0.1"/>
+		<param name="min_size" value="20" />
+		<param name="min_area" value="0.01" />
+		<param name="ransac_refine_outlier_distance_threashold" value="0.4" />
+	</node>
+	<node if="$(arg gui)" name="visualizer" pkg="rviz" type="rviz" args="-d $(find soma_samples)/rviz/3dmap_analyze.rviz" />
+</launch>
