@@ -21,7 +21,8 @@ if __name__ == '__main__':
       cloud = o3d.io.read_point_cloud(file,format='xyz')
       # print(cloud)
       # print(cloud.get_center())
-      center_points.append(cloud.get_center())
+      tmp = [cloud.get_center()[0], cloud.get_center()[1], 0.3]
+      center_points.append(tmp)
     
     center_points = np.array(center_points)
     print(center_points)
