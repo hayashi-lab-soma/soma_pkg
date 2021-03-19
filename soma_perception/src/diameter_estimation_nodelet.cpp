@@ -74,7 +74,7 @@ namespace soma_perception
       transform_pointCloud(input, *cloud_transformed);
       if(cloud_transformed->empty()) return;
       estimate_normal(cloud_transformed, cloud_normals);
-      segment_cylinder(cloud_transformed, cloud_normals, pc_cylinder);
+      double diameter_coeffs = segment_cylinder(cloud_transformed, cloud_normals, pc_cylinder);
 
       //--------------------------------------------------
       // calcurate diameter
@@ -92,6 +92,7 @@ namespace soma_perception
       pub.publish(pc_output);
       NODELET_INFO("pub points size: %5d", (int)pc_cylinder->size());
       NODELET_INFO("diameter: %5lf [m]", diameter);
+      NODELET_INFO("diameter coeffs: %5lf [m]", diameter_coeffs);
       NODELET_INFO("--------------------------");
     }
 
@@ -122,12 +123,12 @@ namespace soma_perception
         ne.compute(*output_normal);
       }
 
-      void segment_cylinder(pcl::PointCloud<PointT>::Ptr input,
+      double segment_cylinder(pcl::PointCloud<PointT>::Ptr input,
                       pcl::PointCloud<pcl::Normal>::Ptr input_normals,
                       pcl::PointCloud<PointT>::Ptr output)
       {
         if (input->size() < 10)
-          return;
+          return 0;
         //instance of RANSAC segmentation processing object
         pcl::SACSegmentationFromNormals<PointT, pcl::Normal> sacseg;
         pcl::ExtractIndices<PointT> EI;
@@ -156,9 +157,9 @@ namespace soma_perception
         catch (const pcl::PCLException &e)
         {
           NODELET_WARN("Cylinder Model Detection Error");
-          return; //failure
+          return 0; //failure
         }
-        return; //success
+        return 2*coeffs->values[6]; //success
       }
 
   private:
