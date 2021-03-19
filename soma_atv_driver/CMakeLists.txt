@@ -12,14 +12,14 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
   maxon_epos_msgs
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-# find_package(std_msgs REQUIRED)
-# find_package(roscpp REQUIRED)
-# find_package(rospy REQUIRED)
+find_package(Qt5 REQUIRED
+  Network
+)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -170,6 +170,7 @@ add_executable(atv_driver_node
 # )
 target_link_libraries(atv_driver_node
   ${catkin_LIBRARIES}
+  Qt5::Network
 )
 
 
