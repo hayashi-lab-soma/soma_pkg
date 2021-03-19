@@ -68,6 +68,7 @@ namespace Clutch
 struct Definitions_t
 {
   int state;
+  int cmd;
   //
   double *current_positions; //motor current positions
   double *target_positions;  //motor target positions

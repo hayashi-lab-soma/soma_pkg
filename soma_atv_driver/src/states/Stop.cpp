@@ -10,6 +10,12 @@ Stop::~Stop()
 
 int Stop::_Transition(Definitions_t *data)
 {
+  switch (data->cmd)
+  {
+  case Mode::Forward:
+  case Mode::Backward:
+    return State::Starting;
+  }
   return State::Stop;
 }
 int Stop::_Enter(Definitions_t *data)
