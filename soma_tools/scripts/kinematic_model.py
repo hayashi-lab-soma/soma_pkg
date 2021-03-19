@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 # paremeters
 L = 1.04  # tread length [m]
 V = 1.0  # constant velocity [m]
-PHIS = np.linspace(-30, 30, num=7)  # constant steering angle [deg]
+dPHI = 5.0
+PHI_MIN = -30.0
+PHI_MAX = 30.0
+NUM_PHI = int((PHI_MAX - PHI_MIN)/dPHI) + 1
+PHIS = np.linspace(-30, 30, num=NUM_PHI)  # constant steering angle [deg]
 Q_INIT = [0.0, 0.0, 0.0]  # initial state vector on 2-D [x,y,theta]
 
 #
@@ -23,13 +27,13 @@ def func_kinematics(var, t, l, v, phi):
 if __name__ == '__main__':
     print('SOMA Kinematic Model Simulator')
 
-    t_list = np.linspace(0.0, 10.0, 100)
+    t_list = np.linspace(0.0, 5.0, num=10000)
 
     print("compute")
     data_set = []
     for phi in PHIS:
         print("Steer:", phi, math.radians(phi))
-        Q = odeint(func_kinematics, Q_INIT, t_list, args=(L, V, phi))
+        Q = odeint(func_kinematics, Q_INIT, t_list, args=(L, V, math.radians(phi)))
 
         x_list = np.array(Q[:, 0]).copy()
         y_list = np.array(Q[:, 1]).copy()
@@ -42,17 +46,10 @@ if __name__ == '__main__':
     data_set = np.array(data_set)
     print(data_set.shape)
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1, 1, 1)
-    # ax.set_xlim(-0.0, 5.0)
-    # ax.set_ylim(0.0, 5.0)
-    # ax.plot(x_list, y_list,)
-    # plt.show()
-
-    for i,d in enumerate(data_set):
+    for i, d in enumerate(data_set):
         np.savetxt(SAVE_DIR+str(i)+'_kinematics-model.txt',
-                d,
-                fmt='%.2f',
-                delimiter='\t',
-                header='x,y,th,',
-                comments='#')
+                   d,
+                   fmt='%.2f',
+                   delimiter='\t',
+                   header='x,y,th,',
+                   comments='#',)
