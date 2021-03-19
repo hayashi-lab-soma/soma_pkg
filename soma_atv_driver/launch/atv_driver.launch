@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="maxon_bringup" pkg="maxon_epos_driver" type="maxon_bringup" output="screen">
+		<rosparam command="load" file="$(find soma_atv_driver)/config/motors.yaml" />
+	</node>
+</launch>
