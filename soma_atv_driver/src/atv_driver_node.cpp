@@ -19,24 +19,26 @@
 #include "atv_driver/states/Braking.h"
 //
 
-#define TIMER_T 0.1 //[sec]
-
 class ATVDriver
 {
 private:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
   ros::Timer timer;
+  double dt;
 
+  //publihser and subscriber
   ros::Publisher pub_motor_states;
   ros::Subscriber sub_cmd_vel;
   ros::Subscriber sub_motor_states;
 
+  //networks
   QUdpSocket *clutch_recv;
   QUdpSocket *clutch_send;
 
   soma_atv_driver::Data_t *data;
 
+  //state machine and states
   std::map<int, StateBase *> states;
   Stop *stop;
   Starting *starting;
@@ -50,6 +52,8 @@ public:
       : nh(ros::NodeHandle()),
         pnh(ros::NodeHandle("~"))
   {
+    //============================================================
+    // get parameters
     get_parameters(pnh);
 
     //============================================================
@@ -96,7 +100,7 @@ public:
     states[State::Braking] = braking;
 
     ROS_INFO("Start timer callback");
-    timer = nh.createTimer(ros::Duration((double)TIMER_T),
+    timer = nh.createTimer(ros::Duration(dt),
                            &ATVDriver::main,
                            this);
   }
@@ -131,10 +135,14 @@ private:
   void get_parameters(ros::NodeHandle pnh)
   {
     std::vector<std::string> motor_names;
-    if(!pnh.getParam("motor_name",motor_names)){
+    if (!pnh.getParam("motor_name", motor_names))
+    {
       ROS_FATAL("Failed to load motor_names");
       exit(255);
     }
+
+    dt = pnh.param<double>("timer_dt", 0.1);
+
     return;
   }
 
