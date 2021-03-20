@@ -7,6 +7,7 @@
 //
 #include <string>
 #include <map>
+#include <signal.h>
 //
 #include <qudpsocket.h>
 //
@@ -86,6 +87,29 @@ public:
   {
   }
 
+  void shutdown()
+  {
+    ROS_INFO("ATV Driver shutdown process");
+
+    maxon_epos_msgs::MotorStates motor_cmd;
+    motor_cmd.states.resize(4);
+    motor_cmd.header.stamp = ros::Time::now();
+
+    motor_cmd.states[0].position = 0.0; //steering [rad]
+    motor_cmd.states[1].position = 0.0; //rear brake [rad]
+    motor_cmd.states[2].position = 0.0; //front brake [rad]
+    motor_cmd.states[3].position = 0.0; //accel throttle [rad]
+
+    motor_cmd.states[0].position = DEG2RAD(data->target_positions[0]);
+    motor_cmd.states[1].position = DEG2RAD(data->target_positions[1]);
+    motor_cmd.states[2].position = DEG2RAD(data->target_positions[2]);
+    motor_cmd.states[3].position = DEG2RAD(data->target_positions[3]);
+
+    pub_motor_commands.publish(motor_cmd);
+
+    return;
+  }
+
 private:
   void main(const ros::TimerEvent &e)
   {
@@ -131,6 +155,7 @@ private:
 
     pub_motor_commands.publish(motor_cmd);
   }
+  //
   //
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
   {
@@ -201,11 +226,32 @@ private:
   }
 };
 
+static bool isShutdown = false;
+
+void SignalHander(int sig)
+{
+  isShutdown = true;
+}
+
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "atv_driver");
+  ros::init(argc, argv, "atv_driver", ros::init_options::NoSigintHandler);
   ROS_INFO("Start ATV driver node");
   ATVDriver driver;
-  ros::spin();
+
+  signal(SIGINT, SignalHander);
+
+  ros::Rate rate(5);
+  while (ros::ok())
+  {
+    if (isShutdown)
+    {
+      driver.shutdown();
+      break;
+    }
+    ros::spinOnce();
+    rate.sleep();
+  }
+
   return 0;
 }
