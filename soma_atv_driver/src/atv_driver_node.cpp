@@ -28,7 +28,7 @@ private:
   ros::NodeHandle pnh;
   ros::Timer timer;
 
-  ros::Publisher pub_motor_commands;
+  ros::Publisher pub_motor_states;
   ros::Subscriber sub_cmd_vel;
   ros::Subscriber sub_motor_states;
 
@@ -44,19 +44,33 @@ private:
   Braking *braking;
 
 public:
-  ATVDriver() : nh(ros::NodeHandle()),
-                pnh(ros::NodeHandle("~"))
+  //============================================================
+  // constructor
+  ATVDriver()
+      : nh(ros::NodeHandle()),
+        pnh(ros::NodeHandle("~"))
   {
-    pub_motor_commands = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_state", 1);
+    get_parameters(pnh);
+
+    //============================================================
+    // publishers
+    // publiser for motor states
+    pub_motor_states = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_states", 3);
+    //============================================================
+    //
+    //============================================================
+    // subscribers
+    // subscriber for cmd_vel:Twist
     sub_cmd_vel = nh.subscribe<geometry_msgs::Twist>("/cmd_vel",
-                                                     1,
+                                                     3,
                                                      &ATVDriver::callback_cmd_vel,
                                                      this);
+    // subscriber for motor states
     sub_motor_states = nh.subscribe<maxon_epos_msgs::MotorStates>("/get_all_state",
-                                                                  1,
+                                                                  3,
                                                                   &ATVDriver::callback_motor_states,
                                                                   this);
-
+    //============================================================
     //
     data = new soma_atv_driver::Data_t();
     data->state = State::Stop; //initial state
@@ -87,6 +101,8 @@ public:
                            this);
   }
 
+  //============================================================
+  // destructor
   ~ATVDriver()
   {
   }
@@ -106,12 +122,22 @@ public:
     motor_cmd.states[2].position = DEG2RAD(0.0);
     motor_cmd.states[3].position = DEG2RAD(0.0);
 
-    pub_motor_commands.publish(motor_cmd);
+    pub_motor_states.publish(motor_cmd);
 
     return;
   }
 
 private:
+  void get_parameters(ros::NodeHandle pnh)
+  {
+    std::vector<std::string> motor_names;
+    if(!pnh.getParam("motor_name",motor_names)){
+      ROS_FATAL("Failed to load motor_names");
+      exit(255);
+    }
+    return;
+  }
+
   void main(const ros::TimerEvent &e)
   {
     // ROS_INFO(State::Str.at(data->state).c_str());
@@ -137,21 +163,19 @@ private:
     send_clutch_state(data);
     //====================================================================
 
+    //====================================================================
+    // publish motor target states
     maxon_epos_msgs::MotorStates motor_cmd;
     motor_cmd.states.resize(4);
     motor_cmd.header.stamp = ros::Time::now();
 
-    motor_cmd.states[0].position = 0.0; //steering [rad]
-    motor_cmd.states[1].position = 0.0; //rear brake [rad]
-    motor_cmd.states[2].position = 0.0; //front brake [rad]
-    motor_cmd.states[3].position = 0.0; //accel throttle [rad]
+    motor_cmd.states[0].position = DEG2RAD(data->target_positions[0]); //steering
+    motor_cmd.states[1].position = DEG2RAD(data->target_positions[1]); //rear brake
+    motor_cmd.states[2].position = DEG2RAD(data->target_positions[2]); //front brake
+    motor_cmd.states[3].position = DEG2RAD(data->target_positions[3]); //throttle
 
-    motor_cmd.states[0].position = DEG2RAD(data->target_positions[0]);
-    motor_cmd.states[1].position = DEG2RAD(data->target_positions[1]);
-    motor_cmd.states[2].position = DEG2RAD(data->target_positions[2]);
-    motor_cmd.states[3].position = DEG2RAD(data->target_positions[3]);
-
-    pub_motor_commands.publish(motor_cmd);
+    pub_motor_states.publish(motor_cmd);
+    //====================================================================
   }
   //
   //
