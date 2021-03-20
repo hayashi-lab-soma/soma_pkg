@@ -36,6 +36,7 @@ private:
   QUdpSocket *clutch_send;
 
   soma_atv_driver::Data_t *data;
+
   std::map<int, StateBase *> states;
   Stop *stop;
   Starting *starting;
@@ -56,16 +57,19 @@ public:
                                                                   &ATVDriver::callback_motor_states,
                                                                   this);
 
+    //
     data = new soma_atv_driver::Data_t();
     data->state = State::Stop; //initial state
-    data->cmd_v = 0.0;
+    data->u_in.v = 0.0;
+    data->u_in.phi = 0.0;
+
     data->current_positions = new double[4]{0.0};
     data->target_positions = new double[4]{0.0};
     data->target_velocity = new long[4]{3500}; //initial values
     data->clutch = data->clutch_cmd = Clutch::Free;
 
     clutch_recv = new QUdpSocket();
-    clutch_recv->bind(12345);
+    clutch_recv->bind(Clutch::RecvPort);
     clutch_send = new QUdpSocket();
 
     stop = new Stop();
@@ -110,10 +114,11 @@ public:
 private:
   void main(const ros::TimerEvent &e)
   {
-    ROS_INFO(State::Str.at(data->state).c_str());
+    // ROS_INFO(State::Str.at(data->state).c_str());
 
-    //data recieve
+    //====================================================================
     recv_clutch_state(data);
+    //====================================================================
 
     //fms
     int new_state = states[data->state]->Transition(data);
@@ -129,11 +134,7 @@ private:
     }
 
     //====================================================================
-    // send clutch
-    clutch_send->writeDatagram((char *)&data->clutch_cmd,
-                               sizeof(int),
-                               QHostAddress("192.168.1.79"),
-                               22345);
+    send_clutch_state(data);
     //====================================================================
 
     maxon_epos_msgs::MotorStates motor_cmd;
@@ -180,7 +181,8 @@ private:
     // ROS_INFO("Steer:%.2f", phi);
 
     //set commands
-    data->cmd_v = cmd_vel->linear.x;
+    data->u_in.v = cmd_vel->linear.x;
+    data->u_in.phi = phi;
 
     return;
   }
@@ -195,7 +197,7 @@ private:
       str_motor_states += std::to_string(motor_states->states[i].position);
       str_motor_states += "\n";
     }
-    ROS_INFO(str_motor_states.c_str());
+    // ROS_INFO(str_motor_states.c_str());
 
     //store position value to local member
     data->current_positions[0] = RAD2DEG(motor_states->states[0].position);
@@ -220,6 +222,14 @@ private:
     {
     }
     return;
+  }
+
+  void send_clutch_state(soma_atv_driver::Data_t *data)
+  {
+    clutch_send->writeDatagram((char *)&data->clutch_cmd,
+                               sizeof(int),
+                               QHostAddress(QString(Clutch::IP.c_str())),
+                               Clutch::SendPort);
   }
 };
 

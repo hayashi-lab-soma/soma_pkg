@@ -10,7 +10,7 @@ Stop::~Stop()
 
 int Stop::_Transition(soma_atv_driver::Data_t *data)
 {
-  if(abs(data->cmd_v) > 0.001){
+  if(abs(data->u_in.v) > 0.001){
     return State::Starting;
   }
   return State::Stop;

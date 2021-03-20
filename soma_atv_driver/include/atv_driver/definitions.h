@@ -23,18 +23,6 @@ namespace State
       {Braking, "Braking"}};
 } // namespace State
 
-namespace Mode
-{
-  const int Forward = 1;
-  const int Backward = 2;
-  const int Stop = 3;
-
-  const std::map<int, std::string> Str = {{Forward, "Forward"},
-                                          {Backward, "Backward"},
-                                          {Stop, "Stop"}};
-
-}
-
 namespace Motor
 {
   namespace Steering
@@ -62,6 +50,10 @@ namespace Motor
 
 namespace Clutch
 {
+  const std::string IP = "192.168.1.79";
+  const int RecvPort = 12345;
+  const int SendPort = 22345;
+
   const int Forward = 1;
   const int Reverse = 2;
   const int Free = 3;
@@ -71,14 +63,26 @@ namespace Clutch
                                        {Free, "Free"}};
 }
 
+namespace Rotary
+{
+  const std::string IP = "192.168.1.79";
+  const int RecvPort = 12346;
+  const int SendPort = 22346;
+}
+
 namespace soma_atv_driver
 {
+  struct U_t
+  {
+    double v;   //linear velocity (m/s)
+    double phi; //steering angle (rad)
+  };
+
   struct Data_t
   {
     int state;
+    U_t u_in; //controll input
     int cmd;
-    //commands
-    double cmd_v;
     //
     double *current_positions; //motor current positions (deg)
     double *target_positions;  //motor target positions (deg)

@@ -10,7 +10,7 @@ Starting::~Starting()
 
 int Starting::_Transition(soma_atv_driver::Data_t *data)
 {
-  if (abs(data->cmd_v) <= 0.001)
+  if (abs(data->u_in.v) <= 0.001)
   {
     return State::Braking;
   }
@@ -18,11 +18,11 @@ int Starting::_Transition(soma_atv_driver::Data_t *data)
 }
 int Starting::_Enter(soma_atv_driver::Data_t *data)
 {
-  if (data->cmd_v > 0.001)
+  if (data->u_in.v > 0.001)
   {
     data->clutch_cmd = Clutch::Forward;
   }
-  else if (data->cmd_v < 0.001)
+  else if (data->u_in.v < 0.001)
   {
     data->clutch_cmd = Clutch::Reverse;
   }
@@ -43,7 +43,7 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
   data->target_velocity[1] = 500; //rpm
   data->target_positions[1] = Motor::RearBrake::Min;
   data->target_positions[2] = Motor::FrontBrake::Min; //front brake
-  data->target_positions[3] = 9.0; //throttle (deg)
+  data->target_positions[3] = 9.0;                    //throttle (deg)
 
   return 0;
 }
