@@ -25,12 +25,12 @@ find_package(catkin REQUIRED COMPONENTS
     base_local_planner
     dwa_local_planner
     navfn
-    )
+)
 
 #
 # Find PCL package
 #
-find_package(PCL 1.7 REQUIRED)
+# find_package(PCL 1.7 REQUIRED)
 #find_package(PCL 1.7.2 REQUIRED EXACT)
 
 #
@@ -72,7 +72,8 @@ include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
-    )
+    ${QT_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 
@@ -84,6 +85,14 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+add_executable(atv_rotary_communication_node
+    src/atv_rotary_communication_node.cpp
+)
+
+target_link_libraries(atv_rotary_communication_node
+    ${catkin_LIBRARIES}
+    ${QT_LIBRARIES}
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
