@@ -2,6 +2,10 @@
 
 #include <string>
 #include <map>
+#include <math.h>
+
+#define DEG2RAD(x) (x/180.0*M_PI)
+#define RAD2DEG(x) (x/M_PI*180.0)
 
 namespace State
 {
@@ -39,7 +43,7 @@ namespace Motor
   namespace RearBrake
   {
     const double Min = 0.0;
-    const double Max = 10.0;
+    const double Max = 9.0;
   }
   namespace FrontBrake
   {
@@ -49,7 +53,7 @@ namespace Motor
   namespace Throttle
   {
     const double Min = 0.0;
-    const double Max = 10.0;
+    const double Max = 20.0;
   }
 
 }

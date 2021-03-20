@@ -16,19 +16,19 @@ steering:
   control_mode: 'profile_position'
   encoder:
     type: 1
-    resolution: 1024
-    gear_ratio: 308
+    resolution: 500
+    gear_ratio: -400.4
     inverted_polarity: false
   position_profile:
-    velocity: 3000
+    velocity: 3500
     acceleration: 8000
     deceleration: 8000
 
 rear_brake:
   device: 'EPOS2'
-  protocol_stack: 'MAXON SERIAL V2'
-  interface: 'USB'
-  port: 'USB0'
+  protocol_stack: 'CANopen'
+  interface: ''
+  port: ''
   node_id: 2
   baudrate: 1000000
   timeout: 500
@@ -36,19 +36,19 @@ rear_brake:
   control_mode: 'profile_position'
   encoder:
     type: 1
-    resolution: 1024
-    gear_ratio: 15
+    resolution: 512
+    gear_ratio: 150.0
     inverted_polarity: false
   position_profile:
-    velocity: 10000
+    velocity: 3500
     acceleration: 8000
     deceleration: 8000
 
 front_brake:
   device: 'EPOS2'
-  protocol_stack: 'MAXON SERIAL V2'
-  interface: 'USB'
-  port: 'USB0'
+  protocol_stack: 'CANopen'
+  interface: ''
+  port: ''
   node_id: 3
   baudrate: 1000000
   timeout: 500
@@ -56,28 +56,28 @@ front_brake:
   control_mode: 'profile_position'
   encoder:
     type: 1
-    resolution: 1024
-    gear_ratio: 15
+    resolution: 500
+    gear_ratio: 150
     inverted_polarity: false
   position_profile:
-    velocity: 10000
+    velocity: 3500
     acceleration: 8000
     deceleration: 8000
 
 throttle:
   device: 'EPOS2'
-  protocol_stack: 'MAXON SERIAL V2'
-  interface: 'USB'
-  port: 'USB0'
-  node_id: 3
+  protocol_stack: 'CANopen'
+  interface: ''
+  port: ''
+  node_id: 4
   baudrate: 1000000
   timeout: 500
   use_ros_unit: true
   control_mode: 'profile_position'
   encoder:
-    type: 4
-    resolution: 1024
-    gear_ratio: 15
+    type: 1
+    resolution: 500
+    gear_ratio: -260.0
     inverted_polarity: false
   position_profile:
     velocity: 10000

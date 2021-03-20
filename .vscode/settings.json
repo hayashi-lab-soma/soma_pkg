@@ -7,4 +7,8 @@
   "python.pythonPath": "/usr/bin/python3",
   "python.jediEnabled": false,
   "python.languageServer": "Microsoft",
+  "files.associations": {
+    "unordered_map": "cpp",
+    "unordered_set": "cpp"
+  },
 }

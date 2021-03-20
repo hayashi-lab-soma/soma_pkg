@@ -118,10 +118,10 @@ private:
     motor_cmd.states[2].position = 0.0; //front brake [rad]
     motor_cmd.states[3].position = 0.0; //accel throttle [rad]
 
-    motor_cmd.states[0].position = data->target_positions[0];
-    motor_cmd.states[1].position = data->target_positions[1];
-    motor_cmd.states[2].position = data->target_positions[2];
-    motor_cmd.states[3].position = data->target_positions[3];
+    motor_cmd.states[0].position = DEG2RAD(data->target_positions[0]);
+    motor_cmd.states[1].position = DEG2RAD(data->target_positions[1]);
+    motor_cmd.states[2].position = DEG2RAD(data->target_positions[2]);
+    motor_cmd.states[3].position = DEG2RAD(data->target_positions[3]);
 
     pub_motor_commands.publish(motor_cmd);
   }
@@ -146,10 +146,10 @@ private:
     ROS_INFO(str_motor_states.c_str());
 
     //store position value to local member
-    data->current_positions[0] = motor_states->states[0].position;
-    data->current_positions[1] = motor_states->states[1].position;
-    data->current_positions[2] = motor_states->states[2].position;
-    data->current_positions[3] = motor_states->states[3].position;
+    data->current_positions[0] = RAD2DEG(motor_states->states[0].position);
+    data->current_positions[1] = RAD2DEG(motor_states->states[1].position);
+    data->current_positions[2] = RAD2DEG(motor_states->states[2].position);
+    data->current_positions[3] = RAD2DEG(motor_states->states[3].position);
   }
 
   void recv_clutch_state(Definitions_t *data)
