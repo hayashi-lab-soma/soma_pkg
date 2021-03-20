@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="atv_wheel_odom" pkg="soma_sensor" type="atv_wheel_odometry.py" output="screen" />
+</launch>
