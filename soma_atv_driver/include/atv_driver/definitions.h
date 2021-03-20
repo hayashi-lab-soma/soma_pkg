@@ -80,9 +80,8 @@ namespace soma_atv_driver
 
   struct Data_t
   {
-    int state;
-    U_t u_in; //controll input
-    int cmd;
+    int state; //state variable (State namespace)
+    U_t u_in;  //controll input
     //
     double *current_positions; //motor current positions (deg)
     double *target_positions;  //motor target positions (deg)
