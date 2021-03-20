@@ -11,7 +11,8 @@ Braking::~Braking()
 int Braking::_Transition(Definitions_t *data)
 {
   //if ATV velocity nearly equal 0, transition to State::Stop
-  return State::Braking;
+  // return State::Braking;
+  return State::Stop;
 }
 int Braking::_Enter(Definitions_t *data)
 {

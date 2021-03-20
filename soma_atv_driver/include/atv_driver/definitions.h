@@ -50,7 +50,7 @@ namespace Motor
   namespace FrontBrake
   {
     const double Min = 0.0;
-    const double Max = 12.0;
+    const double Max = 14.0;
   }
   namespace Throttle
   {
