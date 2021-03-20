@@ -120,7 +120,7 @@ private:
     recv_clutch_state(data);
     //====================================================================
 
-    //fms
+    //finite state machine
     int new_state = states[data->state]->Transition(data);
     if (new_state != data->state)
     {
@@ -161,28 +161,29 @@ private:
     // ROS_INFO("%.2f,%.2f",cmd_vel->linear.x,cmd_vel->angular.z);
 
     //convert to steering angle phi
-    double phi = 0.0;
-    if (abs(cmd_vel->angular.z) <= 0.001 || abs(cmd_vel->linear.x) <= 0.001)
-    {
-      phi = 0.0;
-    }
-    else
-    {
-      double _phi = cmd_vel->angular.z * ((double)WHEEL_BASE / cmd_vel->linear.x); //(rad)
-      if (abs(_phi) > DEG2RAD(30.0))
-      {
-        phi = DEG2RAD(30.0);
-      }
-      else
-      {
-        phi = asin(_phi);
-      }
-    }
+    // double phi = 0.0;
+    // if (abs(cmd_vel->angular.z) <= 0.001 || abs(cmd_vel->linear.x) <= 0.001)
+    // {
+    //   phi = 0.0;
+    // }
+    // else
+    // {
+    //   double _phi = cmd_vel->angular.z * ((double)WHEEL_BASE / cmd_vel->linear.x); //(rad)
+    //   if (abs(_phi) > DEG2RAD(30.0))
+    //   {
+    //     phi = DEG2RAD(30.0);
+    //   }
+    //   else
+    //   {
+    //     phi = asin(_phi);
+    //   }
+    // }
     // ROS_INFO("Steer:%.2f", phi);
 
     //set commands
     data->u_in.v = cmd_vel->linear.x;
-    data->u_in.phi = phi;
+    data->u_in.phi = angular_vel_to_steering_angle(cmd_vel->linear.x,
+                                                   cmd_vel->angular.z); //defined in definitions.h
 
     return;
   }

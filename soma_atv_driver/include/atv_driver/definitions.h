@@ -91,5 +91,13 @@ namespace soma_atv_driver
     int clutch;
     int clutch_cmd;
   };
+}
 
+static double angular_vel_to_steering_angle(double v, double omega)
+{
+  if (v == 0 || omega == 0)
+    return 0; //zero radian
+
+  double radius = v / omega;
+  return atan((double)WHEEL_BASE / radius);
 }
