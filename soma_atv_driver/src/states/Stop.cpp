@@ -8,14 +8,14 @@ Stop::~Stop()
 {
 }
 
-int Stop::_Transition(Definitions_t *data)
+int Stop::_Transition(soma_atv_driver::Data_t *data)
 {
   if(abs(data->cmd_v) > 0.001){
     return State::Starting;
   }
   return State::Stop;
 }
-int Stop::_Enter(Definitions_t *data)
+int Stop::_Enter(soma_atv_driver::Data_t *data)
 {
 
   data->target_positions[0] = 0.0;
@@ -25,7 +25,7 @@ int Stop::_Enter(Definitions_t *data)
 
   return 0;
 }
-int Stop::_Process(Definitions_t *data)
+int Stop::_Process(soma_atv_driver::Data_t *data)
 {
   data->target_positions[0] = 0.0;
   data->target_positions[1] = Motor::RearBrake::Max;
@@ -34,7 +34,7 @@ int Stop::_Process(Definitions_t *data)
 
   return 0;
 }
-int Stop::_Exit(Definitions_t *data)
+int Stop::_Exit(soma_atv_driver::Data_t *data)
 {
   return 0;
 }

@@ -4,8 +4,8 @@
 #include <map>
 #include <math.h>
 
-#define DEG2RAD(x) (x/180.0*M_PI)
-#define RAD2DEG(x) (x/M_PI*180.0)
+#define DEG2RAD(x) (x / 180.0 * M_PI)
+#define RAD2DEG(x) (x / M_PI * 180.0)
 
 #define WHEEL_BASE 1.04 //(m)
 
@@ -71,17 +71,21 @@ namespace Clutch
                                        {Free, "Free"}};
 }
 
-struct Definitions_t
+namespace soma_atv_driver
 {
-  int state;
-  int cmd;
-  //commands
-  double cmd_v;
-  //
-  double *current_positions; //motor current positions (deg)
-  double *target_positions;  //motor target positions (deg)
-  long *target_velocity; //motor target velocity (rmp)
-  //
-  int clutch;
-  int clutch_cmd;
-};
+  struct Data_t
+  {
+    int state;
+    int cmd;
+    //commands
+    double cmd_v;
+    //
+    double *current_positions; //motor current positions (deg)
+    double *target_positions;  //motor target positions (deg)
+    long *target_velocity;     //motor target velocity (rmp)
+    //
+    int clutch;
+    int clutch_cmd;
+  };
+
+}

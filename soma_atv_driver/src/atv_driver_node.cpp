@@ -35,7 +35,7 @@ private:
   QUdpSocket *clutch_recv;
   QUdpSocket *clutch_send;
 
-  Definitions_t *data;
+  soma_atv_driver::Data_t *data;
   std::map<int, StateBase *> states;
   Stop *stop;
   Starting *starting;
@@ -56,7 +56,7 @@ public:
                                                                   &ATVDriver::callback_motor_states,
                                                                   this);
 
-    data = new Definitions_t();
+    data = new soma_atv_driver::Data_t();
     data->state = State::Stop; //initial state
     data->cmd_v = 0.0;
     data->current_positions = new double[4]{0.0};
@@ -204,7 +204,7 @@ private:
     data->current_positions[3] = RAD2DEG(motor_states->states[3].position);
   }
 
-  void recv_clutch_state(Definitions_t *data)
+  void recv_clutch_state(soma_atv_driver::Data_t *data)
   {
     if (clutch_recv->waitForReadyRead(33))
     {

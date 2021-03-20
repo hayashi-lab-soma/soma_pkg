@@ -8,7 +8,7 @@ Travelling::~Travelling()
 {
 }
 
-int Travelling::_Transition(Definitions_t *data)
+int Travelling::_Transition(soma_atv_driver::Data_t *data)
 {
   if(abs(data->cmd_v) <= 0.001){
     return State::Braking;
@@ -16,16 +16,16 @@ int Travelling::_Transition(Definitions_t *data)
 
   return State::Travelling;
 }
-int Travelling::_Enter(Definitions_t *data)
+int Travelling::_Enter(soma_atv_driver::Data_t *data)
 {
   return 0;
 }
-int Travelling::_Process(Definitions_t *data)
+int Travelling::_Process(soma_atv_driver::Data_t *data)
 {
   
   return 0;
 }
-int Travelling::_Exit(Definitions_t *data)
+int Travelling::_Exit(soma_atv_driver::Data_t *data)
 {
   return 0;
 }
