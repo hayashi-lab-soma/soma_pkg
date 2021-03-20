@@ -45,20 +45,22 @@ public:
   ATVDriver() : nh(ros::NodeHandle()),
                 pnh(ros::NodeHandle("~"))
   {
-    pub_motor_commands = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_state", 10);
+    pub_motor_commands = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_state", 1);
     sub_cmd_vel = nh.subscribe<geometry_msgs::Twist>("/cmd_vel",
-                                                     10,
+                                                     1,
                                                      &ATVDriver::callback_cmd_vel,
                                                      this);
     sub_motor_states = nh.subscribe<maxon_epos_msgs::MotorStates>("/get_all_state",
-                                                                  10,
+                                                                  1,
                                                                   &ATVDriver::callback_motor_states,
                                                                   this);
 
     data = new Definitions_t();
     data->state = State::Stop; //initial state
+    data->cmd_v = 0.0;
     data->current_positions = new double[4]{0.0};
     data->target_positions = new double[4]{0.0};
+    data->target_velocity = new long[4]{3500}; //initial values
     data->clutch = data->clutch_cmd = Clutch::Free;
 
     clutch_recv = new QUdpSocket();
@@ -66,6 +68,9 @@ public:
     clutch_send = new QUdpSocket();
 
     stop = new Stop();
+    starting = new Starting();
+    travelling = new Travelling();
+    braking = new Braking();
     states[State::Stop] = stop;
     states[State::Starting] = starting;
     states[State::Travelling] = travelling;
@@ -103,10 +108,11 @@ private:
     }
 
     //====================================================================
+    // send clutch
     clutch_send->writeDatagram((char *)&data->clutch_cmd,
                                sizeof(int),
                                QHostAddress("192.168.1.79"),
-                               12345);
+                               22345);
     //====================================================================
 
     maxon_epos_msgs::MotorStates motor_cmd;
@@ -129,7 +135,31 @@ private:
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
   {
     //convert for steering angle, velocity and move direction (Forward,Backward)
-    //data->,,,
+    // ROS_INFO("%.2f,%.2f",cmd_vel->linear.x,cmd_vel->angular.z);
+
+    //convert to steering angle phi
+    double phi = 0.0;
+    if (abs(cmd_vel->angular.z) <= 0.001 || abs(cmd_vel->linear.x) <= 0.001)
+    {
+      phi = 0.0;
+    }
+    else
+    {
+      double _phi = cmd_vel->angular.z * ((double)WHEEL_BASE / cmd_vel->linear.x); //(rad)
+      if (abs(_phi) > DEG2RAD(30.0))
+      {
+        phi = DEG2RAD(30.0);
+      }
+      else
+      {
+        phi = asin(_phi);
+      }
+    }
+    // ROS_INFO("Steer:%.2f", phi);
+
+    //set commands
+    data->cmd_v = cmd_vel->linear.x;
+
     return;
   }
   //
@@ -156,12 +186,13 @@ private:
   {
     if (clutch_recv->waitForReadyRead(33))
     {
+      int recv; //Integer type 4byte date
       while (clutch_recv->bytesAvailable() > 0)
       {
-
-        int recv; //Integer type 4byte date
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
+      // ROS_INFO("Clutch state: %d", recv);
+      data->clutch = recv;
     }
     else
     {

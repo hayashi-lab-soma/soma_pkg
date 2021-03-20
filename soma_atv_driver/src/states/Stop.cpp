@@ -10,10 +10,7 @@ Stop::~Stop()
 
 int Stop::_Transition(Definitions_t *data)
 {
-  switch (data->cmd)
-  {
-  case Mode::Forward:
-  case Mode::Backward:
+  if(abs(data->cmd_v) > 0.001){
     return State::Starting;
   }
   return State::Stop;

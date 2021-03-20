@@ -11,7 +11,7 @@ steering:
   port: 'USB0'
   node_id: 1
   baudrate: 1000000
-  timeout: 500
+  timeout: 100
   use_ros_unit: true
   control_mode: 'profile_position'
   encoder:
@@ -31,7 +31,7 @@ rear_brake:
   port: ''
   node_id: 2
   baudrate: 1000000
-  timeout: 500
+  timeout: 100
   use_ros_unit: true
   control_mode: 'profile_position'
   encoder:
@@ -51,13 +51,13 @@ front_brake:
   port: ''
   node_id: 3
   baudrate: 1000000
-  timeout: 500
+  timeout: 100
   use_ros_unit: true
   control_mode: 'profile_position'
   encoder:
     type: 1
     resolution: 500
-    gear_ratio: 150
+    gear_ratio: 150.0
     inverted_polarity: false
   position_profile:
     velocity: 3500
@@ -71,7 +71,7 @@ throttle:
   port: ''
   node_id: 4
   baudrate: 1000000
-  timeout: 500
+  timeout: 100
   use_ros_unit: true
   control_mode: 'profile_position'
   encoder:

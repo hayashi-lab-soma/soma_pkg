@@ -7,6 +7,8 @@
 #define DEG2RAD(x) (x/180.0*M_PI)
 #define RAD2DEG(x) (x/M_PI*180.0)
 
+#define WHEEL_BASE 1.04 //(m)
+
 namespace State
 {
   const int Stop = 0;
@@ -48,7 +50,7 @@ namespace Motor
   namespace FrontBrake
   {
     const double Min = 0.0;
-    const double Max = 10.0;
+    const double Max = 12.0;
   }
   namespace Throttle
   {
@@ -73,9 +75,12 @@ struct Definitions_t
 {
   int state;
   int cmd;
+  //commands
+  double cmd_v;
   //
-  double *current_positions; //motor current positions
-  double *target_positions;  //motor target positions
+  double *current_positions; //motor current positions (deg)
+  double *target_positions;  //motor target positions (deg)
+  long *target_velocity; //motor target velocity (rmp)
   //
   int clutch;
   int clutch_cmd;

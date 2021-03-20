@@ -10,8 +10,7 @@ Travelling::~Travelling()
 
 int Travelling::_Transition(Definitions_t *data)
 {
-  if (data->cmd == Mode::Stop)
-  {
+  if(abs(data->cmd_v) <= 0.001){
     return State::Braking;
   }
 

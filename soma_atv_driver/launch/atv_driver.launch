@@ -1,5 +1,12 @@
 <?xml version="1.0"?>
 <launch>
+	<!--  -->
+	<node name="joy_node" pkg="joy" type="joy_node" output="screen"/>
+	<node name="teleop_node" pkg="teleop_twist_joy" type="teleop_node" output="screen">
+		<param name="scale_linear" value="1.0" />
+		<param name="scale_angular" value="3.1415" />
+	</node>
+	<!--  -->
 	<node name="maxon_bringup" pkg="maxon_epos_driver" type="maxon_bringup" output="screen">
 		<rosparam command="load" file="$(find soma_atv_driver)/config/motors.yaml" />
 	</node>

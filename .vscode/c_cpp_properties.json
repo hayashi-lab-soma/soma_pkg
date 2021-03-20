@@ -10,8 +10,8 @@
         "/usr/include/**",
         "/home/hayashi/catkin_ws/src/soma_pkg/soma_atv_driver/include",
         "/home/hayashi/catkin_ws/devel/include/",
-        "/home/soma2/catkin_ws/src/soma_pkg/soma_atv_driver/include",
-        "/home/soma2/catkin_ws/devel/include/"
+        "/home/soma/catkin_ws/src/soma_pkg/soma_atv_driver/include",
+        "/home/soma/catkin_ws/devel/include/"
       ],
       "name": "ROS"
     }
