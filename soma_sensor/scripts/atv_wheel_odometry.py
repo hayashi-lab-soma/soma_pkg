@@ -36,12 +36,12 @@ def timer_callback(event):
 
     # Dead Recogning
     dt = TIMER_T
-    if v != 0.0 and phi != 0.0:
+    if v != 0.0 and phi != 0.0: #turning
         omega = v*sin(phi)/WHEEL_BASE
         X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
         X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
         X_t[2] = X_t[2] + omega*dt
-    elif v == 0.0 and phi != 0.0:
+    elif v != 0.0 and phi == 0.0: #move straight
         X_t[0] = X_t[0] + v*dt*cos(X_t[2])
         X_t[1] = X_t[1] + v*dt*sin(X_t[2])
         X_t[2] = X_t[2]
