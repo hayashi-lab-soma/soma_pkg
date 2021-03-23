@@ -83,7 +83,7 @@ public:
 
     data->current_positions = new double[4]{0.0};
     data->target_positions = new double[4]{0.0};
-    data->target_velocity = new long[4]{3500}; //initial values
+    data->target_velocity = new long[4]{3500,3500,3500,3500}; //initial values
     data->clutch = data->clutch_cmd = Clutch::Free;
 
     clutch_recv = new QUdpSocket();
@@ -126,6 +126,11 @@ public:
     motor_cmd.states[2].position = DEG2RAD(0.0);
     motor_cmd.states[3].position = DEG2RAD(0.0);
 
+    motor_cmd.states[0].velocity = 3500;
+    motor_cmd.states[1].velocity = 3500;
+    motor_cmd.states[2].velocity = 3500;
+    motor_cmd.states[3].velocity = 3500;
+
     pub_motor_states.publish(motor_cmd);
 
     return;
@@ -134,12 +139,12 @@ public:
 private:
   void get_parameters(ros::NodeHandle pnh)
   {
-    std::vector<std::string> motor_names;
-    if (!pnh.getParam("motor_name", motor_names))
-    {
-      ROS_FATAL("Failed to load motor_names");
-      exit(255);
-    }
+    // std::vector<std::string> motor_names;
+    // if (!pnh.getParam("motor_name", motor_names))
+    // {
+    //   ROS_FATAL("Failed to load motor_names");
+    //   exit(255);
+    // }
 
     dt = pnh.param<double>("timer_dt", 0.1);
 
@@ -181,6 +186,11 @@ private:
     motor_cmd.states[1].position = DEG2RAD(data->target_positions[1]); //rear brake
     motor_cmd.states[2].position = DEG2RAD(data->target_positions[2]); //front brake
     motor_cmd.states[3].position = DEG2RAD(data->target_positions[3]); //throttle
+
+    motor_cmd.states[0].velocity = data->target_velocity[0];
+    motor_cmd.states[1].velocity = data->target_velocity[1];
+    motor_cmd.states[2].velocity = data->target_velocity[2];
+    motor_cmd.states[3].velocity = data->target_velocity[3];
 
     pub_motor_states.publish(motor_cmd);
     //====================================================================
