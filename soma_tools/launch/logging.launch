@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="prefix" default="/home/soma1/Documents/test"/>
+  <arg name="topics" default="tf tf_static /velodyne_points /imu/data /imu/mag /imu_data_str /camera/color/camera_info /camera/color/image_raw /camera/depth/camera_info /camera/depth/image_rect_raw /camera/depth_registered/points /soma/wheel_vel /soma/action /soma/action_str /maxon_bringup/get_all_states" />
+  <node pkg="rosbag" type="record" name="soma_logging" output="screen" args="-o $(arg prefix) $(arg topics)">
+  </node>
+</launch>
