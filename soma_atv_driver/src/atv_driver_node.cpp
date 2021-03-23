@@ -87,15 +87,6 @@ public:
                                                                   this);
     //============================================================
     //
-    data = new soma_atv_driver::Data_t();
-    data->state = State::Stop; //initial state
-    data->u_in.v = 0.0;
-    data->u_in.phi = 0.0;
-
-    data->current_positions = new double[4]{0.0};
-    data->target_positions = new double[4]{0.0};
-    data->target_velocity = new long[4]{3500,3500,3500,3500}; //initial values
-    data->clutch = data->clutch_cmd = Clutch::Free;
 
     clutch_recv = new QUdpSocket();
     clutch_recv->bind(Clutch::RecvPort);
@@ -159,12 +150,36 @@ private:
 
     dt = pnh.param<double>("timer_dt", 0.1);
 
+    data = new soma_atv_driver::Data_t();
+    data->dt = dt;
+    data->state = State::Stop; //initial state
+    data->u_in.v = 0.0;
+    data->u_in.phi = 0.0;
+
+    data->current_positions = new double[4]{0.0};
+    data->target_positions = new double[4]{0.0};
+    data->target_velocity = new long[4]{3500,3500,3500,3500}; //initial values
+    data->clutch = data->clutch_cmd = Clutch::Free;
+
+    data->wheel_vel = 0.0;
+    data->ev = new double[3]{0.0};
+    data->P = 0.05;
+    data->D = 0.1;
+
+    data->rear_brake_slow_open_rpm = pnh.param<double>("rear_brake_slow_open_rpm", 100.0);
+    data->throttle_offset = pnh.param<double>("throttle_offset",7.0);
+    data->throttle_max = pnh.param<double>("throttle_max",13.0);
+
     return;
   }
 
   void main(const ros::TimerEvent &e)
   {
     // ROS_INFO(State::Str.at(data->state).c_str());
+
+    data->ev[2] = data->ev[1];
+    data->ev[1] = data->ev[0];
+    data->ev[0] = data->wheel_vel - 1.0;
 
     //====================================================================
     recv_clutch_state(data);
@@ -218,33 +233,13 @@ private:
   //
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
   {
-    //convert for steering angle, velocity and move direction (Forward,Backward)
-    // ROS_INFO("%.2f,%.2f",cmd_vel->linear.x,cmd_vel->angular.z);
-
-    //convert to steering angle phi
-    // double phi = 0.0;
-    // if (abs(cmd_vel->angular.z) <= 0.001 || abs(cmd_vel->linear.x) <= 0.001)
-    // {
-    //   phi = 0.0;
-    // }
-    // else
-    // {
-    //   double _phi = cmd_vel->angular.z * ((double)WHEEL_BASE / cmd_vel->linear.x); //(rad)
-    //   if (abs(_phi) > DEG2RAD(30.0))
-    //   {
-    //     phi = DEG2RAD(30.0);
-    //   }
-    //   else
-    //   {
-    //     phi = asin(_phi);
-    //   }
-    // }
-    // ROS_INFO("Steer:%.2f", phi);
-
     //set commands
     data->u_in.v = cmd_vel->linear.x;
     data->u_in.phi = angular_vel_to_steering_angle(cmd_vel->linear.x,
                                                    cmd_vel->angular.z); //defined in definitions.h
+    //steering angle limit (-25~25degree)
+    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(-25));
+    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(25));
 
     return;
   }
@@ -253,7 +248,6 @@ private:
   {
     ROS_DEBUG("call back wheel velocity: %.2f", wheel_vel->data);
     data->wheel_vel = wheel_vel->data;
-    // data->u_in.v = data->wheel_vel; //store
   }
   //
   void callback_motor_states(const maxon_epos_msgs::MotorStatesConstPtr &motor_states)

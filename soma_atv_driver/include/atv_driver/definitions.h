@@ -80,6 +80,7 @@ namespace soma_atv_driver
 
   struct Data_t
   {
+    double dt;
     int state; //state variable (State namespace)
     U_t u_in;  //controll input
     //
@@ -91,6 +92,14 @@ namespace soma_atv_driver
     int clutch_cmd;
     //
     double wheel_vel;
+    double *ev;
+    double P,D; //gain
+    // mechanism parameters
+    // for rear brake
+    double rear_brake_slow_open_rpm;
+    // for throttle
+    double throttle_offset; //deg
+    double throttle_max;  //deg
   };
 }
 
@@ -100,5 +109,5 @@ static double angular_vel_to_steering_angle(double v, double omega)
     return 0; //zero radian
 
   double radius = v / omega;
-  return atan((double)WHEEL_BASE / radius);
+  return atan((double)WHEEL_BASE / radius); //radian
 }
