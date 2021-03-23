@@ -5,14 +5,16 @@ To estimate odometry
 -->
 <launch>
 	<!-- arguments -->
-	<arg name="use_nodelet_manager" default="false" doc="" />
+	<arg name="use_nodelet_manager" default="true" doc="" />
 	<arg name="nodelet_manager" default="manager" doc="" />
-	<arg name="base_frame_id" default="base_link" doc="" />
+	<arg name="base_frame_id" default="velodyne" doc="" />
 	<arg name="points_topic" default="/velodyne_points" doc="" />
 	<!--  -->
+	<node if="$(arg use_nodelet_manager)" name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" />
+	<!--  -->
 	<!-- prefiltering_nodelet -->
-	<node pkg="nodelet" type="nodelet" name="prefiltering_nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)">
-		<remap from="/velodyne_points" to="$(arg points_topic)" />
+	<node pkg="nodelet" type="nodelet" name="prefiltering_nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)" output="screen"> 
+		<remap from="/velodyne_points" to="$(arg points_topic)"  />
 		<!-- in case base_link_frame is blank, mapping will be performed in the lidar frame -->
 		<param name="base_link_frame" value="$(arg base_frame_id)" />
 		<!-- distance filter -->
@@ -31,7 +33,7 @@ To estimate odometry
 	</node>
 	<!--  -->
 	<!-- scan_matching_odometry_nodelet -->
-	<node pkg="nodelet" type="nodelet" name="scan_matching_odometry_nodelet" args="load hdl_graph_slam/ScanMatchingOdometryNodelet $(arg nodelet_manager)">
+	<node pkg="nodelet" type="nodelet" name="scan_matching_odometry_nodelet" args="load hdl_graph_slam/ScanMatchingOdometryNodelet $(arg nodelet_manager)" output="screen">
 		<param name="points_topic" value="/filtered_points" />
 		<param name="odom_frame_id" value="odom" />
 		<param name="keyframe_delta_trans" value="1.0" />
