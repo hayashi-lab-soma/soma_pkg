@@ -1,5 +1,5 @@
-#!/usr/bin/python
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
@@ -7,6 +7,7 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion
 from tf.transformations import quaternion_from_euler
 from tf import TransformBroadcaster
+from maxon_epos_msgs.msg import MotorState
 from maxon_epos_msgs.msg import MotorStates
 
 WHEEL_BASE = 1.04
@@ -27,8 +28,8 @@ def callback_wheel_vel(data):
     v = data.data  # velocity [m/s]
 
 
-def callback_motor_states(data):
-    phi = data.states[0].position
+def callback_steering_state(data):
+    phi = data.position
 
 
 def timer_callback(event):
@@ -37,12 +38,12 @@ def timer_callback(event):
 
     # Dead Recogning
     dt = TIMER_T
-    if v != 0.0 and phi != 0.0: #turning
+    if v != 0.0 and phi != 0.0:  # turning
         omega = v*sin(phi)/WHEEL_BASE
         X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
         X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
         X_t[2] = X_t[2] + omega*dt
-    elif v != 0.0 and phi == 0.0: #move straight
+    elif v != 0.0 and phi == 0.0:  # move straight
         X_t[0] = X_t[0] + v*dt*cos(X_t[2])
         X_t[1] = X_t[1] + v*dt*sin(X_t[2])
         X_t[2] = X_t[2]
@@ -77,11 +78,11 @@ def timer_callback(event):
 if __name__ == '__main__':
     rospy.loginfo('Run atv wheel odometry node')
     rospy.init_node('atv_wheel_odometry', anonymous=True)
-    rospy.Subscriber('/soma/wheel_vel', Float32, callback=callback_wheel_vel)
-    rospy.Subscriber('/get_all_states', MotorStates, callback_motor_states)
+    rospy.Subscriber('/wheel_vel', Float32, callback=callback_wheel_vel)
+    rospy.Subscriber('/steering_state', MotorState, callback_steering_state)
 
     # publishers
-    odom_pub = rospy.Publisher('/soma/odom_dr', Odometry, queue_size=3)
+    odom_pub = rospy.Publisher('/wheel_odom', Odometry, queue_size=3)
     odom_broadcaster = TransformBroadcaster()
 
     rospy.Timer(rospy.Duration(TIMER_T), timer_callback)
