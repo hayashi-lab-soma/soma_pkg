@@ -9,6 +9,7 @@ from tf.transformations import quaternion_from_euler
 from tf import TransformBroadcaster
 from maxon_epos_msgs.msg import MotorState
 from maxon_epos_msgs.msg import MotorStates
+from math import sin, cos, tan
 
 WHEEL_BASE = 1.04
 TIMER_T = 0.2
@@ -29,12 +30,11 @@ def callback_wheel_vel(data):
 
 
 def callback_steering_state(data):
-    phi = data.position
+    phi = data.position  # steering angle [rad]
 
 
 def timer_callback(event):
-    rospy.loginfo('timer callback')
-    rospy.loginfo('(v,phi)=({:.2f},{:.2f})'.format(v, phi))
+    rospy.loginfo('(v,phi)=({:.2f}, {:.2f})'.format(v, phi))
 
     # Dead Recogning
     dt = TIMER_T
@@ -78,6 +78,8 @@ def timer_callback(event):
 if __name__ == '__main__':
     rospy.loginfo('Run atv wheel odometry node')
     rospy.init_node('atv_wheel_odometry', anonymous=True)
+
+    # subscriber
     rospy.Subscriber('/wheel_vel', Float32, callback=callback_wheel_vel)
     rospy.Subscriber('/steering_state', MotorState, callback_steering_state)
 
