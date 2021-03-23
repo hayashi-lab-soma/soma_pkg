@@ -12,11 +12,11 @@ from maxon_epos_msgs.msg import MotorStates
 from math import sin, cos, tan
 
 WHEEL_BASE = 1.04
-TIMER_T = 0.2
+TIMER_T = 0.5
 
 # frame id
-frame_id = 'wodom'
 base_link = 'soma_link'
+frame_id = 'wodom'
 
 #global variable
 v = 0.0
@@ -39,10 +39,15 @@ def timer_callback(event):
     # Dead Recogning
     dt = TIMER_T
     if v != 0.0 and phi != 0.0:  # turning
-        omega = v*sin(phi)/WHEEL_BASE
-        X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
-        X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
-        X_t[2] = X_t[2] + omega*dt
+        # front wheel odometry?
+        # omega = v*sin(phi)/WHEEL_BASE
+        # X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
+        # X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
+        # X_t[2] = X_t[2] + omega*dt
+        # rear wheel odometry?
+        X_t[0] = X_t[0] + v*cos(X_t[2])*dt
+        X_t[1] = X_t[1] + v*sin(X_t[2])*dt
+        X_t[2] = X_t[2] + v*tan(phi)/WHEEL_BASE*dt
     elif v != 0.0 and phi == 0.0:  # move straight
         X_t[0] = X_t[0] + v*dt*cos(X_t[2])
         X_t[1] = X_t[1] + v*dt*sin(X_t[2])
@@ -84,7 +89,7 @@ if __name__ == '__main__':
     rospy.Subscriber('/steering_state', MotorState, callback_steering_state)
 
     # publishers
-    odom_pub = rospy.Publisher('/wheel_odom', Odometry, queue_size=3)
+    odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=3)
     odom_broadcaster = TransformBroadcaster()
 
     rospy.Timer(rospy.Duration(TIMER_T), timer_callback)

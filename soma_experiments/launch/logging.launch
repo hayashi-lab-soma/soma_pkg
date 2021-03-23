@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="prefix" default="/home/soma1/Documents/test" />
-	<arg name="topics" default="/velodyne_points /imu/data /imu/mag /imu_data_str /camera/color/camera_info /camera/color/image_raw /camera/depth/camera_info /camera/depth/image_rect_raw /camera/depth_registered/points /soma/wheel_vel /soma/action /soma/action_str /maxon_bringup/get_all_states" />
+	<!-- arguments -->
+	<arg name="prefix" default="test" />
+	<arg name="imu_topics" default="/imu/data /imu/mag" doc="" />
+	<arg name="camera_topics" default="/camera/color/camera_info /camera/color/image_raw /camera/depth/camera_info /camera/depth/image_rect_raw /camera/depth_registered/points" doc="" />
+	<arg name="soma_topics" default="/soma/wheel_vel /soma/wheel_odometry /soma/action /soma/action_str" doc="" />
+	<arg name="topics" default="/velodyne_points $(arg imu_topics) $(arg camera_topics) $(arg soma_topics) /maxon_bringup/get_all_states" />
+	<!--  -->
 	<node pkg="rosbag" type="record" name="soma_logging" output="screen" args="-o $(arg prefix) $(arg topics) tf tf_static ">
 	</node>
 </launch>
