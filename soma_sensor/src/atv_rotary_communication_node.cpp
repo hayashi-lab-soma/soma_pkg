@@ -55,11 +55,11 @@ int main(int argc, char **argv)
     {
       while (recv_sock.bytesAvailable() > 0)
       {
-        ROS_INFO("Read UDP data");
+        ROS_DEBUG("Read UDP data");
         recv_sock.readDatagram((char *)&recv,
                                sizeof(Recv_t));
       }
-      ROS_INFO("v=%.2f",recv.v);
+      ROS_DEBUG("v=%.2f",recv.v);
     }
     else
     {
