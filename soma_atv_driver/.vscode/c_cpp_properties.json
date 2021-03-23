@@ -1,0 +1,25 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/soma/catkin_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/soma/catkin_ws/src/DynamixelSDK/ros/include/**",
+        "/home/soma/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_controllers/include/**",
+        "/home/soma/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_operators/include/**",
+        "/home/soma/catkin_ws/src/dynamixel-workbench/dynamixel_workbench_toolbox/include/**",
+        "/home/soma/catkin_ws/src/maxon_epos_ros/maxon_epos_driver/include/**",
+        "/home/soma/catkin_ws/src/soma_pkg/soma_atv_driver/include/**",
+        "/home/soma/catkin_ws/src/soma_pkg/soma_mse/include/**",
+        "/home/soma/catkin_ws/src/soma_pkg/soma_tools/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

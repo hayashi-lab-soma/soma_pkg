@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Int32.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <maxon_epos_msgs/MotorStates.h>
@@ -28,8 +30,11 @@ private:
   double dt;
 
   //publihser and subscriber
+  ros::Publisher pub_action;
+  ros::Publisher pub_action_str; //State::Start,...
   ros::Publisher pub_motor_states;
   ros::Subscriber sub_cmd_vel;
+  ros::Subscriber sub_wheel_vel; //test for
   ros::Subscriber sub_motor_states;
 
   //networks
@@ -58,6 +63,8 @@ public:
 
     //============================================================
     // publishers
+    pub_action = nh.advertise<std_msgs::Int32>("/soma/action", 3);
+    pub_action_str = nh.advertise<std_msgs::String>("/soma/action_str", 3);
     // publiser for motor states
     pub_motor_states = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_states", 3);
     //============================================================
@@ -69,6 +76,10 @@ public:
                                                      3,
                                                      &ATVDriver::callback_cmd_vel,
                                                      this);
+    //
+    sub_wheel_vel = nh.subscribe<std_msgs::Float32>("/soma/wheel_vel",
+    3,
+    &ATVDriver::callback_wheel_vel,this);
     // subscriber for motor states
     sub_motor_states = nh.subscribe<maxon_epos_msgs::MotorStates>("/get_all_state",
                                                                   3,
@@ -177,6 +188,14 @@ private:
     //====================================================================
 
     //====================================================================
+    // publish current states for logging
+    std_msgs::Int32 action;
+    action.data = data->state;
+    pub_action.publish(action);
+    std_msgs::String action_str;
+    action_str.data = State::Str.at(data->state);
+    pub_action_str.publish(action_str); 
+
     // publish motor target states
     maxon_epos_msgs::MotorStates motor_cmd;
     motor_cmd.states.resize(4);
@@ -228,6 +247,13 @@ private:
                                                    cmd_vel->angular.z); //defined in definitions.h
 
     return;
+  }
+  //
+  void callback_wheel_vel(const std_msgs::Float32ConstPtr &wheel_vel)
+  {
+    ROS_DEBUG("call back wheel velocity: %.2f", wheel_vel->data);
+    data->wheel_vel = wheel_vel->data;
+    // data->u_in.v = data->wheel_vel; //store
   }
   //
   void callback_motor_states(const maxon_epos_msgs::MotorStatesConstPtr &motor_states)

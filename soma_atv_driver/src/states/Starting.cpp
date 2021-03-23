@@ -14,6 +14,9 @@ int Starting::_Transition(soma_atv_driver::Data_t *data)
   {
     return State::Braking;
   }
+  if(abs(data->wheel_vel) >= 0.05){
+    return State::Travelling;
+  }
   return State::Starting;
 }
 int Starting::_Enter(soma_atv_driver::Data_t *data)

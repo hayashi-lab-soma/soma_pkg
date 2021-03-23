@@ -11,8 +11,10 @@ Braking::~Braking()
 int Braking::_Transition(soma_atv_driver::Data_t *data)
 {
   //if ATV velocity nearly equal 0, transition to State::Stop
-  // return State::Braking;
-  return State::Stop;
+  if(abs(data->wheel_vel) <= 0.01){
+    return State::Stop;
+  }
+  return State::Braking;
 }
 int Braking::_Enter(soma_atv_driver::Data_t *data)
 {

@@ -89,6 +89,8 @@ namespace soma_atv_driver
     //
     int clutch;
     int clutch_cmd;
+    //
+    double wheel_vel;
   };
 }
 
