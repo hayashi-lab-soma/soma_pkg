@@ -10,4 +10,5 @@
     "unordered_map": "cpp",
     "unordered_set": "cpp"
   },
+  "python.pythonPath": "/usr/bin/python",
 }
