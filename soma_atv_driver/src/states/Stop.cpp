@@ -17,7 +17,6 @@ int Stop::_Transition(soma_atv_driver::Data_t *data)
 }
 int Stop::_Enter(soma_atv_driver::Data_t *data)
 {
-
   data->target_positions[0] = 0.0;
   data->target_positions[1] = Motor::RearBrake::Max;
   data->target_positions[2] = Motor::FrontBrake::Max;

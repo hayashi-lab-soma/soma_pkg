@@ -1,6 +1,8 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Int32.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <maxon_epos_msgs/MotorStates.h>
@@ -28,8 +30,11 @@ private:
   double dt;
 
   //publihser and subscriber
+  ros::Publisher pub_action;
+  ros::Publisher pub_action_str; //State::Start,...
   ros::Publisher pub_motor_states;
   ros::Subscriber sub_cmd_vel;
+  ros::Subscriber sub_wheel_vel; //test for
   ros::Subscriber sub_motor_states;
 
   //networks
@@ -58,6 +63,8 @@ public:
 
     //============================================================
     // publishers
+    pub_action = nh.advertise<std_msgs::Int32>("/soma/action", 3);
+    pub_action_str = nh.advertise<std_msgs::String>("/soma/action_str", 3);
     // publiser for motor states
     pub_motor_states = nh.advertise<maxon_epos_msgs::MotorStates>("/set_all_states", 3);
     //============================================================
@@ -69,6 +76,10 @@ public:
                                                      3,
                                                      &ATVDriver::callback_cmd_vel,
                                                      this);
+    //
+    sub_wheel_vel = nh.subscribe<std_msgs::Float32>("/soma/wheel_vel",
+    3,
+    &ATVDriver::callback_wheel_vel,this);
     // subscriber for motor states
     sub_motor_states = nh.subscribe<maxon_epos_msgs::MotorStates>("/get_all_state",
                                                                   3,
@@ -76,15 +87,6 @@ public:
                                                                   this);
     //============================================================
     //
-    data = new soma_atv_driver::Data_t();
-    data->state = State::Stop; //initial state
-    data->u_in.v = 0.0;
-    data->u_in.phi = 0.0;
-
-    data->current_positions = new double[4]{0.0};
-    data->target_positions = new double[4]{0.0};
-    data->target_velocity = new long[4]{3500,3500,3500,3500}; //initial values
-    data->clutch = data->clutch_cmd = Clutch::Free;
 
     clutch_recv = new QUdpSocket();
     clutch_recv->bind(Clutch::RecvPort);
@@ -148,12 +150,36 @@ private:
 
     dt = pnh.param<double>("timer_dt", 0.1);
 
+    data = new soma_atv_driver::Data_t();
+    data->dt = dt;
+    data->state = State::Stop; //initial state
+    data->u_in.v = 0.0;
+    data->u_in.phi = 0.0;
+
+    data->current_positions = new double[4]{0.0};
+    data->target_positions = new double[4]{0.0};
+    data->target_velocity = new long[4]{3500,3500,3500,3500}; //initial values
+    data->clutch = data->clutch_cmd = Clutch::Free;
+
+    data->wheel_vel = 0.0;
+    data->ev = new double[3]{0.0};
+    data->P = 0.05;
+    data->D = 0.1;
+
+    data->rear_brake_slow_open_rpm = pnh.param<double>("rear_brake_slow_open_rpm", 100.0);
+    data->throttle_offset = pnh.param<double>("throttle_offset",7.0);
+    data->throttle_max = pnh.param<double>("throttle_max",13.0);
+
     return;
   }
 
   void main(const ros::TimerEvent &e)
   {
     // ROS_INFO(State::Str.at(data->state).c_str());
+
+    data->ev[2] = data->ev[1];
+    data->ev[1] = data->ev[0];
+    data->ev[0] = data->wheel_vel - 1.0;
 
     //====================================================================
     recv_clutch_state(data);
@@ -177,6 +203,14 @@ private:
     //====================================================================
 
     //====================================================================
+    // publish current states for logging
+    std_msgs::Int32 action;
+    action.data = data->state;
+    pub_action.publish(action);
+    std_msgs::String action_str;
+    action_str.data = State::Str.at(data->state);
+    pub_action_str.publish(action_str); 
+
     // publish motor target states
     maxon_epos_msgs::MotorStates motor_cmd;
     motor_cmd.states.resize(4);
@@ -199,35 +233,21 @@ private:
   //
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
   {
-    //convert for steering angle, velocity and move direction (Forward,Backward)
-    // ROS_INFO("%.2f,%.2f",cmd_vel->linear.x,cmd_vel->angular.z);
-
-    //convert to steering angle phi
-    // double phi = 0.0;
-    // if (abs(cmd_vel->angular.z) <= 0.001 || abs(cmd_vel->linear.x) <= 0.001)
-    // {
-    //   phi = 0.0;
-    // }
-    // else
-    // {
-    //   double _phi = cmd_vel->angular.z * ((double)WHEEL_BASE / cmd_vel->linear.x); //(rad)
-    //   if (abs(_phi) > DEG2RAD(30.0))
-    //   {
-    //     phi = DEG2RAD(30.0);
-    //   }
-    //   else
-    //   {
-    //     phi = asin(_phi);
-    //   }
-    // }
-    // ROS_INFO("Steer:%.2f", phi);
-
     //set commands
     data->u_in.v = cmd_vel->linear.x;
     data->u_in.phi = angular_vel_to_steering_angle(cmd_vel->linear.x,
                                                    cmd_vel->angular.z); //defined in definitions.h
+    //steering angle limit (-25~25degree)
+    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(-25));
+    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(25));
 
     return;
+  }
+  //
+  void callback_wheel_vel(const std_msgs::Float32ConstPtr &wheel_vel)
+  {
+    ROS_DEBUG("call back wheel velocity: %.2f", wheel_vel->data);
+    data->wheel_vel = wheel_vel->data;
   }
   //
   void callback_motor_states(const maxon_epos_msgs::MotorStatesConstPtr &motor_states)

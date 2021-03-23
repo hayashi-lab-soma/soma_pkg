@@ -14,6 +14,9 @@ int Starting::_Transition(soma_atv_driver::Data_t *data)
   {
     return State::Braking;
   }
+  if(abs(data->wheel_vel) >= 0.05){
+    return State::Travelling;
+  }
   return State::Starting;
 }
 int Starting::_Enter(soma_atv_driver::Data_t *data)
@@ -27,13 +30,11 @@ int Starting::_Enter(soma_atv_driver::Data_t *data)
     data->clutch_cmd = Clutch::Reverse;
   }
 
-  // data->target_positions[0] =
-  // data->target_velocity[1] =
-  // data->target_velocity[3] =
-    //rear brake open (slowly)
-  data->target_velocity[1] = 100; //rpm
+  //steering
+
+  //rear brake open (slowly)
+  data->target_velocity[1] = data->rear_brake_slow_open_rpm; //rpm
   data->target_positions[2] = Motor::FrontBrake::Min; //front brake
-  data->target_positions[3] = 9.0;                    //throttle (deg)
 }
 
 int Starting::_Process(soma_atv_driver::Data_t *data)
@@ -41,9 +42,10 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
   if (data->clutch != data->clutch_cmd)
     return 0;
 
+  data->target_positions[0] = RAD2DEG(data->u_in.phi);//degrees
   data->target_positions[1] = Motor::RearBrake::Min;
   data->target_positions[2] = Motor::FrontBrake::Min; //front brake
-  data->target_positions[3] = 7.0;                    //throttle (deg)
+  data->target_positions[3] = data->throttle_offset;  //throttle (deg)
 
   return 0;
 }
