@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 
 
 
-    //publish
+    //publish rear wheel velocity
     std_msgs::Float32 wheel_vel;
     wheel_vel.data = recv.v;
     pub_wheel_vel.publish(wheel_vel);
