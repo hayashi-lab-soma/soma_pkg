@@ -7,11 +7,11 @@ X_RANGE = [0.0, 30.0]
 Y_RANGE = [0.0, 30.0]
 TH_RANGE = [-math.pi, math.pi]  # (radians)
 
-DX = 0.1  # (m)
-DY = 0.1  # (m)
-DTH = math.radians(1.0)   # (rdians)
+DX = 10.0  # (m)
+DY = 10.0  # (m)
+DTH = math.radians(90.0)   # (rdians)
 
-SAVE_FILE_NAME=os.path.dirname(__file__)+'/Q-set3.txt'
+SAVE_FILE_NAME=os.path.dirname(__file__)+'/Q-set-test.txt'
 HEADER='dx={},dy={},dth={}\nx,y,th'.format(DX,DY,math.degrees(DTH))
 
 Q = []

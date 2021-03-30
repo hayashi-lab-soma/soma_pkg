@@ -4,130 +4,157 @@ import math
 import scipy.spatial as ss
 from scipy.spatial import distance
 
-# Definitions
+# input
+Q_SET_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set1.txt'
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_DATASET = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/train_dataset.txt'
+# output
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train.txt'
 
 
-X_RANGE = [0.0, 30.0]
-Y_RANGE = [0.0, 30.0]
-TH_RANGE = [-math.pi, math.pi]
+def search_neighbor_trees(M: np.array,
+                          q: np.array,):
+    kdTree = ss.KDTree(M[:, 1:], leafsize=4)
+    dists, indices = kdTree.query((q[0], q[1]), eps=0.01, k=3)
 
-DX = 10.0  # (m)
-DY = 10.0  # (m)
-DTH = 90  # (deg)
+    # unique IDs
+    IDs = []
+    for i in indices:
+        IDs.append(M[i][0])
 
-def uniform_sampling(x_range: [], y_range: [], th_range: [], nx, ny, nth):
-    # print(nx, ny, nth)
-    q_set = []
+    # global coord.
+    global_coods = []
+    for i in indices:
+        global_coods.append(M[i][1])
+        global_coods.append(M[i][2])
 
-    x_set = np.arange(x_range[0], x_range[1], step=nx)
-    y_set = np.arange(y_range[0], y_range[1], step=ny)
-    th_set = np.arange(th_range[0], th_range[1], step=nth)
+    # local coord.
+    local_coords = []
+    Tr = np.array([
+        [math.cos(thi), -math.sin(thi), 0],
+        [math.sin(thi), math.cos(thi), 0],
+        [0, 0, 1]]
+    )  # rotational matrix
 
-    q_set = list(itertools.product(x_set, y_set, th_set))
-    return q_set
+    Tm = np.array(
+        [[1, 0, xi],
+         [0, 1, yi],
+         [0, 0, 1]]
+    )  # transform matrix
+
+    for i in indices:
+        _pos = np.array([[M[i][1]],
+                         [M[i][2]],
+                         [1]])
+        pos = Tm @ Tr @ _pos
+        local_coords.append(pos[0][0])
+        local_coords.append(pos[1][0])
+
+    return IDs, global_coods, local_coords
+
+
+def to_polar(pt: np.array,
+             ps=np.array([0.0, 0.0])):
+    r = distance.euclidean(pt, ps)
+    phi = math.atan2(pt[1]-ps[1], pt[0]-ps[0])
+
+    return r, phi
 
 
 if __name__ == '__main__':
-    Q = uniform_sampling(X_RANGE,
-                         Y_RANGE,
-                         TH_RANGE,
-                         DX, DY, math.radians(DTH))
-    print('total qspace sample: {}'.format(len(Q)))
+    # load c-space samples
+    Q = np.loadtxt(Q_SET_PATH, delimiter='\t')
+    print('total C-Space samples: {}'.format(len(Q)))
 
+    # load tree locations
     tree_locations = np.loadtxt(TREE_LOCATION_PATH, comments='#')
     print('tree spread range =>')
-    print('x min:{},  x max:{}'.format(
+    print(' x min:{},  x max:{}'.format(
         np.min(tree_locations[:, 1]),
         np.max(tree_locations[:, 1])))
-    print('y min:{},  y max:{}'.format(
+    print(' y min:{},  y max:{}'.format(
         np.min(tree_locations[:, 2]),
         np.max(tree_locations[:, 2])))
+    print('Number of trees:{}'.format(len(tree_locations)))
+    IDs_array = tree_locations[:, 0:1]
+    IDs_array = np.ravel(IDs_array)
 
     # Sort trees by neighborhood ordering
+    # top 4 trees
     kdTree = ss.KDTree(tree_locations[:, 1:], leafsize=4)
     dataset = []
 
     # iteration and make dataset
-    for (x, y, th) in Q:
-        dists, indices = kdTree.query((x, y), eps=0.01, k=3)
-        tmp = [x, y, th]  # sampled state vector
+    for (xi, yi, thi) in Q:
+        tmp = [xi, yi, thi]  # append sample state vector
 
-        # print(indices)
-        for i in indices:
-            # Global coord.
-            tmp.append(tree_locations[i][1])
-            tmp.append(tree_locations[i][2])
+        IDs, global_coords, local_coords = search_neighbor_trees(
+            tree_locations, np.array([xi, yi, thi]))
 
-        mat = np.array([
-            [math.cos(th), -math.sin(th)],
-            [math.sin(th), math.cos(th)]]
-        )
+        print(np.array([xi, yi, thi]))
+        # print('->', IDs)
+        # print('->', global_coords)
+        # print('->', local_coords)
 
-        for i in indices:
-            # local coord.
-            _pos = np.array([[tree_locations[i][1]-x],
-                             [tree_locations[i][2]-y]]
-                            )
-            pos = np.dot(mat, _pos)
-            tmp.append(pos[0][0])
-            tmp.append(pos[1][0])
+        # conver to polar coordinate
+        r_alpha, phi_alpha = to_polar(
+            pt=np.array([local_coords[0], local_coords[1]]))
+        r_beta, phi_beta = to_polar(
+            pt=np.array([local_coords[2], local_coords[3]]))
+        r_gamma, phi_gamma = to_polar(
+            pt=np.array([local_coords[4], local_coords[5]]))
 
-        # tree IDs
-        for i in indices:
-            tmp.append(tree_locations[i][0])
+        polar_coords = [r_alpha, phi_alpha,
+                        r_beta, phi_beta,
+                        r_gamma, phi_gamma]
 
-        dataset.append(tmp)
+        # print('->', polar_coords)
 
-    # polar coordinates
-    local_coords = np.array(dataset)[:, 12:]
-    tmp = []
-    for row in local_coords:
-        _tmp = []
+        d_alpha_beta, psi_alpha_beta = to_polar(
+            pt=np.array([local_coords[2], local_coords[3]]),
+            ps=np.array([local_coords[0], local_coords[1]]))
+        d_beta_gamma, psi_beta_gamma = to_polar(
+            pt=np.array([local_coords[4], local_coords[5]]),
+            ps=np.array([local_coords[2], local_coords[3]]))
+        d_gamma_alpha, psi_gamma_alpha = to_polar(
+            pt=np.array([local_coords[0], local_coords[1]]),
+            ps=np.array([local_coords[4], local_coords[5]]))
 
-        p_alpha = row[0:2]
-        p_beta = row[2:4]
-        p_gamma = row[4:6]
+        relative_polar_coords = [d_alpha_beta, psi_alpha_beta,
+                                 d_beta_gamma, psi_beta_gamma,
+                                 d_gamma_alpha, psi_gamma_alpha]
 
-        r_alpha = distance.euclidean(p_alpha, [0, 0])
-        r_beta = distance.euclidean(p_beta, [0, 0])
-        r_gamma = distance.euclidean(p_gamma, [0, 0])
+        # print('->', relative_polar_coords)
 
-        phi_alpha = math.atan2(p_alpha[1], p_alpha[0])
-        phi_beta = math.atan2(p_beta[1], p_beta[0])
-        phi_gamma = math.atan2(p_gamma[1], p_gamma[0])
-
-        d_alpha_beta = distance.euclidean(p_alpha, p_beta)
-        d_beta_gamma = distance.euclidean(p_beta, p_gamma)
-        d_gamma_alpha = distance.euclidean(p_gamma, p_alpha)
-
-        psi_alpha_beta = math.atan2((p_beta[1]-p_alpha[1]),
-                                    (p_beta[0]-p_alpha[0]))
-        psi_beta_gamma = math.atan2((p_gamma[1]-p_beta[1]),
-                                    (p_gamma[0]-p_beta[0]))
-        psi_gamma_alpha = math.atan2((p_alpha[1]-p_gamma[1]),
-                                     (p_alpha[0]-p_gamma[0]))
-
-        _tmp.append(r_alpha)
-        _tmp.append(r_beta)
-        _tmp.append(r_gamma)
-        _tmp.append(phi_alpha)
-        _tmp.append(phi_beta)
-        _tmp.append(phi_gamma)
-        _tmp.append(d_alpha_beta)
-        _tmp.append(d_beta_gamma)
-        _tmp.append(d_gamma_alpha)
-        _tmp.append(psi_alpha_beta)
-        _tmp.append(psi_beta_gamma)
-        _tmp.append(psi_gamma_alpha)
-
-        tmp.append(_tmp)
+        col = np.concatenate([IDs,
+                              global_coords,
+                              local_coords,
+                              polar_coords,
+                              relative_polar_coords])
+        print(' ->', col)
+        dataset.append(col)
+        print('No. col:', len(dataset))
 
     dataset = np.array(dataset)
-    tmp = np.array(tmp)
-    print(dataset.shape, tmp.shape)
-    dataset = np.hstack((dataset, tmp))
-    print(dataset.shape)
+    print('shape:', dataset.shape)
+    np.savetxt(TRAIN_X_DATASET_NAME, dataset, fmt='%.3f', delimiter='\t')
 
-    np.savetxt(TRAIN_DATASET, dataset, fmt='%.3f')
+    # make y_train
+    rho_N = []
+    for col in dataset:
+        rho_array = np.zeros((3, len(tree_locations)))
+        # print(rho_array.shape)
+        for no, tree_id in enumerate(col[0:3]):
+            # print(no,tree_id)
+            # print(np.where(IDs_array==tree_id)[0])
+            rho_array[no][np.where(IDs_array == int(tree_id))[0]] = 1.0
+
+        rho_N.append(np.ravel(rho_array))
+
+    rho_N = np.array(rho_N)
+    # print(rho_N.shape)
+
+    np.savetxt(TRAIN_Y_DATASET_NAME,
+               rho_N,
+               fmt='%.1f',
+               delimiter='\t')
