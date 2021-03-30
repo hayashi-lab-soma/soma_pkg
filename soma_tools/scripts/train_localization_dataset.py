@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python
 
 import os
 import sys
@@ -18,8 +18,7 @@ TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_t
 TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-test.txt'
 MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-test.h5'
 
-EPOCH = 100
-
+EPOCH = 10
 
 def make_train_model(num_inputs, num_trees):
     # input layer
@@ -36,7 +35,7 @@ def make_train_model(num_inputs, num_trees):
     output_beta = layers.Dense(num_trees, activation='softmax')(dense_beta)
     output_gamma = layers.Dense(num_trees, activation='softmax')(dense_gamma)
 
-    outputs = layers.Concatenate(axis=1)(
+    outputs = layers.Concatenate(name='concat',axis=1)(
         [output_alpha, output_beta, output_gamma])
 
     model = tf.keras.Model(inputs=inputs,
@@ -92,4 +91,4 @@ if __name__ == '__main__':
             epochs=EPOCH,)
 
     dt = datetime.datetime.now()
-    model.save(MODEL_NAME,)
+    model.save(MODEL_NAME,save_format='h5')
