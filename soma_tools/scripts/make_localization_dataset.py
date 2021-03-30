@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import itertools
 import math
@@ -5,11 +7,11 @@ import scipy.spatial as ss
 from scipy.spatial import distance
 
 # input
-Q_SET_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set1.txt'
+Q_SET_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set2.txt'
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
 # output
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train.txt'
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train2.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train2.txt'
 
 
 def search_neighbor_trees(M: np.array,

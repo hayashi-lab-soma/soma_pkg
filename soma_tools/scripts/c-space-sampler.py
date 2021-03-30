@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import math
 import itertools
@@ -7,11 +9,11 @@ X_RANGE = [0.0, 30.0]
 Y_RANGE = [0.0, 30.0]
 TH_RANGE = [-math.pi, math.pi]  # (radians)
 
-DX = 10.0  # (m)
-DY = 10.0  # (m)
-DTH = math.radians(90.0)   # (rdians)
+DX = 0.5  # (m)
+DY = 0.5  # (m)
+DTH = math.radians(1.0)   # (rdians)
 
-SAVE_FILE_NAME=os.path.dirname(__file__)+'/Q-set-test.txt'
+SAVE_FILE_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set2.txt'
 HEADER='dx={},dy={},dth={}\nx,y,th'.format(DX,DY,math.degrees(DTH))
 
 Q = []
