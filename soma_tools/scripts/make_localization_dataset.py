@@ -17,7 +17,6 @@ DX = 10.0  # (m)
 DY = 10.0  # (m)
 DTH = 90  # (deg)
 
-
 def uniform_sampling(x_range: [], y_range: [], th_range: [], nx, ny, nth):
     # print(nx, ny, nth)
     q_set = []
