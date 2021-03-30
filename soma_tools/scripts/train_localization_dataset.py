@@ -1,6 +1,11 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import numpy as np
+import datetime
+import time
+from sklearn import preprocessing
 
 # tensorflow,keras by functional API
 import tensorflow as tf
@@ -9,10 +14,11 @@ from tensorflow.keras import models
 from tensorflow.keras import layers
 
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train.txt'
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-test.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-test.txt'
+MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-test.h5'
 
-EPOCH = 8000
+EPOCH = 100
 
 
 def make_train_model(num_inputs, num_trees):
@@ -68,6 +74,7 @@ if __name__ == '__main__':
 
     x_train = _x_train[:, 15:27]
     # x_train = np.reshape(x_train, (-1, 1, 12))
+    x_train = preprocessing.minmax_scale(x_train)
     print('x_train shape:', x_train.shape)
     y_train = _y_train
     # y_train = np.reshape(_y_train, (-1, 1, 3*len(tree_locations)))
@@ -79,7 +86,10 @@ if __name__ == '__main__':
     tf.keras.utils.plot_model(model,
                               show_shapes=True,
                               to_file='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/model.png')
-    model.fit(x=x_train,
-              y=y_train,
-              #   y=[y_train[:, 0:38], y_train[:, 38:76], y_train[:, 76:114]],
-              epochs=EPOCH,)
+    history = model.fit(x=x_train,
+            y=y_train,
+            #   y=[y_train[:, 0:38], y_train[:, 38:76], y_train[:, 76:114]],
+            epochs=EPOCH,)
+
+    dt = datetime.datetime.now()
+    model.save(MODEL_NAME,)
