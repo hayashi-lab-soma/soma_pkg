@@ -1,4 +1,12 @@
 
 .vscode/
 
-soma_tools/data/
+soma_tools/data/Q-set*.txt
+
+*.eps
+
+soma_tools/data/train_dataset.txt
+
+soma_tools/data/x_train.txt
+
+soma_tools/data/y_train.txt
