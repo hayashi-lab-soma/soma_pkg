@@ -13,7 +13,7 @@ DX = 0.5  # (m)
 DY = 0.5  # (m)
 DTH = math.radians(1.0)   # (rdians)
 
-SAVE_FILE_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set2.txt'
+SAVE_FILE_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set3.txt'
 HEADER='dx={},dy={},dth={}\nx,y,th'.format(DX,DY,math.degrees(DTH))
 
 Q = []

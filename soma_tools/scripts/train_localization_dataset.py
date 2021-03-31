@@ -6,6 +6,7 @@ import numpy as np
 import datetime
 import time
 from sklearn import preprocessing
+import pandas as pd
 
 # tensorflow,keras by functional API
 import tensorflow as tf
@@ -14,11 +15,17 @@ from tensorflow.keras import models
 from tensorflow.keras import layers
 
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-test.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-test.txt'
-MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-test.h5'
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train3.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train3.txt'
+MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-3-1000.h5'
+HISTORY_FILE_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-3-1000.csv'
 
+<<<<<<< HEAD
 EPOCH = 10
+=======
+EPOCH = 1000
+
+>>>>>>> devel
 
 def make_train_model(num_inputs, num_trees):
     # input layer
@@ -85,10 +92,25 @@ if __name__ == '__main__':
     tf.keras.utils.plot_model(model,
                               show_shapes=True,
                               to_file='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/model.png')
+    print('start training')
     history = model.fit(x=x_train,
             y=y_train,
             #   y=[y_train[:, 0:38], y_train[:, 38:76], y_train[:, 76:114]],
-            epochs=EPOCH,)
+            epochs=EPOCH,
+            verbose=1)
 
+    #save history
+    hist_df = pd.DataFrame(history.history)
+    hist_df.to_csv(HISTORY_FILE_NAME)
+    #save model
     dt = datetime.datetime.now()
+<<<<<<< HEAD
     model.save(MODEL_NAME,save_format='h5')
+=======
+    model.save(MODEL_NAME,)
+
+
+
+
+
+>>>>>>> devel
