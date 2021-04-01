@@ -5,21 +5,14 @@ import itertools
 import math
 import scipy.spatial as ss
 from scipy.spatial import distance
+import progressbar
 
 # input
-<<<<<<< HEAD
 Q_SET_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set-test.txt'
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
 # output
 TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-test.txt'
 TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-test.txt'
-=======
-Q_SET_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set3.txt'
-TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-# output
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train3.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train3.txt'
->>>>>>> devel
 
 
 def search_neighbor_trees(M: np.array,
@@ -67,7 +60,6 @@ def to_polar(pt: np.array,
              ps=np.array([0.0, 0.0])):
     r = distance.euclidean(pt, ps)
     phi = math.atan2(pt[1]-ps[1], pt[0]-ps[0])
-
     return r, phi
 
 
@@ -95,55 +87,59 @@ if __name__ == '__main__':
     dataset = []
 
     # iteration and make dataset
-    for (xi, yi, thi) in Q:
-        tmp = [xi, yi, thi]  # append sample state vector
+    print('make x_train dataset')
+    with progressbar.ProgressBar(max_value=len(Q)) as bar:
+        for i,(xi, yi, thi) in enumerate(Q):
+            tmp = [xi, yi, thi]  # append sample state vector
 
-        IDs, global_coords, local_coords = search_neighbor_trees(
-            tree_locations, np.array([xi, yi, thi]))
+            IDs, global_coords, local_coords = search_neighbor_trees(
+                tree_locations, np.array([xi, yi, thi]))
 
-        print(np.array([xi, yi, thi]))
-        # print('->', IDs)
-        # print('->', global_coords)
-        # print('->', local_coords)
+            # print(np.array([xi, yi, thi]))
+            # print('->', IDs)
+            # print('->', global_coords)
+            # print('->', local_coords)
 
-        # conver to polar coordinate
-        r_alpha, phi_alpha = to_polar(
-            pt=np.array([local_coords[0], local_coords[1]]))
-        r_beta, phi_beta = to_polar(
-            pt=np.array([local_coords[2], local_coords[3]]))
-        r_gamma, phi_gamma = to_polar(
-            pt=np.array([local_coords[4], local_coords[5]]))
+            # conver to polar coordinate
+            r_alpha, phi_alpha = to_polar(
+                pt=np.array([local_coords[0], local_coords[1]]))
+            r_beta, phi_beta = to_polar(
+                pt=np.array([local_coords[2], local_coords[3]]))
+            r_gamma, phi_gamma = to_polar(
+                pt=np.array([local_coords[4], local_coords[5]]))
 
-        polar_coords = [r_alpha, phi_alpha,
-                        r_beta, phi_beta,
-                        r_gamma, phi_gamma]
+            polar_coords = [r_alpha, phi_alpha,
+                            r_beta, phi_beta,
+                            r_gamma, phi_gamma]
 
-        # print('->', polar_coords)
+            # print('->', polar_coords)
 
-        d_alpha_beta, psi_alpha_beta = to_polar(
-            pt=np.array([local_coords[2], local_coords[3]]),
-            ps=np.array([local_coords[0], local_coords[1]]))
-        d_beta_gamma, psi_beta_gamma = to_polar(
-            pt=np.array([local_coords[4], local_coords[5]]),
-            ps=np.array([local_coords[2], local_coords[3]]))
-        d_gamma_alpha, psi_gamma_alpha = to_polar(
-            pt=np.array([local_coords[0], local_coords[1]]),
-            ps=np.array([local_coords[4], local_coords[5]]))
+            d_alpha_beta, psi_alpha_beta = to_polar(
+                pt=np.array([local_coords[2], local_coords[3]]),
+                ps=np.array([local_coords[0], local_coords[1]]))
+            d_beta_gamma, psi_beta_gamma = to_polar(
+                pt=np.array([local_coords[4], local_coords[5]]),
+                ps=np.array([local_coords[2], local_coords[3]]))
+            d_gamma_alpha, psi_gamma_alpha = to_polar(
+                pt=np.array([local_coords[0], local_coords[1]]),
+                ps=np.array([local_coords[4], local_coords[5]]))
 
-        relative_polar_coords = [d_alpha_beta, psi_alpha_beta,
-                                 d_beta_gamma, psi_beta_gamma,
-                                 d_gamma_alpha, psi_gamma_alpha]
+            relative_polar_coords = [d_alpha_beta, psi_alpha_beta,
+                                    d_beta_gamma, psi_beta_gamma,
+                                    d_gamma_alpha, psi_gamma_alpha]
 
-        # print('->', relative_polar_coords)
+            # print('->', relative_polar_coords)
 
-        col = np.concatenate([IDs,
-                              global_coords,
-                              local_coords,
-                              polar_coords,
-                              relative_polar_coords])
-        print(' ->', col)
-        dataset.append(col)
-        print('No. col:', len(dataset))
+            col = np.concatenate([IDs,
+                                global_coords,
+                                local_coords,
+                                polar_coords,
+                                relative_polar_coords])
+            # print(' ->', col)
+            dataset.append(col)
+            # print('No. col:', len(dataset))
+
+            bar.update(i)
 
     dataset = np.array(dataset)
     print('shape:', dataset.shape)
@@ -151,6 +147,8 @@ if __name__ == '__main__':
 
     # make y_train
     rho_N = []
+    print('make y_train dataset')
+    # with progressbar.ProgressBar(max_value=len(Q)) as bar:
     for col in dataset:
         rho_array = np.zeros((3, len(tree_locations)))
         # print(rho_array.shape)
@@ -168,3 +166,5 @@ if __name__ == '__main__':
                rho_N,
                fmt='%.1f',
                delimiter='\t')
+
+    print('finished:', TRAIN_X_DATASET_NAME,TRAIN_Y_DATASET_NAME)

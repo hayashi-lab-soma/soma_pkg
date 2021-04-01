@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import os
-import sys
+# import os
+# import sys
 import numpy as np
 import datetime
-import time
+# import time
 from sklearn import preprocessing
 import pandas as pd
 
@@ -15,17 +15,13 @@ from tensorflow.keras import models
 from tensorflow.keras import layers
 
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train3.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train3.txt'
-MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-3-1000.h5'
-HISTORY_FILE_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-3-1000.csv'
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-2.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-2.txt'
+MODEL_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-1-n12-e5000.h5'
+HISTORY_FILE_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/history/model-2-n12-e5000.csv'
 
-<<<<<<< HEAD
-EPOCH = 10
-=======
-EPOCH = 1000
+EPOCH = 5000
 
->>>>>>> devel
 
 def make_train_model(num_inputs, num_trees):
     # input layer
@@ -33,16 +29,18 @@ def make_train_model(num_inputs, num_trees):
     # inputs = tf.keras.Input(shape=(1,num_inputs,))
 
     # hidden layer
-    dense_alpha = layers.Dense(3, activation='relu')(inputs)
-    dense_beta = layers.Dense(3, activation='relu')(inputs)
-    dense_gamma = layers.Dense(3, activation='relu')(inputs)
+    # num_nodes = num_trees
+    num_nodes=12
+    dense_alpha = layers.Dense(num_nodes, activation='relu')(inputs)
+    dense_beta = layers.Dense(num_nodes, activation='relu')(inputs)
+    dense_gamma = layers.Dense(num_nodes, activation='relu')(inputs)
 
     # output layer
     output_alpha = layers.Dense(num_trees, activation='softmax')(dense_alpha)
     output_beta = layers.Dense(num_trees, activation='softmax')(dense_beta)
     output_gamma = layers.Dense(num_trees, activation='softmax')(dense_gamma)
 
-    outputs = layers.Concatenate(name='concat',axis=1)(
+    outputs = layers.Concatenate(name='concat', axis=1)(
         [output_alpha, output_beta, output_gamma])
 
     model = tf.keras.Model(inputs=inputs,
@@ -94,23 +92,14 @@ if __name__ == '__main__':
                               to_file='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/model.png')
     print('start training')
     history = model.fit(x=x_train,
-            y=y_train,
-            #   y=[y_train[:, 0:38], y_train[:, 38:76], y_train[:, 76:114]],
-            epochs=EPOCH,
-            verbose=1)
+                        y=y_train,
+                        #   y=[y_train[:, 0:38], y_train[:, 38:76], y_train[:, 76:114]],
+                        epochs=EPOCH,
+                        verbose=1)
 
-    #save history
+    # save history
     hist_df = pd.DataFrame(history.history)
     hist_df.to_csv(HISTORY_FILE_NAME)
-    #save model
+    # save model
     dt = datetime.datetime.now()
-<<<<<<< HEAD
-    model.save(MODEL_NAME,save_format='h5')
-=======
-    model.save(MODEL_NAME,)
-
-
-
-
-
->>>>>>> devel
+    model.save(MODEL_NAME, save_format='h5')
