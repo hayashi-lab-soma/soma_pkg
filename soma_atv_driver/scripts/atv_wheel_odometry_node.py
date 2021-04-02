@@ -9,13 +9,14 @@ from tf.transformations import quaternion_from_euler
 from tf import TransformBroadcaster
 from maxon_epos_msgs.msg import MotorState
 from maxon_epos_msgs.msg import MotorStates
+from math import sin, cos, tan
 
 WHEEL_BASE = 1.04
-TIMER_T = 0.2
+TIMER_T = 0.5
 
 # frame id
-frame_id = 'wodom'
 base_link = 'soma_link'
+frame_id = 'wodom'
 
 #global variable
 v = 0.0
@@ -29,20 +30,24 @@ def callback_wheel_vel(data):
 
 
 def callback_steering_state(data):
-    phi = data.position
+    phi = data.position  # steering angle [rad]
 
 
 def timer_callback(event):
-    rospy.loginfo('timer callback')
-    rospy.loginfo('(v,phi)=({:.2f},{:.2f})'.format(v, phi))
+    rospy.loginfo('(v,phi)=({:.2f}, {:.2f})'.format(v, phi))
 
     # Dead Recogning
     dt = TIMER_T
     if v != 0.0 and phi != 0.0:  # turning
-        omega = v*sin(phi)/WHEEL_BASE
-        X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
-        X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
-        X_t[2] = X_t[2] + omega*dt
+        # front wheel odometry?
+        # omega = v*sin(phi)/WHEEL_BASE
+        # X_t[0] = X_t[0] - v/omega*sin(X_t[2]) + v/omega*sin(X_t[2] + omega*dt)
+        # X_t[1] = X_t[1] + v/omega*cos(X_t[2]) - v/omega*cos(X_t[2] + omega*dt)
+        # X_t[2] = X_t[2] + omega*dt
+        # rear wheel odometry?
+        X_t[0] = X_t[0] + v*cos(X_t[2])*dt
+        X_t[1] = X_t[1] + v*sin(X_t[2])*dt
+        X_t[2] = X_t[2] + v*tan(phi)/WHEEL_BASE*dt
     elif v != 0.0 and phi == 0.0:  # move straight
         X_t[0] = X_t[0] + v*dt*cos(X_t[2])
         X_t[1] = X_t[1] + v*dt*sin(X_t[2])
@@ -78,11 +83,13 @@ def timer_callback(event):
 if __name__ == '__main__':
     rospy.loginfo('Run atv wheel odometry node')
     rospy.init_node('atv_wheel_odometry', anonymous=True)
+
+    # subscriber
     rospy.Subscriber('/wheel_vel', Float32, callback=callback_wheel_vel)
     rospy.Subscriber('/steering_state', MotorState, callback_steering_state)
 
     # publishers
-    odom_pub = rospy.Publisher('/wheel_odom', Odometry, queue_size=3)
+    odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=3)
     odom_broadcaster = TransformBroadcaster()
 
     rospy.Timer(rospy.Duration(TIMER_T), timer_callback)
