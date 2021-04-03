@@ -1,12 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="topic" default="/soma/vel" doc="publish topic name" />
-	<arg name="publish_rate" default="1.0" />
-	<!--  -->
+	<!-- arguments -->
+	<arg name="topic" default="/soma/wheel_vel" doc="publish topic name" />
+	<arg name="publish_rate" default="2.0" />
+	<!-- rotary server artuments -->
 	<arg name="server_ip" default="192.168.1.79" />
 	<arg name="send_port" default="22346" />
 	<arg name="recv_port" default="12346" />
-	<node name="atv_rotary_comm" pkg="soma_sensor" type="atv_rotary_communication_node">
+	<!-- run node -->
+	<node name="atv_rotary_client" pkg="soma_sensor" type="atv_rotary_client_node">
 		<remap from="/vel" to="$(arg topic)" />
 		<param name="publish_rate" value="$(arg publish_rate)" />
 		<param name="server_ip" value="$(arg server_ip)" />

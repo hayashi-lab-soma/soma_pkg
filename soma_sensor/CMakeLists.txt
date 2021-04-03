@@ -85,11 +85,11 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(atv_rotary_communication_node
-    src/atv_rotary_communication_node.cpp
+add_executable(atv_rotary_client_node
+    src/atv_rotary_client_node.cpp
 )
 
-target_link_libraries(atv_rotary_communication_node
+target_link_libraries(atv_rotary_client_node
     ${catkin_LIBRARIES}
     ${QT_LIBRARIES}
 )
