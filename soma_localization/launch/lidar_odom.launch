@@ -18,7 +18,7 @@
 	-->
 	<arg name="use_distance_filter" default="true" />
 	<arg name="distance_near_thresh" default="0.1" />
-	<arg name="distance_far_thresh" default="20.0" />
+	<arg name="distance_far_thresh" default="15.0" />
 	<arg name="down_sampling_resolution" default="0.3" />
 	<!--  -->
 	<node if="$(arg enable_manager)" pkg="nodelet" type="nodelet" name="$(arg nodelet_manager)" args="manager" output="screen">
