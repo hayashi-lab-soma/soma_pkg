@@ -30,9 +30,11 @@
 		<arg name="depth_fps" value="15" />
 		<arg name="publish_tf" value="true" />
 		<arg name="tf_publish_rate" value="0" />
+		<arg name="align_depth" value="true" />
 	</include>
+	<!--  -->
 	<arg name="PI" default="3.1415" />
-	<group ns="$(arg camera_name)">
+	<group if="false" ns="$(arg camera_name)">
 		<arg name="pan" value="$(eval arg('pan_angle')/180.0*arg('PI'))" />
 		<arg name="tilt" value="$(eval arg('tilt_angle')/180.0*arg('PI'))" />
 		<arg name="role" value="$(eval arg('role_angle')/180.0*arg('PI'))" />

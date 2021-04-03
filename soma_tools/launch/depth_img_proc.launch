@@ -1,8 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-	<node name="to_pc" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyzrgb" output="log">
-		<remap from="rgb/camera_info" to="/camera_F/color/camera_info" />
-		<remap from="rgb/image_rect_color" to="/camera_F/color/image_raw" />
-		<remap from="depth_registered/image_rect" to="/camera_F/depth/image_rect_raw" />
+	<!--
+	<node name="to_pc" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyzrgb" output="screen">
+	<remap from="rgb/camera_info" to="/camera_F/color/camera_info" />
+	<remap from="rgb/image_rect_color" to="/camera_F/color/image_raw" />
+	<remap from="depth_registered/image_rect" to="/camera_F/depth/image_rect_raw" />
+	</node>
+	-->
+	<node name="to_pc" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyz" output="screen">
+		<remap from="camera_info" to="/camera_F/color/camera_info" />
+		<remap from="image_rect" to="/camera_F/depth/image_rect_raw" />
 	</node>
 </launch>
