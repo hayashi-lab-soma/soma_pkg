@@ -2,7 +2,7 @@
 <launch>
 	<!-- arguments -->
 	<arg name="topic" default="/soma/wheel_vel" doc="publish topic name" />
-	<arg name="publish_rate" default="2.0" />
+	<arg name="publish_rate" default="2.0" doc="publish rate [Hz]" />
 	<!-- rotary server artuments -->
 	<arg name="server_ip" default="192.168.1.79" />
 	<arg name="send_port" default="22346" />
