@@ -1,14 +1,35 @@
 <?xml version="1.0"?>
 <launch>
-
 	<node name="to_pc" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyzrgb" output="screen">
 		<remap from="rgb/camera_info" to="/camera_F/color/camera_info" />
 		<remap from="rgb/image_rect_color" to="/camera_F/color/image_raw" />
 		<remap from="depth_registered/image_rect" to="/camera_F/aligned_depth_to_color/image_raw" />
 	</node>
-
-	<!-- <node name="to_pc" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyzrgb" output="screen">
-		<remap from="camera_info" to="/camera_F/color/camera_info" />
-		<remap from="image_rect" to="/camera_F/depth/image_rect_raw" />
-	</node> -->
+	<node name="camera_nodelet_manager" pkg="nodelet" type="nodelet" output="screen" args="manager" />
+	<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough camera_nodelet_manager">
+		<remap from="~input" to="depth_registered/points" />
+		<param name="input_frame" value="soma_link" />
+		<param name="filter_field_name" value="x" />
+		<param name="filter_limit_min" value="-6.0" />
+		<param name="filter_limit_max" value="6.0" />
+		<param name="filter_limit_negative" value="false" />
+	</node>
+	<node pkg="nodelet" type="nodelet" name="pt_z_filter" args="load pcl/PassThrough camera_nodelet_manager">
+		<remap from="~input" to="/pt_x_filter/output" />
+		<param name="input_frame" value="soma_link" />
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="-0.8" />
+		<param name="filter_limit_max" value="2.5" />
+		<param name="filter_limit_negative" value="false" />
+	</node>
+	<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid camera_nodelet_manager">
+		<remap from="~input" to="/pt_z_filter/output" />
+		<remap from="~output" to="/depth_registered/filtered_points" />
+		<param name="input_frame" value="soma_link" />
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="-10.0" />
+		<param name="filter_limit_max" value="10.0" />
+		<param name="leaf_size" value="0.05" />
+		<param name="filter_limit_negative" value="false" />
+	</node>
 </launch>
