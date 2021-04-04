@@ -13,6 +13,7 @@
 	<arg name="rtabmap_args" default="delete_db_on_start" doc="" />
 	<arg name="odom_args" default="" doc="additional arguments for odometry" />
 	<arg name="output" default="screen" doc="" />
+	<!--  -->
 	<!-- RGB-D Odometry -->
 	<node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="$(arg output)" args="$(arg rtabmap_args) $(arg odom_args)">
 		<!-- image subscribe topics -->
@@ -42,5 +43,10 @@
 		<param name="expected_update_rate" type="double" value="0" />
 		<param name="max_update_rate" type="double" value="0" />
 		<param name="keep_color" type="bool" value="false" />
+		<!--  -->
+		<!-- Advanced parameters -->
+		<param name="Odom/Strategy" value="1"/> <!-- Frame2Frame strategy -->
+		<param name="Vis/MaxFeatures" value="1000"/>
+		
 	</node>
 </launch>

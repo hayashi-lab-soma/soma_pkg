@@ -7,6 +7,7 @@
 	<!-- arguments -->
 	<arg name="base_frame_id" default="soma_link" />
 	<arg name="lidar_link" default="velodyne" />
+	<arg name="odom_frame_id" default="lidar_odom" doc="" />
 	<arg name="points_topic" default="/velodyne_points" doc="input points for odometory" />
 	<arg name="enable_manager" default="false" doc="If you publish PointCloud2 from bagfile, set true" />
 	<arg name="nodelet_manager" default="velodyne_nodelet_manager" />
@@ -53,7 +54,7 @@
 	<!-- Run scan_matching_odometry_nodelet in hdl_graph_slam pkg -->
 	<node name="scan_matching_odometry_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/ScanMatchingOdometryNodelet $(arg nodelet_manager)">
 		<param name="points_topic" value="/filtered_points" />
-		<param name="odom_frame_id" value="odom" />
+		<param name="odom_frame_id" value="$(arg odom_frame_id)" />
 		<param name="keyframe_delta_trans" value="1.0" />
 		<param name="keyframe_delta_angle" value="1.0" />
 		<param name="keyframe_delta_time" value="3000.0" />
@@ -63,7 +64,7 @@
 		<param name="downsample_method" value="NONE" />
 		<param name="downsample_resolution" value="0.05" />
 		<!-- ICP, GICP, NDT, GICP_OMP, or NDT_OMP(recommended) -->
-		<param name="registration_method" value="GICP_OMP"/>
+		<param name="registration_method" value="GICP_OMP" />
 		<param name="transformation_epsilon" value="0.01" />
 		<param name="maximum_iterations" value="64" />
 		<param name="use_reciprocal_correspondences" value="false" />
@@ -74,5 +75,7 @@
 		<param name="ndt_resolution" value="5.0" />
 		<param name="ndt_num_threads" value="0" />
 		<param name="ndt_nn_search_method" value="DIRECT7" />
+		<!--  -->
+		<remap from="odom" to="lidar_odom" />
 	</node>
 </launch>
