@@ -21,7 +21,7 @@
 		<arg name="recv_port" value="12346" />
 	</include>
 	<!-- rgbd camera node launch -->
-	<include file="$(find soma_sensor)/launch/rgbd_camera.launch">
+	<include if="true" file="$(find soma_sensor)/launch/rgbd_camera.launch">
 		<arg name="base_link" value="soma_link" />
 		<arg name="camera_name" value="camera_F" />
 		<arg name="serial_no" value="939622073512" />
