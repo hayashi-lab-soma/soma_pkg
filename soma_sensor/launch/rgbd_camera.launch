@@ -4,6 +4,8 @@
 	<arg name="base_link" default="base_link" doc="robot base link name" />
 	<arg name="camera_name" default="camera" doc="unique camera name (group name)" />
 	<arg name="serial_no" default="" doc="serial number" />
+	<arg name="color_fps" default="15"/>
+	<arg name="depth_fps" default="15"/>
 	<!--  -->
 	<!-- transform argumanets -->
 	<arg name="use_center_frame" default="true" />
@@ -26,15 +28,17 @@
 		<arg name="enable_infra2" value="false" />
 		<arg name="enable_gyro" value="false" />
 		<arg name="enable_accel" value="false" />
-		<arg name="color_fps" value="15" />
-		<arg name="depth_fps" value="15" />
+		<!-- <arg name="color_height" value=""/> -->
+		<!-- <arg name="color_width" value=""/> -->
+		<arg name="color_fps" value="$(arg color_fps)" />
+		<arg name="depth_fps" value="$(arg depth_fps)" />
 		<arg name="publish_tf" value="true" />
 		<arg name="tf_publish_rate" value="0" />
 		<arg name="align_depth" value="true" />
 	</include>
 	<!--  -->
 	<arg name="PI" default="3.1415" />
-	<group if="false" ns="$(arg camera_name)">
+	<group if="true" ns="$(arg camera_name)">
 		<arg name="pan" value="$(eval arg('pan_angle')/180.0*arg('PI'))" />
 		<arg name="tilt" value="$(eval arg('tilt_angle')/180.0*arg('PI'))" />
 		<arg name="role" value="$(eval arg('role_angle')/180.0*arg('PI'))" />
@@ -47,7 +51,7 @@
 		<group unless="$(arg use_center_frame)">
 			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
 		</group>
-		<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
+		<!-- <node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
 			<remap from="~input" to="/$(arg camera_name)/depth_registered/points" />
 			<param name="input_frame" value="$(arg base_link)" />
 			<param name="filter_field_name" value="x" />
@@ -72,6 +76,6 @@
 			<param name="filter_limit_max" value="10.0" />
 			<param name="leaf_size" value="0.03" />
 			<param name="filter_limit_negative" value="false" />
-		</node>
+		</node> -->
 	</group>
 </launch>

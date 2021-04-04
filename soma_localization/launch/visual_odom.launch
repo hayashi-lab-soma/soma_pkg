@@ -3,7 +3,7 @@
 	<!-- arguments -->
 	<arg name="camera_name" default="camera_F" doc="" />
 	<arg name="rgb_image_topic" default="$(arg camera_name)/color/image_raw" doc="" />
-	<arg name="depth_image_topic" default="$(arg camera_name)/depth/image_rect_raw" doc="" />
+	<arg name="depth_image_topic" default="$(arg camera_name)/aligned_depth_to_color/image_raw" doc="" />
 	<arg name="camera_info_topic" default="$(arg camera_name)/color/camera_info" doc="" />
 	<arg name="odom_topic" default="vodom" doc="" />
 	<arg name="frame_id" default="soma_link" doc="base frame name" />
