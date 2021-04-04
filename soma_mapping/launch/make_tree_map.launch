@@ -1,36 +1,29 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- arguments -->
-	<arg name="map_points_topic" default="/hdl_graph_slam/map_points" doc="" />
-	<arg name="map_frame_id" default="map" doc="" />
-	<arg name="nodelet_manager" default="velodyne_nodelet_manager" doc="" />
+	<arg name="input_map" default="/map_points" doc="" />
+	<arg name="nodelet_manager" default="map_manager" doc="" />
 	<!--  -->
-	<arg name="x_min" default="-1.0" doc="" />
-	<arg name="x_max" default="21.0" doc="" />
-	<arg name="y_min" default="0" doc="" />
-	<arg name="y_max" default="28.0" doc="" />
-	<arg name="height_min" default="-0.2" doc="" />
-	<arg name="height_max" default="2.5" doc="" />
 	<!--  -->
-	<node name="x_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
-		<remap from="~input" to="$(arg map_points_topic)" />
-		<!-- <remap from="~output" to="/filtered_map_points" /> -->
-		<param name="filter_field_name" value="x" />
-		<param name="filter_limit_min" value="$(arg x_min)" />
-		<param name="filter_limit_max" value="$(arg x_max)" />
-	</node>
-	<node name="y_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
-		<remap from="~input" to="/x_axis_clip/output" />
-		<!-- <remap from="~output" to="/filtered_map_points" /> -->
-		<param name="filter_field_name" value="y" />
-		<param name="filter_limit_min" value="$(arg y_min)" />
-		<param name="filter_limit_max" value="$(arg y_max)" />
-	</node>
-	<node name="height_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
-		<remap from="~input" to="/y_axis_clip/output" />
-		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" output="screen" />
+	<!-- filter -->
+	<node name="map_downsampling" pkg="nodelet" type="nodelet" output="screen" args="load pcl/VoxelGrid $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg input_map)" />
+		<remap from="~output" to="$(arg input_map)_filtered" />
 		<param name="filter_field_name" value="z" />
-		<param name="filter_limit_min" value="$(arg height_min)" />
-		<param name="filter_limit_max" value="$(arg height_max)" />
+		<param name="leaf_size" value="0.1" />
+		<param name="filter_limit_min" value="-100" />
+		<param name="filter_limit_max" value="100" />
+	</node>
+	<!-- Euclidean clustering -->
+	<node name="clustering" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/EuclideanClustering $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg input_map)_filtered" />
+		<param name="tolerance" value="0.3" />
+		<param name="min_size" value="80" />
+	</node>
+	<!-- decompose -->
+	<node name="cluster_decomposer" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg input_map)_filtered" />
+		<remap from="~target" to="/clustering/output" />
 	</node>
 </launch>
