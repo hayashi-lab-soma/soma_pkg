@@ -12,7 +12,7 @@ from maxon_epos_msgs.msg import MotorStates
 from math import sin, cos, tan
 
 WHEEL_BASE = 1.04
-TIMER_T = 0.5
+TIMER_T = 0.1
 
 # frame id
 base_link = 'soma_link'
@@ -25,15 +25,18 @@ X_t = [0.0, 0.0, 0.0]  # odometry x,y,theta estimated
 
 
 def callback_wheel_vel(data):
-    rospy.loginfo('wheel vel:'+str(data.data))
-    v = data.data  # velocity [m/s]
+    # rospy.loginfo('wheel vel:'+str(data.data))
+   global v
+   v = data.data  # velocity [m/s]
 
 
 def callback_steering_state(data):
+    global phi
     phi = data.position  # steering angle [rad]
 
-
 def timer_callback(event):
+    global v
+    global phi
     rospy.loginfo('(v,phi)=({:.2f}, {:.2f})'.format(v, phi))
 
     # Dead Recogning
@@ -53,6 +56,7 @@ def timer_callback(event):
         X_t[1] = X_t[1] + v*dt*sin(X_t[2])
         X_t[2] = X_t[2]
     else:
+        rospy.logwarn('warn {}, {}'.format(v,phi))
         pass
 
     rospy.loginfo('(x,y,th)=({:.2f},{:.2f},{:.2f})'.format(
@@ -85,8 +89,8 @@ if __name__ == '__main__':
     rospy.init_node('atv_wheel_odometry', anonymous=True)
 
     # subscriber
-    rospy.Subscriber('/wheel_vel', Float32, callback=callback_wheel_vel)
-    rospy.Subscriber('/steering_state', MotorState, callback_steering_state)
+    rospy.Subscriber('/soma/wheel_vel', Float32, callback=callback_wheel_vel)
+    rospy.Subscriber('/maxon_bringup/steering/get_state', MotorState, callback_steering_state)
 
     # publishers
     odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=3)

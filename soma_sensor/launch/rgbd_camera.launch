@@ -40,7 +40,7 @@
 
     <arg name="PI" default="3.1415"/>
 
-    <group ns="$(arg camera_name)">
+    <!-- <group ns="$(arg camera_name)">
         <arg name="pan" value="$(eval arg('pan_angle')/180.0*arg('PI'))"/>
         <arg name="tilt" value="$(eval arg('tilt_angle')/180.0*arg('PI'))"/>
         <arg name="role" value="$(eval arg('role_angle')/180.0*arg('PI'))"/>
@@ -85,6 +85,6 @@
             <param name="filter_limit_negative" value="false"/>
         </node>
 
-    </group>
+    </group> -->
 
 </launch>
