@@ -5,5 +5,7 @@
 		<rosparam command="load" file="$(find soma_localization)/config/visual_imu.yaml" />
 		<!--  -->
 		<remap from="/odometry/filtered" to="/soma/odom_conbined" />
+		<remap from="visual_odom" to="/vodom" />
+		<remap from="imu_data" to="/imu/data" />
 	</node>
 </launch>
