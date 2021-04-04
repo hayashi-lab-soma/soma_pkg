@@ -5,8 +5,9 @@
 	<arg name="interval" default="1.0" />
 	<arg name="frame_id" default="base_link" />
 	<arg name="output" default="raw_points" doc="" />
+	<arg name="name" default="" />
 	<!-- run pcd publihser node -->
-	<node name="pcd_publisher" pkg="pcl_ros" type="pcd_to_pointcloud" args="$(arg file) $(arg interval)">
+	<node name="$(arg name)_pcd_publisher" pkg="pcl_ros" type="pcd_to_pointcloud" args="$(arg file) $(arg interval)">
 		<param name="frame_id" value="$(arg frame_id)" />
 		<remap from="cloud_pcd" to="$(arg output)" />
 	</node>

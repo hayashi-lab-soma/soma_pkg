@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="map_points_topic" default="/hdl_graph_slam/map_points" doc="" />
+	<arg name="map_frame_id" default="map" doc="" />
+	<arg name="nodelet_manager" default="velodyne_nodelet_manager" doc="" />
+	<!--  -->
+	<arg name="x_min" default="-1.0" doc="" />
+	<arg name="x_max" default="21.0" doc="" />
+	<arg name="y_min" default="0" doc="" />
+	<arg name="y_max" default="28.0" doc="" />
+	<arg name="height_min" default="-0.2" doc="" />
+	<arg name="height_max" default="2.5" doc="" />
+	<!--  -->
+	<node name="x_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="$(arg map_points_topic)" />
+		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+		<param name="filter_field_name" value="x" />
+		<param name="filter_limit_min" value="$(arg x_min)" />
+		<param name="filter_limit_max" value="$(arg x_max)" />
+	</node>
+	<node name="y_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="/x_axis_clip/output" />
+		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+		<param name="filter_field_name" value="y" />
+		<param name="filter_limit_min" value="$(arg y_min)" />
+		<param name="filter_limit_max" value="$(arg y_max)" />
+	</node>
+	<node name="height_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="/y_axis_clip/output" />
+		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="$(arg height_min)" />
+		<param name="filter_limit_max" value="$(arg height_max)" />
+	</node>
+</launch>
