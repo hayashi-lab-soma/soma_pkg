@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="atv_wheel_odometry" pkg="soma_atv_driver" type="atv_wheel_odometry_node.py" output="screen">
+	</node>
+</launch>

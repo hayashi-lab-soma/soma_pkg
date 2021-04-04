@@ -10,4 +10,6 @@
     "unordered_map": "cpp",
     "unordered_set": "cpp"
   },
+  "files.encoding": "utf8",
+  "files.eol": "\n"
 }
