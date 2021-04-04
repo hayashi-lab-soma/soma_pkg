@@ -33,22 +33,4 @@
 		<param name="filter_limit_min" value="$(arg height_min)" />
 		<param name="filter_limit_max" value="$(arg height_max)" />
 	</node>
-	<!-- <node name="to_color" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl_utils/PointCloudXYZToXYZRGB $(arg nodelet_manager)">
-		<remap from="~input" to="/height_clip/output" />
-	</node>
-	<node name="normal_omp" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/NormalEstimationOMP $(arg nodelet_manager)">
-		<remap from="~input" to="/to_color/output" />
-	</node>
-	<node name="normal_filter" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/NormalDirectionFilter $(arg nodelet_manager)">
-		<remap from="~input" to="/normal_omp/output" />
-<rosparam>
-  use_imu: false
-  eps_angle: 0.1
-  direction: [0, 0, 1]
-</rosparam>
-	</node>
-	<node name="ext" pkg="nodelet" type="nodelet" output="log" args="load jsk_pcl/ExtractIndices $(arg nodelet_manager)">
-		<remap from="~input" to="/normal_omp/output_with_xyz" />
-		<remap from="~indices" to="/normal_filter/output" />
-	</node> -->
 </launch>
