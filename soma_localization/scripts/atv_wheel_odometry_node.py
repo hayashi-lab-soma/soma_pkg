@@ -63,7 +63,7 @@ def timer_callback(event):
         X_t[1] = X_t[1] + _v*dt*sin(X_t[2])
         X_t[2] = X_t[2]
     else:
-        rospy.logwarn('warn {}, {}'.format(_v, _phi))
+        # rospy.logwarn('warn {}, {}'.format(_v, _phi))
         X_t[0] = X_t[0]
         X_t[1] = X_t[1]
         X_t[2] = X_t[2]
@@ -72,15 +72,18 @@ def timer_callback(event):
         X_t[0], X_t[1], X_t[2]))
 
     # publish
-    odom = Odometry()
+    odom = Odometry() #nav_msgs.msg.Odometry
     odom.header.stamp = rospy.Time.now()
     odom.header.frame_id = frame_id
     odom.child_frame_id = base_link
+    # set pose xyz
     odom.pose.pose.position.x = X_t[0]
     odom.pose.pose.position.y = X_t[1]
-    odom.pose.pose.position.z = 0.0
+    odom.pose.pose.position.z = 0.0 #for 2D
+    # set pose quaternion as yaw,pitch,roll
     q = quaternion_from_euler(0.0, 0.0, X_t[2])
     odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
+    # let's publish
     odom_pub.publish(odom)
 
     # publish tf odom_dr -> soma_link

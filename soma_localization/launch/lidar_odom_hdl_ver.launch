@@ -3,6 +3,7 @@
 	<!--
 	LiDAR based odometry by scan matching pkg
 	何だかんだでhdl_graph_slam/ScanMathingOdometryNodeletが一番使い勝手がいい
+	bagfileから点群をパブリッシュしてやるなら
 	-->
 	<!-- arguments -->
 	<arg name="base_frame_id" default="soma_link" />
