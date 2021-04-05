@@ -1,11 +1,67 @@
 <?xml version="1.0"?>
 <launch>
-	<!-- publish tree map pcd map -->
-	<include file="$(find soma_samples)">
-		
+	<!-- arguments -->
+	<arg name="pcd_file" default="$(find soma_mapping)/data/tree_extracted_map.pcd" doc="" />
+	<arg name="nodelet_manager" default="map_manager" doc="" />
+	<!--
+	publish 3-D tree map from PCD file
+	launch pcd_publish.launch in soma_tools
+	-->
+	<include file="$(find soma_tools)/launch/pcd_publish.launch">
+		<arg name="file" value="$(find soma_mapping)/data/tree_extracted_map.pcd" doc="" />
+		<arg name="interval" value="5.0" doc="" />
+		<arg name="frame_id" value="map" doc="" />
+		<arg name="output" value="map_points" doc="" />
 	</include>
-	<!-- run planner -->
-	<node name="planner" pkg="soma_planner" type="global_motion_planner_node.py" output="screen">
+	<!-- run nodelet manager -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" />
+	<node name="map_ds" pkg="nodelet" type="nodelet" args="load pcl/VoxelGrid $(arg nodelet_manager)">
+		<remap from="~input" to="/map_points" />
+		<!-- <remap from="~output" to="/map_points_filtered" /> -->
+		<param name="filter_field_name" value="z" />
+		<param name="leaf_size" value="0.1" />
+		<param name="filter_limit_min" value="-100" />
+		<param name="filter_limit_max" value="100" />
+	</node>
+	<node name="map_sor" pkg="nodelet" type="nodelet" args="load pcl/StatisticalOutlierRemoval $(arg nodelet_manager)">
+		<remap from="~input" to="/map_ds/output" />
+		<!-- <remap from="~output" to="/map_points_filtered" /> -->
+		<!-- <param name="filter_field_name" value="z" /> -->
+		<param name="mean_k" value="10" />
+		<param name="stddev" value="0.05" />
+		<param name="filter_limit_min" value="-100" />
+		<param name="filter_limit_max" value="100" />
+	</node>
+	<node name="x_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="/map_sor/output" />
+		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+		<param name="filter_field_name" value="x" />
+		<param name="filter_limit_min" value="3.0" />
+		<param name="filter_limit_max" value="10.0" />
+	</node>
+	<node name="y_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
+		<remap from="~input" to="/x_axis_clip/output" />
+		<remap from="~output" to="/map_points_filtered" />
+		<param name="filter_field_name" value="y" />
+		<param name="filter_limit_min" value="3.0" />
+		<param name="filter_limit_max" value="10.0" />
+	</node>
+	<!-- Euclidean clustering -->
+	<node name="clustering" pkg="nodelet" type="nodelet" args="load jsk_pcl/EuclideanClustering $(arg nodelet_manager)">
+		<remap from="~input" to="/map_points_filtered" />
+		<param name="tolerance" value="2.0" />
+		<param name="min_size" value="25" />
+	</node>
+	<!-- decompose -->
+	<node name="cluster_decomposer" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg nodelet_manager)">
+		<remap from="~input" to="/map_points_filtered" />
+		<remap from="~target" to="/clustering/output" />
+	</node>
+	<!--
+	run graph based global planner
+	created by Tominaga
+	-->
+	<node if="true" name="planner" pkg="soma_planner" type="global_motion_planner_node.py" output="screen">
 		<remap from="tree_poses" to="/cluster_decomposer/centroid_pose_array" />
 	</node>
 </launch>

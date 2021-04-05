@@ -18,15 +18,18 @@ import DubinsPath
 import itertools
 import math
 import networkx as nx
+from scipy.spatial import KDTree
 
 # SOMA parameters
 WHEEL_BASE = 1.04  # [m]
-MIN_CURVATURE = 0.43  # minimum curvature
+# MIN_CURVATURE = 0.43  # minimum curvature
+MIN_CURVATURE = 0.406
 
 # Q-Space parameter
 NH = 30
 LOCAL_PATH_PLANNER = 'DubinsPath'
-q_init = [0.0, 0.0, 0.0]
+DUBINS_STEP = 0.5
+q_init = [1.0, 1.0, 0.0]
 
 # ros publisher
 pub_waypoints = None  # publisher
@@ -139,6 +142,7 @@ def call_back(data):
   tree_positions = [[pose.position.x, pose.position.y]
                     for pose in data.poses]
   tree_positions = np.array(tree_positions)
+  kd_tree = KDTree(tree_positions, leafsize=3)
 
   # create planner and waypoints
   planner = PathPlanner(tree_positions)
@@ -156,10 +160,6 @@ def call_back(data):
   # add nodes
   for k, h in set_kh_tup:
     GQ.add_node(h + k*NH)
-  # for k, p in enumerate(way_points):
-  #     for h in range(NH):
-  #         GQ.add_node(h + k*NH)
-  # print(' Num node: ', GQ.number_of_nodes())
   # add edges
   for k, h in set_kh_tup:
     if k >= len(way_points)-1:
@@ -172,12 +172,20 @@ def call_back(data):
         px, py, pyaw, mode, length = DubinsPath.dubins_path_planning(
             qi[0], qi[1], qi[2],  # source pose
             qj[0], qj[1], qj[2],  # target pose
-            c=MIN_CURVATURE)
+            c=MIN_CURVATURE,
+            step_size=DUBINS_STEP)
+
+      # minimum distance to obstacle
+      min_d = float('inf')
+      for p in zip(px,py):
+        d,i = kd_tree.query(p, k=1)
+        if d < min_d:
+          min_d = d
 
       # set edge weight
       GQ.add_edge(h+k*NH,
                   i+(k+1)*NH,
-                  weight=length)
+                  weight=min_d)
 
   # print(' Num edges: ', GQ.number_of_edges())
 
@@ -211,7 +219,8 @@ def call_back(data):
       px, py, pyaw, mode, length = DubinsPath.dubins_path_planning(
           q_init[0], q_init[1], q_init[2],
           Q[h][0], Q[h][1], Q[h][2],
-          c=MIN_CURVATURE)
+          c=MIN_CURVATURE,
+          step_size=DUBINS_STEP)
       # check collision
       # if checkCollision(env,px,py,1.4):
       # continue
@@ -306,7 +315,8 @@ def call_back(data):
       px, py, pyaw, mode, length = DubinsPath.dubins_path_planning(
           qi[0], qi[1], qi[2],
           qj[0], qj[1], qj[2],
-          c=MIN_CURVATURE)
+          c=MIN_CURVATURE,
+          step_size=DUBINS_STEP)
 
     # tmp_list = [(xi, yi) for xi, yi in zip(px, py)]
     # traj_node2node.append(tmp_list)

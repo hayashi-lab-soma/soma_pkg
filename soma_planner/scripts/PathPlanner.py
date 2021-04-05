@@ -101,19 +101,22 @@ class PathPlanner:
     # print('Num triangles=', len(triangles.simplices))
     G = nx.Graph()
     for t in triangles.simplices:
-      G.add_edge(t[0], t[1])
-      G.add_edge(t[1], t[2])
-      G.add_edge(t[2], t[0])
+      if distance.euclidean((self.pos[t[0]]), (self.pos[t[1]])) > 2.0:
+        G.add_edge(t[0], t[1])
+      if distance.euclidean((self.pos[t[1]]), (self.pos[t[2]])) > 2.0:
+        G.add_edge(t[1], t[2])
+      if distance.euclidean((self.pos[t[2]]), (self.pos[t[0]])) > 2.0:
+        G.add_edge(t[2], t[0])
     return G
 
   def chinese_postmap_problem(self, Gin):
     # print(type(Gin.degree()))
     odd_nodes = [v for (v, d) in Gin.degree() if d % 2 == 1]
     # odd_nodes = [v for (v, d) in Gin.degree().items() if d % 2 == 1]
-    print('Odd nodes ==>')
-    print(odd_nodes)
+    # print('Odd nodes ==>')
+    # print(odd_nodes)
     odd_node_pairs = list(itertools.combinations(odd_nodes, 2))
-    print('Odd nodes pairs ==>')
+    # print('Odd nodes pairs ==>')
     print(odd_node_pairs)
     cost_list = {}
     for pair in odd_node_pairs:
@@ -121,7 +124,7 @@ class PathPlanner:
                                                 pair[0],
                                                 pair[1],
                                                 weight='weight')
-    print('Cost list ==>')
+    # print('Cost list ==>')
     print(cost_list)
 
     Gc = nx.Graph()
@@ -131,14 +134,14 @@ class PathPlanner:
     odd_matching_dupes = nx.max_weight_matching(Gc)
     M = list(pd.unique([tuple(sorted([k, v]))
                         for k, v in odd_matching_dupes.items()]))
-    print('Matching M ==>')
-    print(M)
+    # print('Matching M ==>')
+    # print(M)
 
     Geular = nx.MultiGraph()
     Geular.add_nodes_from(Gin.nodes(), pos=self.pos)
     Geular.add_edges_from(Gin.edges())
 
-    print('Add paths ==>')
+    # print('Add paths ==>')
     for (m1, m2) in M:
       path = nx.dijkstra_path(Gin,
                               m1,
