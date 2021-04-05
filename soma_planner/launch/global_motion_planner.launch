@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="planner" pkg="soma_planner" type="global_motion_planner_node.py" output="screen">
+		<remap from="tree_poses" to="/cluster_decomposer/centroid_pose_array" />
+	</node>
+</launch>

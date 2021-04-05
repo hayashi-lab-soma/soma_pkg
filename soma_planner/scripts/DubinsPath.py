@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug 25 13:42:36 2020
@@ -12,12 +13,12 @@ Dubins path planner sample code
 author Atsushi Sakai(@Atsushi_twi)
 
 """
-import math
 
+
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial.transform import Rotation as Rot
-
 show_animation = True
 
 
@@ -228,15 +229,17 @@ def dubins_path_planning(s_x, s_y, s_yaw, g_x, g_y, g_yaw, c, step_size=0.1):
     g_x = g_x - s_x
     g_y = g_y - s_y
 
-    l_rot = Rot.from_euler('z', s_yaw).as_matrix()[0:2, 0:2]
-    le_xy = np.stack([g_x, g_y]).T @ l_rot
+    # l_rot = Rot.from_euler('z', s_yaw).as_matrix()[0:2, 0:2]
+    l_rot = Rot.from_euler('z', s_yaw).as_dcm()[0:2,0:2]
+    le_xy = np.dot(np.stack([g_x, g_y]).T, l_rot)
     le_yaw = g_yaw - s_yaw
 
     lp_x, lp_y, lp_yaw, mode, lengths = dubins_path_planning_from_origin(
         le_xy[0], le_xy[1], le_yaw, c, step_size)
 
-    rot = Rot.from_euler('z', -s_yaw).as_matrix()[0:2, 0:2]
-    converted_xy = np.stack([lp_x, lp_y]).T @ rot
+    # rot = Rot.from_euler('z', -s_yaw).as_matrix()[0:2, 0:2]
+    rot = Rot.from_euler('z', -s_yaw).as_dcm()[0:2, 0:2]
+    converted_xy = np.dot(np.stack([lp_x, lp_y]).T, rot)
     x_list = converted_xy[:, 0] + s_x
     y_list = converted_xy[:, 1] + s_y
     yaw_list = [pi_2_pi(i_yaw + s_yaw) for i_yaw in lp_yaw]
@@ -353,8 +356,3 @@ def main():
 if __name__ == '__main__':
     main()
 """
-
-
-
-
-

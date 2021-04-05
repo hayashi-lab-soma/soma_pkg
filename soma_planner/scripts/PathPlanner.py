@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import numpy as np
 import math
 import itertools
@@ -7,6 +9,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from scipy.spatial import Delaunay
 from scipy.spatial import distance
+import pandas as pd
 
 
 class PathPlanner:
@@ -59,7 +62,9 @@ class PathPlanner:
 
         if not nx.is_eulerian(self.Ge):
             print('Not Eulerian')
-            sys.exit(-1)
+            print(self.Ge.degree())
+            # sys.exit(-1)
+            return None
 
         eularian_circuit = list(nx.eulerian_circuit(self.Ge, 0))
         print('Eularian circuit ==>')
@@ -93,7 +98,9 @@ class PathPlanner:
         return G
 
     def chinese_postmap_problem(self, Gin):
-        odd_nodes = [v for v, d in Gin.degree() if d % 2 == 1]
+        # print(type(Gin.degree()))
+        odd_nodes = [v for (v, d) in Gin.degree() if d % 2 == 1]
+        # odd_nodes = [v for (v, d) in Gin.degree().items() if d % 2 == 1]
         print('Odd nodes ==>')
         print(odd_nodes)
         odd_node_pairs = list(itertools.combinations(odd_nodes, 2))
@@ -105,13 +112,16 @@ class PathPlanner:
                                                       pair[0],
                                                       pair[1],
                                                       weight='weight')
+        print('Cost list ==>')
         print(cost_list)
 
         Gc = nx.Graph()
         for k, v in cost_list.items():
             Gc.add_edge(k[0], k[1], **{'distance': v, 'weight': v})
 
-        M = nx.max_weight_matching(Gc)
+        odd_matching_dupes = nx.max_weight_matching(Gc)
+        M = list(pd.unique([tuple(sorted([k, v]))
+                            for k, v in odd_matching_dupes.items()]))
         print('Matching M ==>')
         print(M)
 
@@ -120,10 +130,10 @@ class PathPlanner:
         Geular.add_edges_from(Gin.edges())
 
         print('Add paths ==>')
-        for m in M:
+        for (m1, m2) in M:
             path = nx.dijkstra_path(Gin,
-                                    m[0],
-                                    m[1],
+                                    m1,
+                                    m2,
                                     weight='weight')
             print(path)
             nx.add_path(Geular, path)
