@@ -1,3 +1,13 @@
+"""
+atv_kinematic_model.py
+
+Description
+-----------
+Analyze python module for ATV kinematic model
+
+
+"""
+
 import numpy as np
 import math
 from scipy.integrate import odeint
