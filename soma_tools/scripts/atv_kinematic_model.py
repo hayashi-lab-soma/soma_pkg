@@ -20,6 +20,7 @@ q' = {
 
 import numpy as np
 import math
+import itertools
 from scipy.integrate import odeint  # simulation library
 import matplotlib.pyplot as plt
 import os
@@ -28,18 +29,24 @@ import os
 L = 1.04  # tread length (sec)
 
 # Simulation arguments
-T = 3.0  # time limit (sec)
+T = 5.0  # time limit (sec)
 DT = 0.1  # time slice (sec)
 
 V = 1.0  # constant velocity [m]
 PHI = math.radians(-30.0)  # constant steering angle [rad]
 
-# dPHI = 5.0
-# PHI_MIN = -30.0
-# PHI_MAX = 30.0
-# NUM_PHI = int((PHI_MAX - PHI_MIN)/dPHI) + 1
-# PHIS = np.linspace(-30, 30, num=NUM_PHI)  # constant steering angle [deg]
-# Q_INIT = [0.0, 0.0, 0.0]  # initial state vector on 2-D [x,y,theta]
+V_MIN = 1.0
+V_MAX = 1.0
+V_STEP = 1.0
+
+PHI_MIN = -30.0
+PHI_MAX = 30.0
+PHI_STEP = 5.0
+
+V_SET = np.linspace(V_MIN, V_MAX, num=int((V_MAX-V_MIN)/V_STEP)+1)
+PHI_SET = np.linspace(math.radians(PHI_MIN),
+                      math.radians(PHI_MAX),
+                      num=int((PHI_MAX-PHI_MIN)/PHI_STEP)+1)
 
 #
 SAVE_DIR = os.path.dirname(__file__)+'/../data/kinematic_model/'
@@ -59,43 +66,18 @@ if __name__ == '__main__':
   t_list = np.linspace(0.0, T, num=int(T/DT))
 
   print('Simulation')
-  print('V={}, PHI={}'.format(V, PHI))
 
-  Q = odeint(kinematic_model,
-             [0.0, 0.0, 0.0],
-             t_list,
-             args=(L, V, PHI))
+  for (v, phi) in list(itertools.product(V_SET, PHI_SET)):
+    print('V={}, PHI={:.2f}'.format(v, math.degrees(phi)))
 
-  np.savetxt(SAVE_DIR+'V{}-PHI{:.2f}'.format(V, math.degrees(PHI)),
-             Q,
-             fmt='%.3f',
-             delimiter='\t',
-             header='x,y,th,',
-             comments='#',)
+    Q = odeint(kinematic_model,
+               [0.0, 0.0, 0.0],
+               t_list,
+               args=(L, v, phi))
 
-#   print(Q)
-
-#   data_set = []
-
-#   for phi in PHIS:
-#     print("Steer:", phi, math.radians(phi))
-#     Q = odeint(func_kinematics, Q_INIT, t_list, args=(L, V, math.radians(phi)))
-
-#     x_list = np.array(Q[:, 0]).copy()
-#     y_list = np.array(Q[:, 1]).copy()
-#     th_list = np.array(Q[:, 2]).copy()
-
-#     _data_set = np.array([x_list, y_list, th_list]).transpose()
-#     data_set.append(_data_set)
-#   print("fin.")
-
-#   data_set = np.array(data_set)
-#   print(data_set.shape)
-
-#   for i, d in enumerate(data_set):
-#     np.savetxt(SAVE_DIR+str(i)+'_kinematics-model.txt',
-#                d,
-#                fmt='%.2f',
-#                delimiter='\t',
-#                header='x,y,th,',
-#                comments='#',)
+    np.savetxt(SAVE_DIR+'V{}-PHI{:.1f}.txt'.format(v, math.degrees(phi)),
+               Q,
+               fmt = '%.3f',
+               delimiter = '\t',
+               header = 'x,y,th,',
+               comments = '#',)
