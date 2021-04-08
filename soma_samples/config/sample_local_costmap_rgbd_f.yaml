@@ -1,7 +1,7 @@
 local_costmap_rgbd_front:
   plugins:
     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
-  global_frame: soma_link
+  global_frame: vodom
   robot_base_frame: soma_link
   transform_tolerance: 0.5
   rolling_window: true
@@ -19,8 +19,8 @@ local_costmap_rgbd_front:
   obstacle_layer:
     observation_sources: rgbd_f
     rgbd_f:
-      sensor_frame: soma_link
-      topic: depth_registered/filtered_points
+      sensor_frame: camera_F_link
+      topic: camera_F/depth_registered/filtered_points
       data_type: PointCloud2
       marking: true
       clearing: true
