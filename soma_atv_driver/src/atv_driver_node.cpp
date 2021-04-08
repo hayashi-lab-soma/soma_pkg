@@ -150,8 +150,8 @@ private:
 
     data->wheel_vel = 0.0;
     data->ev = new double[3]{0.0};
-    data->P = 0.05;
-    data->D = 0.1;
+    data->P = pnh.param<double>("P", 0.1);
+    data->D = pnh.param<double>("D", 0.1);
 
     data->rear_brake_slow_open_rpm =
         pnh.param<double>("rear_brake_slow_open_rpm", 100.0);
@@ -191,8 +191,13 @@ private:
     std_msgs::Int32 action;
     action.data = data->state;
     pub_action.publish(action);
+
     std_msgs::String action_str;
-    action_str.data = State::Str.at(data->state);
+    std::stringstream ss;
+    ss << State::Str.at(data->state);
+    ss << "," << data->P;
+    ss << "," << data->D;
+    action_str.data = std::string(ss.str());
     pub_action_str.publish(action_str);
 
     // publish motor target states

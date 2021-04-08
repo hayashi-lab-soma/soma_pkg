@@ -33,12 +33,12 @@ namespace Motor
   namespace RearBrake
   {
     const double Min = 0.0;
-    const double Max = 9.0;
+    const double Max = 10.0;
   }
   namespace FrontBrake
   {
     const double Min = 0.0;
-    const double Max = 14.0;
+    const double Max = 15.0;
   }
   namespace Throttle
   {
