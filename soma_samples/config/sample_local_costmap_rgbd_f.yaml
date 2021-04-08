@@ -3,6 +3,7 @@ local_costmap_rgbd_front:
     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
   global_frame: soma_link
   robot_base_frame: soma_link
+  transform_tolerance: 0.5
   rolling_window: true
   width: 10
   height: 10
