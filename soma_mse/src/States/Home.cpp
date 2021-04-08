@@ -37,8 +37,10 @@ int Home::_Process(Data_t *data)
   data->fixed_target.pose.position.z = 0.0;
 
   //transform target point "map" to "base_link" frame
+  //way 1)  tf2
   geometry_msgs::PoseStamped out;
   tf2::doTransform(data->fixed_target, out, data->transform_map2base);
+  
 
   //calc local plan
   std::vector<geometry_msgs::PoseStamped> local_path;
