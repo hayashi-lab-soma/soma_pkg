@@ -3,25 +3,25 @@ local_costmap_rgbd_front:
     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
   global_frame: vodom
   robot_base_frame: soma_link
-  transform_tolerance: 0.5
+  transform_tolerance: 2.0
+  # static_map: false
   rolling_window: true
-  width: 10
-  height: 10
+  width: 12
+  height: 8
   resolution: 0.1
   update_frequency: 3.0
   publish_frequency: 3.0
   always_send_full_costmap: false
-  max_obstacle_height: 5.0
-  obstacle_range: 0.0
-  conbination_method: 0
-
+  # obstacle_range: 10.0
+  # conbination_method: 0
 
   obstacle_layer:
     observation_sources: rgbd_f
     rgbd_f:
       sensor_frame: camera_F_link
-      topic: camera_F/depth_registered/filtered_points
+      topic: camera_F/prefiltered
       data_type: PointCloud2
       marking: true
       clearing: true
-      min_obstacle_height: -1.0
+      max_obstacle_height: 2.5
+      min_obstacle_height: 0.3

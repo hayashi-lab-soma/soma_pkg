@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
 
   tf2_ros::Buffer *tfBuf = new tf2_ros::Buffer();
-  tf2_ros::TransformListener *tfListener() = new tf2_ros::TransformListener(*tfBuf);
+  tf2_ros::TransformListener *tfListener = new tf2_ros::TransformListener(*tfBuf);
   costmap_2d::Costmap2DROS costmap("local_costmap_rgbd_front", *tfBuf);
   costmap.start();
   ros::spin();
