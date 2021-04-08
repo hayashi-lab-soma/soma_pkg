@@ -1,18 +1,47 @@
 <launch>
-
-  <!-- rgbd camera node launch-->
-  <include file="$(find soma_sensor)/launch/rgbd_camera.launch">
-    <arg name="base_link" value="soma_link"/>
-    <arg name="camera_name" value="camera_F"/>
-    <arg name="serial_no" value="939622073512"/>
-    <arg name="use_center_frame" value="false"/>
-    <arg name="pan_angle" value="0"/>
-    <arg name="tilt_angle" value="15"/>
-    <arg name="role_angle" value="0"/>
-    <arg name="tx" default="0.85"/>
-    <arg name="ty" default="0.0"/>
-    <arg name="tz" default="0.8"/>
-  </include>
-
+	<!-- arguments -->
+	<arg name="base_link" default="soma_link" doc="" />
+	<arg name="camera_name" default="camera_F" doc="" />
+	<!-- rgbd camera node launch -->
+	<include file="$(find soma_sensor)/launch/rgbd_camera.launch">
+		<arg name="base_link" value="$(arg base_link)" />
+		<arg name="camera_name" value="$(arg camera_name)" />
+		<arg name="serial_no" value="939622073512" />
+		<arg name="use_center_frame" value="false" />
+		<arg name="pan_angle" value="0" />
+		<arg name="tilt_angle" value="15" />
+		<arg name="role_angle" value="0" />
+		<arg name="tx" default="0.85" />
+		<arg name="ty" default="0.0" />
+		<arg name="tz" default="0.8" />
+	</include>
+	<!-- prefiltering -->
+	<group ns="$(arg camera_name)">
+		<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
+			<remap from="~input" to="/$(arg camera_name)/depth_registered/points" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="x" />
+			<param name="filter_limit_min" value="-6.0" />
+			<param name="filter_limit_max" value="6.0" />
+			<param name="filter_limit_negative" value="false" />
+		</node>
+		<node pkg="nodelet" type="nodelet" name="pt_z_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
+			<remap from="~input" to="/$(arg camera_name)/pt_x_filter/output" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-0.5" />
+			<param name="filter_limit_max" value="1.5" />
+			<param name="filter_limit_negative" value="false" />
+		</node>
+		<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid realsense2_manager_$(arg camera_name)">
+			<remap from="~input" to="/$(arg camera_name)/pt_z_filter/output" />
+			<remap from="~output" to="/$(arg camera_name)/prefiltered" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-10.0" />
+			<param name="filter_limit_max" value="10.0" />
+			<param name="leaf_size" value="0.03" />
+			<param name="filter_limit_negative" value="false" />
+		</node>
+	</group>
 </launch>
-

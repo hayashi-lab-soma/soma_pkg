@@ -1,6 +1,31 @@
 <?xml version="1.0"?>
 <launch>
-	<node name="local_costmap" pkg="soma_smpls" type="sample_local_costmap" output="screen">
-		<rosparam command="load" file="$(find soma_mse)/config/local_costmap.yaml"/>
+	<arg name="base_link" default="soma_link" doc="robot base link name" />
+	<arg name="camera_name" default="camera_F" doc="unique camera name (group name)" />
+	<arg name="use_center_frame" value="false" />
+	<arg name="pan_angle" value="0" />
+	<arg name="tilt_angle" value="15" />
+	<arg name="role_angle" value="0" />
+	<arg name="tx" default="0.85" />
+	<arg name="ty" default="0.0" />
+	<arg name="tz" default="0.8" />
+	<arg name="PI" default="3.1415" />
+	<arg name="pan" value="$(eval arg('pan_angle')/180.0*arg('PI'))" />
+	<arg name="tilt" value="$(eval arg('tilt_angle')/180.0*arg('PI'))" />
+	<arg name="role" value="$(eval arg('role_angle')/180.0*arg('PI'))" />
+	<arg name="tf_param1" default="0 $(arg ty) 0 $(arg pan) $(arg tilt) $(arg role)" />
+	<arg name="tf_param2" default="$(arg tx) 0 $(arg tz) 0 0 0" />
+	<!--  -->
+	<!-- <group if="$(arg use_center_frame)">
+		<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Center" args="$(arg tf_param1) camera_center_link $(arg camera_name)_link" />
+		<node pkg="tf2_ros" type="static_transform_publisher" name="Center2Base" args="$(arg tf_param2) $(arg base_link) camera_center_link" />
+	</group>
+	<group unless="$(arg use_center_frame)">
+		<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
+	</group> -->
+	<!--  -->
+	<node name="local_costmap" pkg="soma_samples" type="sample_local_costmap" output="screen">
+		<!-- <rosparam command="load" file="$(find soma_mse)/config/local_costmap.yaml"/> -->
+		<rosparam command="load" file="$(find soma_samples)/config/sample_local_costmap_rgbd_f.yaml" />
 	</node>
 </launch>

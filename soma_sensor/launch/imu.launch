@@ -14,7 +14,7 @@
     <arg name="initial_wait" default="0.1" doc="initial wait to allow device to come up"/>
 
     <!-- IMUのフレーム名を設定 -->
-    <arg name="frame_id" default="/imu" doc="frame id of the IMU"/>
+    <arg name="frame_id" default="imu" doc="frame id of the IMU"/>
 
     <arg name="frame_local" default="ENU" doc="desired frame orientation (ENU, NED or NWU)"/>
     <arg name="no_rotation_duration" default="0" doc="duration (int in seconds) of the no-rotation calibration procedure"/>

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- launch LiDAR -->
+	<include file="$(find soma_sensor)/launch/lidar.launch">
+		<arg name="base_link" value="soma_link" />
+		<arg name="frame_id" default="velodyne" />
+		<arg name="tfargs" value="0.5 0 1.65 0 0 0" />
+		<arg name="max_range" default="100.0" />
+		<arg name="min_range" default="0.4" />
+	</include>
+	<include file="$(find soma_sensor)/launch/imu.launch">
+		<arg name="base_link" default="soma_link" />
+		<arg name="frame_id" default="imu" />
+		<arg name="tfargs" default="0 0 1.45 0 0 0" />
+	</include>
+	<include file="$(find soma_sensor)/launch/atv_rotary.launch">
+		<arg name="topic" value="/soma/wheel_vel" />
+		<arg name="publish_rate" value="0.2" />
+		<arg name="server_ip" value="192.168.1.79" />
+		<arg name="send_port" value="22346" />
+		<arg name="recv_port" value="12346" />
+	</include>
+	<!-- rgbd camera node launch -->
+	<include if="true" file="$(find soma_sensor)/launch/rgbd_camera.launch">
+		<arg name="base_link" value="soma_link" />
+		<arg name="camera_name" value="camera_F" />
+		<arg name="serial_no" value="939622073512" />
+		<arg name="use_center_frame" value="false" />
+		<arg name="pan_angle" value="0" />
+		<arg name="tilt_angle" value="15" />
+		<arg name="role_angle" value="0" />
+		<arg name="tx" default="0.85" />
+		<arg name="ty" default="0.0" />
+		<arg name="tz" default="0.8" />
+	</include>
+</launch>

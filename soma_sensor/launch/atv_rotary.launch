@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<node name="rotary_comm" pkg="soma_sensor" type="atv_rotary_communication_node" output="screen">
-		<param name="timer_t" value="0.1" />
-	</node>
-</launch>
