@@ -166,7 +166,7 @@ private:
 
     data->ev[2] = data->ev[1];
     data->ev[1] = data->ev[0];
-    data->ev[0] = data->wheel_vel - 1.0;
+    data->ev[0] = 1.0 - data->wheel_vel;
 
     //====================================================================
     recv_clutch_state(data);
