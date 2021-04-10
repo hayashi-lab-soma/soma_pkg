@@ -19,18 +19,18 @@ int Stop::_Transition(soma_atv_driver::Data_t *data)
 int Stop::_Enter(soma_atv_driver::Data_t *data)
 {
   data->target_positions[0] = 0.0;
-  data->target_positions[1] = data->motors_poslim.rear_brake.Max;
-  data->target_positions[2] = data->motors_poslim.front_brake.Max;
-  data->target_positions[3] = data->motors_poslim.throttle.Min;
+  data->target_positions[1] = data->motor_params.rear_brake.Max;
+  data->target_positions[2] = data->motor_params.front_brake.Max;
+  data->target_positions[3] = data->motor_params.throttle.Min;
 
   return 0;
 }
 int Stop::_Process(soma_atv_driver::Data_t *data)
 {
   data->target_positions[0] = 0.0;
-  data->target_positions[1] = data->motors_poslim.rear_brake.Max;
-  data->target_positions[2] = data->motors_poslim.front_brake.Max;
-  data->target_positions[3] = data->motors_poslim.throttle.Min;
+  data->target_positions[1] = data->motor_params.rear_brake.Max;
+  data->target_positions[2] = data->motor_params.front_brake.Max;
+  data->target_positions[3] = data->motor_params.throttle.Min;
 
   return 0;
 }

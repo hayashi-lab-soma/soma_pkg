@@ -26,6 +26,9 @@
 		<param name="front_brake_pos_max" value="10.0" />
 		<param name="throttle_pos_min" value="0.0" />
 		<param name="throttle_pos_max" value="13.0" />
+		<!-- starting state parameters -->
+		<param name="rear_brake_starting_state_low_rpm" value="100" />
+		<param name="throttle_regular" value="7.0" />
 		<!--  -->
 		<param name="rear_brake_slow_open_rpm" value="100" />
 		<param name="throttle_offset" value="8.0" />

@@ -95,6 +95,9 @@ namespace soma_atv_driver
     };
     //
     PositionLimit steering, rear_brake, front_brake, throttle;
+    //starting parameters
+    double rear_brake_starting_state_low_rpm;
+    double throttle_regular;
   };
 
   /**
@@ -116,14 +119,8 @@ namespace soma_atv_driver
     double wheel_vel;
     double *ev;
     double P, D; //gain
-    // mechanism parameters
-    // for rear brake
-    double rear_brake_slow_open_rpm;
-    // for throttle
-    double throttle_offset; //deg
-    double throttle_max;    //deg
 
-    Motors motors_poslim;
+    Motors motor_params;
   };
 }
 

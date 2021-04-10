@@ -65,7 +65,26 @@ public:
   {
     //============================================================
     // get parameters
+    data = new soma_atv_driver::Data_t();
     dt = pnh.param<double>("loop_rate", 0.1);
+    data->dt = pnh.param<double>("loop_rate", 0.1);
+
+    data->motor_params.steering.Min = pnh.param<double>("steering_pos_min", -25.0);
+    data->motor_params.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
+    data->motor_params.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
+    data->motor_params.rear_brake.Max = pnh.param<double>("rear_brake_pos_max", 10.0);
+    data->motor_params.front_brake.Min = pnh.param<double>("front_brake_pos_min", 0.0);
+    data->motor_params.front_brake.Max = pnh.param<double>("front_brake_pos_max", 10.0);
+    data->motor_params.throttle.Min = pnh.param<double>("throttle_pos_min", 0.0);
+    data->motor_params.throttle.Max = pnh.param<double>("throttle_pos_max", 12.0);
+    data->motor_params.rear_brake_starting_state_low_rpm =
+        pnh.param<double>("rear_brake_starting_state_low_rpm", 100.0);
+    data->motor_params.throttle_regular = pnh.param<double>("throttle_regular", 5.0);
+
+    data->state = State::Stop; // initial state
+    data->u_in.v = 0.0;
+    data->u_in.phi = 0.0;
+
     get_parameters(pnh);
 
     //============================================================
@@ -146,21 +165,6 @@ private:
    */
   void get_parameters(ros::NodeHandle pnh)
   {
-    data = new soma_atv_driver::Data_t();
-    data->dt = dt;
-
-    data->state = State::Stop; // initial state
-    data->u_in.v = 0.0;
-    data->u_in.phi = 0.0;
-
-    data->motors_poslim.steering.Min = pnh.param<double>("steering_pos_min", -25.0);
-    data->motors_poslim.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
-    data->motors_poslim.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
-    data->motors_poslim.rear_brake.Max = pnh.param<double>("rear_brake_pos_max", 10.0);
-    data->motors_poslim.front_brake.Min = pnh.param<double>("front_brake_pos_min", 0.0);
-    data->motors_poslim.front_brake.Max = pnh.param<double>("front_brake_pos_max", 10.0);
-    data->motors_poslim.throttle.Min = pnh.param<double>("throttle_pos_min", 0.0);
-    data->motors_poslim.throttle.Max = pnh.param<double>("throttle_pos_max", 12.0);
 
     data->current_positions = new double[4]{0.0};
     data->target_positions = new double[4]{0.0};
@@ -172,11 +176,6 @@ private:
     data->ev = new double[3]{0.0};
     data->P = pnh.param<double>("P", 0.1);
     data->D = pnh.param<double>("D", 0.1);
-
-    data->rear_brake_slow_open_rpm =
-        pnh.param<double>("rear_brake_slow_open_rpm", 100.0);
-    data->throttle_offset = pnh.param<double>("throttle_offset", 7.0);
-    data->throttle_max = pnh.param<double>("throttle_max", 13.0);
 
     return;
   }
@@ -264,10 +263,8 @@ private:
     data->u_in.phi = angular_vel_to_steering_angle(
         cmd_vel->linear.x,
         cmd_vel->angular.z); // defined in definitions.h
-    // data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(-25));
-    // data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(25));
-    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motors_poslim.steering.Min));
-    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motors_poslim.steering.Max));
+    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motor_params.steering.Min));
+    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motor_params.steering.Max));
 
     return;
   }
