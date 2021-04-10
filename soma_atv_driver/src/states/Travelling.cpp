@@ -25,7 +25,6 @@ int Travelling::_Process(soma_atv_driver::Data_t *data)
 {
   data->target_positions[0] = RAD2DEG(data->u_in.phi);//degrees
 
-
   // set throttle position by PD
 	//calclate gains
 	double Pout = data->P * (data->ev[0] - data->ev[1]);
