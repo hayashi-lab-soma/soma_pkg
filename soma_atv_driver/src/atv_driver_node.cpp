@@ -174,8 +174,8 @@ private:
 
     data->wheel_vel = 0.0;
     data->ev = new double[3]{0.0};
-    data->P = pnh.param<double>("P", 0.1);
-    data->D = pnh.param<double>("D", 0.1);
+    data->Kp = pnh.param<double>("P", 0.1);
+    data->Kd = pnh.param<double>("D", 0.1);
 
     return;
   }
@@ -187,9 +187,11 @@ private:
    */
   void main(const ros::TimerEvent &e)
   {
-    data->ev[2] = data->ev[1];
-    data->ev[1] = data->ev[0];
-    data->ev[0] = 1.0 - data->wheel_vel;
+    //calculate velocity errors
+    data->ev[2] = data->ev[1]; //error(t-2)
+    data->ev[1] = data->ev[0]; //error(t-1)
+    // data->ev[0] = data->u_in.v - data->wheel_vel; //error(t)
+    data->ev[0] = 0.8 - data->wheel_vel; //error(t)(constant velocity 0.8 m/s ver.)
 
     //====================================================================
     recv_clutch_state(data);
@@ -221,8 +223,8 @@ private:
     std_msgs::String action_str;
     std::stringstream ss;
     ss << State::Str.at(data->state);
-    ss << "," << data->P;
-    ss << "," << data->D;
+    ss << "," << data->Kp;
+    ss << "," << data->Kd;
     action_str.data = std::string(ss.str());
     pub_action_str.publish(action_str);
 

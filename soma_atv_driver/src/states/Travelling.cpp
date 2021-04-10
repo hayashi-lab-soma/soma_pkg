@@ -1,47 +1,67 @@
 #include "atv_driver/states/Travelling.h"
 
+/**
+ * @brief Construct a new Travelling:: Travelling object
+ * 
+ */
 Travelling::Travelling()
 {
 }
-
+/**
+ * @brief Destroy the Travelling:: Travelling object
+ * 
+ */
 Travelling::~Travelling()
 {
 }
-
+/**
+ * @brief 
+ * 
+ * @param data 
+ * @return int 
+ */
 int Travelling::_Transition(soma_atv_driver::Data_t *data)
 {
   if (abs(data->u_in.v) <= 0.001)
   {
+    //if input STOP
+    return State::Braking;
+  }
+  if (!(signbit(data->u_in.v) & signbit(data->u_in.v)))
+  {
+    //if input move direction was changed ... it's dangerous situation!
     return State::Braking;
   }
 
   return State::Travelling;
 }
+/**
+ * @brief 
+ * 
+ * @param data 
+ * @return int 
+ */
 int Travelling::_Enter(soma_atv_driver::Data_t *data)
 {
   return 0;
 }
+/**
+ * @brief 
+ * 
+ * @param data 
+ * @return int 
+ */
 int Travelling::_Process(soma_atv_driver::Data_t *data)
 {
-  data->target_positions[0] = RAD2DEG(data->u_in.phi); //degrees
+  //change steering angle
+  data->target_positions[0] = RAD2DEG(data->u_in.phi);
 
   // set throttle position by PD
-  //calclate gains
-  double Pout = data->P * (data->ev[0] - data->ev[1]);
-  double Dout = data->D / data->dt * (data->ev[0] - 2 * data->ev[1] + data->ev[2]);
-
-  // qInfo() << "------------------------------------------------";
-  // qInfo() << "velo:" << data->v[0] << "v_ref:" << data->V_ref;
-  // qInfo() << "ev:" << data->ev[0] << "v_err:" << data->V_err;
-  // qInfo() << "KP:" << data->P << "," << "Pout:" << data->Pout;
-  // qInfo() << "KD:" << data->D << "," << "Dout:" << data->Dout;
-
-  double delta_acc = Pout + Dout;
-  // qInfo() << "Delta Acc[deg]:" << delta_acc;
-
-  data->target_positions[3] += delta_acc;
-  // qInfo() << "acc[deg]:" << acc;
-
+  double UP = data->Kp * (data->ev[0] - data->ev[1]);
+  // double UD = data->Kd / data->dt * (data->ev[0] - 2 * data->ev[1] + data->ev[2]);
+  double UD = data->Kd * ((data->ev[0] - data->ev[1]) - (data->ev[1] - data->ev[2]));
+  double M = UP + UD;             //deff operation value
+  data->target_positions[3] += M; //add operation value
   data->target_positions[3] = std::max<double>(data->target_positions[3], data->motor_params.throttle_regular);
   data->target_positions[3] = std::min<double>(data->target_positions[3], data->motor_params.throttle.Max);
 

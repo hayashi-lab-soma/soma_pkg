@@ -118,7 +118,7 @@ namespace soma_atv_driver
     //
     double wheel_vel;
     double *ev;
-    double P, D; //gain
+    double Kp, Kd; //gain
 
     Motors motor_params;
   };

@@ -25,11 +25,11 @@ Starting::~Starting()
  */
 int Starting::_Transition(soma_atv_driver::Data_t *data)
 {
-  if (abs(data->u_in.v) <= 0.001)
+  if (abs(data->u_in.v) <= 0.001) //
   {
     return State::Braking;
   }
-  if (abs(data->wheel_vel) >= 0.05)
+  if (abs(data->wheel_vel) >= 0.1) //completed starting
   {
     return State::Travelling;
   }
@@ -75,11 +75,12 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
   data->target_positions[2] = data->motor_params.front_brake.Min;  //open front brake
   data->target_positions[3] = data->motor_params.throttle_regular; //set throttle (deg)
 
-  T += data->dt;
+  T += data->dt; //spent time measurement
 
   if (T >= 1.0)
   {
-    if (abs(data->wheel_vel) <= 0.1){
+    if (abs(data->wheel_vel) <= 0.1)
+    {
       //increase throttle position
       data->target_positions[3] = data->current_positions[3] + 0.1;
     }
