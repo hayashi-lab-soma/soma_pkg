@@ -10,8 +10,11 @@ int main(int argc, char **argv)
 
   tf2_ros::Buffer *tfBuf = new tf2_ros::Buffer();
   tf2_ros::TransformListener *tfListener = new tf2_ros::TransformListener(*tfBuf);
+
   costmap_2d::Costmap2DROS costmap("local_costmap_rgbd_front", *tfBuf);
+  costmap.resetLayers();
   costmap.start();
+
   ros::spin();
   return 0;
 }

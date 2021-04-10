@@ -24,6 +24,7 @@
 		<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
 	</group> -->
 	<!--  -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="tfBase2Footprint" args="0 0 0 0 0 0 foot_print $(arg base_link) 100" /> -->
 	<node name="local_costmap" pkg="soma_samples" type="sample_local_costmap" output="screen">
 		<!-- <rosparam command="load" file="$(find soma_mse)/config/local_costmap.yaml"/> -->
 		<rosparam command="load" file="$(find soma_samples)/config/sample_local_costmap_rgbd_f.yaml" />

@@ -77,6 +77,6 @@
 		<param name="ndt_num_threads" value="0" />
 		<param name="ndt_nn_search_method" value="DIRECT7" />
 		<!--  -->
-		<remap from="odom" to="lidar_odom" />
+		<remap from="odom" to="$(arg odom_frame_id)" />
 	</node>
 </launch>

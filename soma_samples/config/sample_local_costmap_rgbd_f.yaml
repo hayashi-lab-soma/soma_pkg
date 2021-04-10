@@ -3,25 +3,29 @@ local_costmap_rgbd_front:
     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
   global_frame: vodom
   robot_base_frame: soma_link
-  transform_tolerance: 2.0
-  # static_map: false
   rolling_window: true
-  width: 12
-  height: 8
-  resolution: 0.1
-  update_frequency: 3.0
+  width: 13
+  height: 13
+  resolution: 0.3
+  update_frequency: 1.0
   publish_frequency: 3.0
-  always_send_full_costmap: false
-  # obstacle_range: 10.0
-  # conbination_method: 0
+  always_send_full_costmap: true
 
   obstacle_layer:
     observation_sources: rgbd_f
     rgbd_f:
-      sensor_frame: camera_F_link
+      sensor_frame: camera_F_color_optical_frame
+      # sensor_frame: velodyne
       topic: camera_F/prefiltered
+      # topic: /velodyne_points
       data_type: PointCloud2
       marking: true
       clearing: true
       max_obstacle_height: 2.5
       min_obstacle_height: 0.3
+      obstacle_range: 6.0
+      ray_trace_range: 6.0
+      # combination_method: 1
+      rolling_window: true
+      # observation_persistence: 0.1
+      # expected_update_rate: 0.5
