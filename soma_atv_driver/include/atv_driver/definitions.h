@@ -70,36 +70,60 @@ namespace Rotary
   const int SendPort = 22346;
 }
 
+/**
+ * @brief 
+ * 
+ */
 namespace soma_atv_driver
 {
+  /**
+   * @brief 
+   * control input structure
+   */
   struct U_t
   {
     double v;   //linear velocity (m/s)
     double phi; //steering angle (rad)
   };
 
+  struct Motors
+  {
+    struct PositionLimit
+    {
+      double Min, Max;
+      PositionLimit() : Min(0.0), Max(0.0) {}
+    };
+    //
+    PositionLimit steering, rear_brake, front_brake, throttle;
+  };
+
+  /**
+   * @brief 
+   * shared memory data structure
+   */
   struct Data_t
   {
     double dt;
     int state; //state variable (State namespace)
     U_t u_in;  //controll input
+    int clutch;
+    int clutch_cmd;
     //
     double *current_positions; //motor current positions (deg)
     double *target_positions;  //motor target positions (deg)
     long *target_velocity;     //motor target velocity (rmp)
     //
-    int clutch;
-    int clutch_cmd;
-    //
     double wheel_vel;
     double *ev;
-    double P,D; //gain
+    double P, D; //gain
     // mechanism parameters
     // for rear brake
     double rear_brake_slow_open_rpm;
     // for throttle
     double throttle_offset; //deg
-    double throttle_max;  //deg
+    double throttle_max;    //deg
+
+    Motors motors_poslim;
   };
 }
 

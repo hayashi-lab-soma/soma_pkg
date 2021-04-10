@@ -40,7 +40,7 @@ rear_brake:
     gear_ratio: 150.0
     inverted_polarity: false
   position_profile:
-    velocity: 3500
+    velocity: 10000
     acceleration: 8000
     deceleration: 8000
 
@@ -60,7 +60,7 @@ front_brake:
     gear_ratio: 150.0
     inverted_polarity: false
   position_profile:
-    velocity: 3500
+    velocity: 10000
     acceleration: 8000
     deceleration: 8000
 
