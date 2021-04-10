@@ -1,11 +1,16 @@
 <?xml version="1.0"?>
 <launch>
+	<!-- maxon epos driver node -->
+	<node name="maxon_bringup" pkg="maxon_epos_driver" type="maxon_bringup" output="screen">
+		<rosparam command="load" file="$(find soma_atv_driver)/config/motors.yaml" />
+	</node>
+	<!-- atv driver node -->
 	<node name="atv_driver" pkg="soma_atv_driver" type="atv_driver_node" output="screen">
-		<remap from="/set_all_states" to="/maxon_bringup/set_all_states"/>
-		<param name="rear_brake_slow_open_rpm" value="100"/>
-		<param name="throttle_offset" value="8.0"/>
-		<param name="throttle_max" value="13.0"/>
-		<param name="P" value="0.6"/>
-		<param name="D" value="0.1"/>
+		<remap from="/set_all_states" to="/maxon_bringup/set_all_states" />
+		<param name="rear_brake_slow_open_rpm" value="100" />
+		<param name="throttle_offset" value="8.0" />
+		<param name="throttle_max" value="13.0" />
+		<param name="P" value="0.6" />
+		<param name="D" value="0.1" />
 	</node>
 </launch>

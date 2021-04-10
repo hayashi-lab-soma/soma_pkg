@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- arguments -->
-	<arg name="map_points_topic" default="/hdl_graph_slam/map_points" doc="" />
+	<arg name="map_points_topic" default="/map_points" doc="" />
 	<arg name="map_frame_id" default="map" doc="" />
 	<arg name="nodelet_manager" default="velodyne_nodelet_manager" doc="" />
 	<!--  -->
@@ -11,6 +11,8 @@
 	<arg name="y_max" default="28.0" doc="" />
 	<arg name="height_min" default="-0.2" doc="" />
 	<arg name="height_max" default="2.5" doc="" />
+	<!--  -->
+	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" />
 	<!--  -->
 	<node name="x_axis_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
 		<remap from="~input" to="$(arg map_points_topic)" />

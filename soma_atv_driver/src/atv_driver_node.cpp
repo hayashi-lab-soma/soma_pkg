@@ -21,7 +21,8 @@
 #include "atv_driver/states/Travelling.h"
 //
 
-class ATVDriver {
+class ATVDriver
+{
 private:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
@@ -52,7 +53,8 @@ private:
 public:
   //============================================================
   // constructor
-  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~")) {
+  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~"))
+  {
     //============================================================
     // get parameters
     get_parameters(pnh);
@@ -101,7 +103,8 @@ public:
   // destructor
   ~ATVDriver() {}
 
-  void shutdown() {
+  void shutdown()
+  {
     ROS_INFO("ATV Driver shutdown process");
 
     timer.stop();
@@ -126,7 +129,8 @@ public:
   }
 
 private:
-  void get_parameters(ros::NodeHandle pnh) {
+  void get_parameters(ros::NodeHandle pnh)
+  {
     // std::vector<std::string> motor_names;
     // if (!pnh.getParam("motor_name", motor_names))
     // {
@@ -161,7 +165,8 @@ private:
     return;
   }
 
-  void main(const ros::TimerEvent &e) {
+  void main(const ros::TimerEvent &e)
+  {
     // ROS_INFO(State::Str.at(data->state).c_str());
 
     data->ev[2] = data->ev[1];
@@ -174,11 +179,14 @@ private:
 
     // finite state machine
     int new_state = states[data->state]->Transition(data);
-    if (new_state != data->state) {
+    if (new_state != data->state)
+    {
       states[data->state]->Exit(data);
       states[new_state]->Enter(data);
       data->state = new_state;
-    } else {
+    }
+    else
+    {
       states[data->state]->Process(data);
     }
 
@@ -224,7 +232,8 @@ private:
   }
   //
   //
-  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel) {
+  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
+  {
     // set commands
     data->u_in.v = cmd_vel->linear.x;
     data->u_in.phi = angular_vel_to_steering_angle(
@@ -237,15 +246,20 @@ private:
     return;
   }
   //
-  void callback_wheel_vel(const std_msgs::Float32ConstPtr &wheel_vel) {
+  void callback_wheel_vel(const std_msgs::Float32ConstPtr &wheel_vel)
+  {
     ROS_DEBUG("call back wheel velocity: %.2f", wheel_vel->data);
     data->wheel_vel = wheel_vel->data;
   }
+  //-------------------------
   //
+  //-------------------------
   void callback_motor_states(
-      const maxon_epos_msgs::MotorStatesConstPtr &motor_states) {
+      const maxon_epos_msgs::MotorStatesConstPtr &motor_states)
+  {
     std::string str_motor_states = "";
-    for (int i = 0; i < (int)motor_states->states.size(); i++) {
+    for (int i = 0; i < (int)motor_states->states.size(); i++)
+    {
 
       str_motor_states += motor_states->states[i].motor_name;
       str_motor_states += ": ";
@@ -260,21 +274,33 @@ private:
     data->current_positions[2] = RAD2DEG(motor_states->states[2].position);
     data->current_positions[3] = RAD2DEG(motor_states->states[3].position);
   }
-
-  void recv_clutch_state(soma_atv_driver::Data_t *data) {
-    if (clutch_recv->waitForReadyRead(33)) {
+  //-------------------------
+  // recv_clutch_state
+  //-------------------------
+  void recv_clutch_state(soma_atv_driver::Data_t *data)
+  {
+    if (clutch_recv->waitForReadyRead(33))
+    {
       int recv; // Integer type 4byte date
-      while (clutch_recv->bytesAvailable() > 0) {
+      while (clutch_recv->bytesAvailable() > 0)
+      {
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
       // ROS_INFO("Clutch state: %d", recv);
       data->clutch = recv;
-    } else {
+    }
+    else
+    {
     }
     return;
   }
 
-  void send_clutch_state(soma_atv_driver::Data_t *data) {
+  //-------------------------
+  // send_clutch_state
+  //
+  //-------------------------
+  void send_clutch_state(soma_atv_driver::Data_t *data)
+  {
     clutch_send->writeDatagram((char *)&data->clutch_cmd, sizeof(int),
                                QHostAddress(QString(Clutch::IP.c_str())),
                                Clutch::SendPort);
@@ -285,7 +311,11 @@ static bool isShutdown = false;
 
 void SignalHander(int sig) { isShutdown = true; }
 
-int main(int argc, char **argv) {
+//-------------------------
+// main
+//-------------------------
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "atv_driver", ros::init_options::NoSigintHandler);
   ROS_INFO("Start ATV driver node");
   ATVDriver driver;
@@ -293,8 +323,10 @@ int main(int argc, char **argv) {
   signal(SIGINT, SignalHander);
 
   ros::Rate rate(5);
-  while (1) {
-    if (isShutdown) {
+  while (1)
+  {
+    if (isShutdown)
+    {
       driver.shutdown();
       ros::spinOnce();
       break;

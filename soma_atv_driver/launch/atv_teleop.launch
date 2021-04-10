@@ -6,8 +6,5 @@
 		<param name="scale_linear" value="1.0" />
 		<param name="scale_angular" value="0.436" />
 	</node>
-	<!--  -->
-	<node name="maxon_bringup" pkg="maxon_epos_driver" type="maxon_bringup" output="screen">
-		<rosparam command="load" file="$(find soma_atv_driver)/config/motors.yaml" />
-	</node>
+
 </launch>
