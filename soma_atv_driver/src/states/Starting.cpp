@@ -25,8 +25,13 @@ Starting::~Starting()
  */
 int Starting::_Transition(soma_atv_driver::Data_t *data)
 {
-  if (abs(data->u_in.v) <= 0.001) //
+  if (abs(data->u_in.v) <= 0.001) //if input STOP
   {
+    return State::Braking;
+  }
+  if (!(signbit(data->u_in.v) & signbit(data->u_in.v)))
+  {
+    //if input move direction was changed ... it's dangerous situation!
     return State::Braking;
   }
   if (abs(data->wheel_vel) >= 0.1) //completed starting
