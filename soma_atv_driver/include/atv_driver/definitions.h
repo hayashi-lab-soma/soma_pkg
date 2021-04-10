@@ -23,30 +23,30 @@ namespace State
       {Braking, "Braking"}};
 } // namespace State
 
-namespace Motor
-{
-  namespace Steering
-  {
-    const double Min = -25.0;
-    const double Max = 25.0;
-  }
-  namespace RearBrake
-  {
-    const double Min = 0.0;
-    const double Max = 10.0;
-  }
-  namespace FrontBrake
-  {
-    const double Min = 0.0;
-    const double Max = 15.0;
-  }
-  namespace Throttle
-  {
-    const double Min = 0.0;
-    const double Max = 20.0;
-  }
+// namespace Motor
+// {
+//   namespace Steering
+//   {
+//     const double Min = -25.0;
+//     const double Max = 25.0;
+//   }
+//   namespace RearBrake
+//   {
+//     const double Min = 0.0;
+//     const double Max = 10.0;
+//   }
+//   namespace FrontBrake
+//   {
+//     const double Min = 0.0;
+//     const double Max = 15.0;
+//   }
+//   namespace Throttle
+//   {
+//     const double Min = 0.0;
+//     const double Max = 20.0;
+//   }
 
-}
+// }
 
 namespace Clutch
 {
