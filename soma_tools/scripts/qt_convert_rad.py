@@ -25,37 +25,42 @@ layout.addWidget(rear_edit)
 layout.addWidget(front_edit)
 layout.addWidget(throttle_edit)
 layout.addWidget(button)
+
 window.setLayout(layout)
 
+
 def converter():
-    rospy.init_node('conoverter', anonymous=True)   
-    pub = rospy.Publisher('radian', MotorStates, queue_size=1)
+  pub = rospy.Publisher('radian', MotorStates, queue_size=1)
 
-    steer_rad = math.radians(float(steer_edit.text()))
-    rear_rad = math.radians(float(rear_edit.text()))
-    front_rad = math.radians(float(front_edit.text()))
-    throttle_rad = math.radians(float(throttle_edit.text()))
+  steer_rad = math.radians(float(steer_edit.text()))
+  rear_rad = math.radians(float(rear_edit.text()))
+  front_rad = math.radians(float(front_edit.text()))
+  throttle_rad = math.radians(float(throttle_edit.text()))
 
-    motor_cmd = MotorStates()
-    motor_cmd.states.append(MotorState(position=steer_rad))
-    motor_cmd.states.append(MotorState(position=rear_rad))
-    motor_cmd.states.append(MotorState(position=front_rad))
-    motor_cmd.states.append(MotorState(position=throttle_rad))
+  motor_cmd = MotorStates()
+  motor_cmd.states.append(MotorState(position=steer_rad))
+  motor_cmd.states.append(MotorState(position=rear_rad))
+  motor_cmd.states.append(MotorState(position=front_rad))
+  motor_cmd.states.append(MotorState(position=throttle_rad))
 
+  motor_cmd.header.stamp = rospy.Time.now()
+  r = rospy.Rate(1)
+  rospy.loginfo("published successfully")
+  pub.publish(motor_cmd)
+  r.sleep()
 
-    motor_cmd.header.stamp = rospy.Time.now()
-    r = rospy.Rate(1)
-    rospy.loginfo("published successfully")
-    pub.publish(motor_cmd)
-    r.sleep()
 
 def main():
-    window.show()
+  window.show()
 
-    def on_button_clicked():
-        converter()
-    button.clicked.connect(on_button_clicked)
-    app.exec_()
+  # slot function
+  def on_button_clicked():
+    converter()
+
+  button.clicked.connect(on_button_clicked)
+  app.exec_()
+
 
 if __name__ == '__main__':
-    main()
+  rospy.init_node('conoverter', anonymous=True)
+  main()

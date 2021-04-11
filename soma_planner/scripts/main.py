@@ -18,7 +18,7 @@ Y_RANGE = [-3, 35]
 OFFSET = 0.0
 
 # Q-Space parameter
-NH = 30
+NH = 3
 LOCAL_PATH_PLANNER = 'DubinsPath'
 CURVATURE = 0.43
 q_init = [0.0, 0.0, 0.0]
