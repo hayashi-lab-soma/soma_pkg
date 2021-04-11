@@ -191,7 +191,7 @@ private:
     data->ev[2] = data->ev[1]; //error(t-2)
     data->ev[1] = data->ev[0]; //error(t-1)
     // data->ev[0] = data->u_in.v - data->wheel_vel; //error(t)
-    data->ev[0] = 0.8 - data->wheel_vel; //error(t)(constant velocity 0.8 m/s ver.)
+    data->ev[0] = 0.1 - abs(data->wheel_vel); //error(t)(constant velocity 0.8 m/s ver.)
 
     //====================================================================
     recv_clutch_state(data);
@@ -225,6 +225,8 @@ private:
     ss << State::Str.at(data->state);
     ss << "," << data->Kp;
     ss << "," << data->Kd;
+    ss << "," << data->ev[0] << "," << data->ev[1] << "," << data->ev[2];
+    ss << "," << data->target_positions[3]; //deg
     action_str.data = std::string(ss.str());
     pub_action_str.publish(action_str);
 
@@ -357,8 +359,8 @@ int main(int argc, char **argv)
 
   signal(SIGINT, SignalHander);
 
-  // ros::Rate rate(5);
-  ros::Duration loop_duration(2.0); //(sec)
+  ros::Rate rate(5);
+  ros::Duration loop_duration(0.2); //(sec)
   while (1)
   {
     ROS_INFO("%f", ros::Time::now().toSec());
@@ -370,8 +372,8 @@ int main(int argc, char **argv)
       break;
     }
     ros::spinOnce();
-    // rate.sleep();
-    loop_duration.sleep();
+    rate.sleep();
+    // loop_duration.sleep();
   }
 
   return 0;
