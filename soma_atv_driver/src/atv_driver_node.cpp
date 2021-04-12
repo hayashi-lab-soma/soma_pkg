@@ -191,7 +191,7 @@ private:
     data->ev[2] = data->ev[1]; //error(t-2)
     data->ev[1] = data->ev[0]; //error(t-1)
     // data->ev[0] = data->u_in.v - data->wheel_vel; //error(t)
-    data->ev[0] = 0.1 - abs(data->wheel_vel); //error(t)(constant velocity 0.8 m/s ver.)
+    data->ev[0] = 0.8 - abs(data->wheel_vel); //error(t)(constant velocity 0.8 m/s ver.)
 
     //====================================================================
     recv_clutch_state(data);
@@ -223,6 +223,7 @@ private:
     std_msgs::String action_str;
     std::stringstream ss;
     ss << State::Str.at(data->state);
+    ss << "0.8";
     ss << "," << data->Kp;
     ss << "," << data->Kd;
     ss << "," << data->ev[0] << "," << data->ev[1] << "," << data->ev[2];
