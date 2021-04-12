@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="prefix" default="/home/soma1/Documents/odoms_test" />
+	<arg name="prefix" default="/home/soma1/pd_control" />
 	<arg name="is_lidar_topics" default="true" doc="" />
 	<arg name="is_camera_topics" default="true" doc="" />
 	<arg name="is_imu_topics" default="true" doc="" />
 	<arg name="is_motor_topics" default="true" doc="" />
 	<arg name="add_topics" default=""/>
-	
+
 	<!--  -->
 	<!--  -->
 	<!-- lidar topics -->
@@ -24,7 +24,7 @@
 	<!-- Odometry topics -->
 	<arg name="odom_topics" default="/soma/wheel_odom /lidar_odom /vodom" doc="" />
 	<!-- marge topics -->
-	<arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg imu_topics) $(arg motor_topics) $(arg odom_topics) /soma/wheel_vel /soma/action /soma/action_str tf tf_static" />
+	<arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg imu_topics) $(arg motor_topics) $(arg odom_topics) /soma/wheel_vel /soma/atv_driver/action /soma/atv_driver/action_str tf tf_static" />
 	<!--  -->
 	<!--  -->
 	<!-- Run logging -->

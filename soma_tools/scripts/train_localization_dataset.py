@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# import os
+import os
 # import sys
 import numpy as np
 import datetime
@@ -13,14 +13,22 @@ import tensorflow as tf
 import tensorflow.keras
 from tensorflow.keras import models
 from tensorflow.keras import layers
+from tensorflow.keras import metrics
 
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-2.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-2.txt'
-MODEL_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-1-n12-e5000.h5'
-HISTORY_FILE_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/history/model-2-n12-e5000.csv'
+TRAIN_X_DATASET_NAME = os.path.dirname(__file__)+'/../data/x_train-1.txt'
+TRAIN_Y_DATASET_NAME = os.path.dirname(__file__)+'/../data/y_train-1.txt'
 
-EPOCH = 5000
+HIDDEN_N = 32
+EPOCH = 2000
+
+# model save arguments
+SUFIX = '-'+os.path.splitext(os.path.basename(TRAIN_X_DATASET_NAME)
+                             )[0]+'-n'+str(HIDDEN_N)+'-e'+str(EPOCH)
+MODEL_NAME = os.path.dirname(
+    __file__)+'/../models/model' + os.path.basename(SUFIX) + '.h5'
+HISTORY_FILE_NAME = os.path.dirname(
+    __file__)+'/../models/history/model'+os.path.basename(SUFIX)+'.csv'
 
 
 def make_train_model(num_inputs, num_trees):
@@ -30,7 +38,7 @@ def make_train_model(num_inputs, num_trees):
 
     # hidden layer
     # num_nodes = num_trees
-    num_nodes=12
+    num_nodes = HIDDEN_N
     dense_alpha = layers.Dense(num_nodes, activation='relu')(inputs)
     dense_beta = layers.Dense(num_nodes, activation='relu')(inputs)
     dense_gamma = layers.Dense(num_nodes, activation='relu')(inputs)
@@ -49,6 +57,9 @@ def make_train_model(num_inputs, num_trees):
                            )
 
     model.compile(loss=tf.keras.losses.CategoricalCrossentropy(),
+                  metrics=[tf.keras.metrics.CategoricalAccuracy(),
+                  tf.keras.metrics.Precision(),
+                  tf.keras.metrics.Recall()],
                   optimizer=tf.keras.optimizers.Adam(),)
 
     return model
@@ -69,6 +80,11 @@ if __name__ == '__main__':
     print(' Number of trees:{}'.format(len(tree_locations)))
     IDs_array = tree_locations[:, 0:1]
     IDs_array = np.ravel(IDs_array)
+
+    print(TRAIN_X_DATASET_NAME)
+    print(TRAIN_Y_DATASET_NAME)
+    print(MODEL_NAME)
+    # exit(1)
 
     _x_train = np.loadtxt(TRAIN_X_DATASET_NAME)
     print('x train shape:', _x_train.shape)
