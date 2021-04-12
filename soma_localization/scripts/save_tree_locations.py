@@ -15,9 +15,10 @@ def cb(data):
   print('Time:', stamp)
 
   trees = []
-  for pose in data.poses:
+  for i, pose in enumerate(data.poses):
     # print(pose.position.x, pose.position.y, pose.position.z)
     tmp = [
+        int(i),
         round(pose.position.x, 3),
         round(pose.position.y, 3),
         round(pose.position.z, 3)
@@ -28,7 +29,9 @@ def cb(data):
   print(trees)
   print('tree num:', len(trees))
 
-  np.savetxt(SAVE_FILE_NAME, trees, fmt="%.3f")
+  np.savetxt(SAVE_FILE_NAME, trees,
+             fmt=['%d',
+                  '%.3f','%.3f','%.3f',])
   print('save tree locations')
 
 
