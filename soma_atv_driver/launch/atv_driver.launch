@@ -3,16 +3,14 @@
 	<!-- arguments -->
 	<arg name="loop_rate" default="0.1" doc="ATV control loop rate (sec)" />
 	<arg name="twist_topic" default="/cmd_vel" doc="name of geometry_msgs::Twist topic which is control input" />
-	<arg name="wheel_vel_topic" default="/wheel_vel" doc="name of std_msgs::Float32 topic which is wheel rotation speed feedback (m/s)" />
+	<arg name="wheel_vel_topic" default="/soma/wheel_vel" doc="name of std_msgs::Float32 topic which is wheel rotation speed feedback (m/s)" />
 	<arg name="motor_states_topic" default="/maxon_bringup/get_all_states" doc="name of maxon_epos_msgs::MotorStates topic which is current motor states" />
 	<!--  -->
-	<!-- maxon epos driver node -->
-	<node if="false" name="maxon_bringup" pkg="maxon_epos_driver" type="maxon_bringup" output="screen">
-		<rosparam command="load" file="$(find soma_atv_driver)/config/motors.yaml" />
-	</node>
-	<!-- atv driver node -->
+		<!-- atv driver node -->
 	<node name="atv_driver" pkg="soma_atv_driver" type="atv_driver_node" output="screen">
 		<param name="loop_rate" value="$(arg loop_rate)" />
+		<remap from="/soma/atv_driver/set_motor_states" to="/maxon_bringup/set_all_states"/>
+
 		<!-- subscribers -->
 		<remap from="/cmd_vel" to="$(arg twist_topic)" />
 		<remap from="/wheel_vel" to="$(arg wheel_vel_topic)" />
@@ -21,19 +19,19 @@
 		<param name="steering_pos_min" value="-25.0" />
 		<param name="steering_pos_max" value="25.0" />
 		<param name="rear_brake_pos_min" value="0.0" />
-		<param name="rear_brake_pos_max" value="8.0" />
+		<param name="rear_brake_pos_max" value="9.0" />
 		<param name="front_brake_pos_min" value="0.0" />
-		<param name="front_brake_pos_max" value="10.0" />
+		<param name="front_brake_pos_max" value="12.0" />
 		<param name="throttle_pos_min" value="0.0" />
 		<param name="throttle_pos_max" value="13.0" />
 		<!-- starting state parameters -->
 		<param name="rear_brake_starting_state_low_rpm" value="100" />
-		<param name="throttle_regular" value="7.0" />
+		<param name="throttle_regular" value="8.0" />
 		<!--  -->
-		<param name="rear_brake_slow_open_rpm" value="100" />
-		<param name="throttle_offset" value="8.0" />
+		<param name="rear_brake_slow_open_rpm" value="50" />
+		<param name="throttle_offset" value="7.8" />
 		<param name="throttle_max" value="13.0" />
-		<param name="P" value="0.6" />
+		<param name="P" value="0.01" />
 		<param name="D" value="0.1" />
 	</node>
 </launch>

@@ -2,7 +2,11 @@
 .vscode/
 
 soma_tools/data/Q-set1.txt
-
 soma_tools/data/Q-set2.txt
-
 soma_tools/data/Q-set3.txt
+soma_tools/data/x_train-1.txt
+soma_tools/data/x_train-2.txt
+soma_tools/data/x_train-3.txt
+soma_tools/data/y_train-1.txt
+soma_tools/data/y_train-2.txt
+soma_tools/data/y_train-3.txt

@@ -14,12 +14,30 @@ from tensorflow.keras import models
 from tensorflow.keras import layers
 
 TREE_LOCATION_PATH = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/TreeLocations_Mirais.txt'
-TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-test.txt'
-TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-test.txt'
-MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-test.h5'
+Q_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/Q-set-test.txt'
+TRAIN_X_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/x_train-1.txt'
+TRAIN_Y_DATASET_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/data/y_train-1.txt'
+MODEL_NAME = '/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-x_train-1-n12-e1.h5'
 
 print(tf.__version__)
 
-#load model
+# load model
 model = tf.keras.models.load_model(MODEL_NAME)
 model.summary()
+
+q_set = np.loadtxt(Q_DATASET_NAME)
+_x_valid = np.loadtxt(TRAIN_X_DATASET_NAME)
+x_valid = _x_valid[:, 15:27]
+x_valid = preprocessing.minmax_scale(x_valid)
+y_valid = np.loadtxt(TRAIN_Y_DATASET_NAME)
+
+print('Q:', q_set.shape)
+print('x:', x_valid.shape, type(x_valid[:1]))
+print('y:', y_valid.shape, type(y_valid))
+
+eval = model.evaluate(x_valid[:], y_valid[:], verbose=0)
+print(eval)
+
+predictions = model.predict(x_valid)
+print(predictions.shape)
+print(predictions)

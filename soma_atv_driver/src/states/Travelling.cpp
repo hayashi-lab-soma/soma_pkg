@@ -27,12 +27,12 @@ int Travelling::_Transition(soma_atv_driver::Data_t *data)
     //if input STOP
     return State::Braking;
   }
-  if (!(signbit(data->u_in.v) & signbit(data->u_in.v)))
+  if ((data->clutch==Clutch::Forward && data->u_in.v < 0.0)
+  || (data->clutch==Clutch::Reverse && data->u_in.v >= 0.0))
   {
     //if input move direction was changed ... it's dangerous situation!
     return State::Braking;
   }
-
   return State::Travelling;
 }
 /**
@@ -61,7 +61,7 @@ int Travelling::_Process(soma_atv_driver::Data_t *data)
   // double UD = data->Kd / data->dt * (data->ev[0] - 2 * data->ev[1] + data->ev[2]);
   double UD = data->Kd * ((data->ev[0] - data->ev[1]) - (data->ev[1] - data->ev[2]));
   double M = UP + UD;             //deff operation value
-  data->target_positions[3] += M; //add operation value
+  data->target_positions[3] = data->target_positions[3] + M; //add operation value
   data->target_positions[3] = std::max<double>(data->target_positions[3], data->motor_params.throttle_regular);
   data->target_positions[3] = std::min<double>(data->target_positions[3], data->motor_params.throttle.Max);
 
