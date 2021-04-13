@@ -42,8 +42,10 @@ namespace Command
 //
 struct Data_t
 {
+  //transform lisners
   tf2_ros::Buffer *tfBuf;
   tf2_ros::TransformListener *tfListener;
+  //maps
   costmap_2d::Costmap2DROS *local_costmap;
   dwa_local_planner::DWAPlannerROS *local_planner;
   geometry_msgs::TransformStamped transform_map2base;
@@ -70,7 +72,7 @@ static double Dist(double x1, double x2, double y1, double y2)
 
 static double Dist(geometry_msgs::Point p1, geometry_msgs::Point p2)
 {
-  double d = Dist(p1.x,p2.x,p1.y,p2.y);
+  double d = Dist(p1.x, p2.x, p1.y, p2.y);
   return d;
 }
 

@@ -2,15 +2,13 @@
 <launch>
 	<!-- arguments -->
 	<arg name="input_points" default="/camera/depth_registered/points" doc="" />
-	<arg name="output_scan" default="/camera/scan" doc="" />
-	<arg name="base_frame_id" default="soma_link" doc="" />
-	<!--  -->
+	<arg name="output_scan" default="/camera/scan" />
+	<arg name="target_frame" default="soma_link" />
 	<!--  -->
 	<node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="realsense_to_laserscan" output="screen">
 		<remap from="cloud_in" to="$(arg input_points)" />
 		<remap from="scan" to="$(arg output_scan)" />
-		<param name="target_frame" value="$(arg base_frame_id)" />
-		<!--  -->
+		<param name="target_frame" value="soma_link" />
 		<param name="tolerance" value="1.0" />
 		<param name="min_height" value="0.3" />
 		<param name="max_height" value="2.5" />
