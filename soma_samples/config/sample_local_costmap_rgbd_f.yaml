@@ -1,31 +1,63 @@
+# local_costmap_rgbd_front:
+#   plugins:
+#     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+#   global_frame: vodom
+#   robot_base_frame: soma_link
+#   rolling_window: true
+#   width: 13
+#   height: 13
+#   resolution: 0.3
+#   update_frequency: 1.0
+#   publish_frequency: 3.0
+#   always_send_full_costmap: true
+
+#   obstacle_layer:
+#     observation_sources: rgbd_f
+#     rgbd_f:
+#       sensor_frame: camera_F_color_optical_frame
+#       # sensor_frame: velodyne
+#       topic: camera_F/prefiltered
+#       # topic: /velodyne_points
+#       data_type: PointCloud2
+#       marking: true
+#       clearing: true
+#       max_obstacle_height: 2.5
+#       min_obstacle_height: 0.3
+#       obstacle_range: 6.0
+#       ray_trace_range: 6.0
+#       # combination_method: 1
+#       rolling_window: true
+#       # observation_persistence: 0.1
+#       # expected_update_rate: 0.5
 local_costmap_rgbd_front:
   plugins:
-    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: voxel_layer, type: 'costmap_2d::VoxelLayer'}
   global_frame: vodom
-  robot_base_frame: soma_link
+  robot_base_frame: camera_F_link
   rolling_window: true
   width: 13
   height: 13
-  resolution: 0.3
-  update_frequency: 1.0
+  resolution: 0.05
+  update_frequency: 3.0
   publish_frequency: 3.0
-  always_send_full_costmap: true
-
-  obstacle_layer:
+  transform_tolerance: 1.5
+  always_send_full_costmap: false
+  voxel_layer:
+    origin_z: 0.3
+    z_resolution: 0.05
+    z_voxels: 100
+    publish_voxel_map: true
     observation_sources: rgbd_f
+    unknown_threshold: 0
     rgbd_f:
       sensor_frame: camera_F_color_optical_frame
-      # sensor_frame: velodyne
       topic: camera_F/prefiltered
-      # topic: /velodyne_points
       data_type: PointCloud2
       marking: true
       clearing: true
-      max_obstacle_height: 2.5
+      obstacle_range: 5.0
+      raytrace_range: 6.0
       min_obstacle_height: 0.3
-      obstacle_range: 6.0
-      ray_trace_range: 6.0
-      # combination_method: 1
-      rolling_window: true
-      # observation_persistence: 0.1
-      # expected_update_rate: 0.5
+      max_obstacle_height: 2.0
+      observation_persistence: 5.0
+      publish_voxel_map: true

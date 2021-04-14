@@ -9,7 +9,7 @@
 	<!-- publish topic -->
 	<arg name="odom_topic" default="vodom" doc="" />
 	<!-- frame setting -->
-	<arg name="frame_id" default="camera_F_link" doc="base frame name" />
+	<arg name="frame_id" default="soma_link" doc="base frame name" />
 	<arg name="vo_frame_id" default="vodom" doc="visual odometry frame name" />
 	<!-- other arguments -->
 	<arg name="publish_tf_odom" default="true" doc="tf vo_frame_id->frame_id publish flag" />
