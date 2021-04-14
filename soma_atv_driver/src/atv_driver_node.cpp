@@ -69,6 +69,7 @@ public:
     dt = pnh.param<double>("loop_rate", 0.1);
     data->dt = pnh.param<double>("loop_rate", 0.1);
 
+    data->target_vel = pnh.param<double>("target_vel", 0.8);
     data->motor_params.steering.Min = pnh.param<double>("steering_pos_min", -25.0);
     data->motor_params.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
     data->motor_params.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
@@ -80,12 +81,20 @@ public:
     data->motor_params.rear_brake_starting_state_low_rpm =
         pnh.param<double>("rear_brake_starting_state_low_rpm", 100.0);
     data->motor_params.throttle_regular = pnh.param<double>("throttle_regular", 5.0);
+    data->Kp = pnh.param<double>("P", 0.1);
+    data->Kd = pnh.param<double>("D", 0.1);
 
     data->state = State::Stop; // initial state
     data->u_in.v = 0.0;
     data->u_in.phi = 0.0;
+    data->current_positions = new double[4]{0.0};
+    data->target_positions = new double[4]{0.0};
+    data->target_velocity = new long[4]{3500};
+    data->clutch = data->clutch_cmd = Clutch::Free;
+    data->wheel_vel = 0.0;
+    data->ev = new double[3]{0.0};
 
-    get_parameters(pnh);
+    // get_parameters(pnh);
 
     //============================================================
     // subscribers
@@ -109,6 +118,7 @@ public:
     clutch_recv->bind(Clutch::RecvPort);
     clutch_send = new QUdpSocket();
 
+    //make state machine
     stop = new Stop();
     starting = new Starting();
     travelling = new Travelling();
@@ -163,22 +173,10 @@ private:
    * 
    * @param pnh 
    */
-  void get_parameters(ros::NodeHandle pnh)
-  {
-
-    data->current_positions = new double[4]{0.0};
-    data->target_positions = new double[4]{0.0};
-    data->target_velocity =
-        new long[4]{3500, 3500, 3500, 3500}; // initial values
-    data->clutch = data->clutch_cmd = Clutch::Free;
-
-    data->wheel_vel = 0.0;
-    data->ev = new double[3]{0.0};
-    data->Kp = pnh.param<double>("P", 0.1);
-    data->Kd = pnh.param<double>("D", 0.1);
-
-    return;
-  }
+  // void get_parameters(ros::NodeHandle pnh)
+  // {
+  //   return;
+  // }
 
   /**
    * @brief 
@@ -191,7 +189,7 @@ private:
     data->ev[2] = data->ev[1]; //error(t-2)
     data->ev[1] = data->ev[0]; //error(t-1)
     // data->ev[0] = data->u_in.v - data->wheel_vel; //error(t)
-    data->ev[0] = 0.8 - abs(data->wheel_vel); //error(t)(constant velocity 0.8 m/s ver.)
+    data->ev[0] = data->target_vel - abs(data->wheel_vel);
 
     //====================================================================
     recv_clutch_state(data);
@@ -215,15 +213,15 @@ private:
     //====================================================================
 
     //====================================================================
-    // publish current states for logging
+    // publish current states
     std_msgs::Int32 action;
     action.data = data->state;
     pub_action.publish(action);
-
+    //
     std_msgs::String action_str;
     std::stringstream ss;
     ss << State::Str.at(data->state);
-    ss << "0.8";
+    ss << "," << data->target_vel;
     ss << "," << data->Kp;
     ss << "," << data->Kd;
     ss << "," << data->ev[0] << "," << data->ev[1] << "," << data->ev[2];

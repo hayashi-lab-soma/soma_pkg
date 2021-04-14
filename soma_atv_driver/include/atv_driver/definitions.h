@@ -106,7 +106,11 @@ namespace soma_atv_driver
    */
   struct Data_t
   {
-    double dt;
+    //parameters
+    double dt;           //loop duration time (sec)
+    double target_vel;   //target velocity (m/s)
+    Motors motor_params; //motor control parameter
+
     int state; //state variable (State namespace)
     U_t u_in;  //controll input
     int clutch;
@@ -116,11 +120,9 @@ namespace soma_atv_driver
     double *target_positions;  //motor target positions (deg)
     long *target_velocity;     //motor target velocity (rmp)
     //
-    double wheel_vel;
-    double *ev;
-    double Kp, Kd; //gain
-
-    Motors motor_params;
+    double wheel_vel; //current velocity of wheel (m/s)
+    double *ev;       //error of velocity
+    double Kp, Kd;    //control gain
   };
 }
 
