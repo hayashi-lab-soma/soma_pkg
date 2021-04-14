@@ -6,11 +6,10 @@
 	<arg name="wheel_vel_topic" default="/soma/wheel_vel" doc="name of std_msgs::Float32 topic which is wheel rotation speed feedback (m/s)" />
 	<arg name="motor_states_topic" default="/maxon_bringup/get_all_states" doc="name of maxon_epos_msgs::MotorStates topic which is current motor states" />
 	<!--  -->
-		<!-- atv driver node -->
+	<!-- atv driver node -->
 	<node name="atv_driver" pkg="soma_atv_driver" type="atv_driver_node" output="screen">
 		<param name="loop_rate" value="$(arg loop_rate)" />
-		<remap from="/soma/atv_driver/set_motor_states" to="/maxon_bringup/set_all_states"/>
-
+		<remap from="/soma/atv_driver/set_motor_states" to="/maxon_bringup/set_all_states" />
 		<!-- subscribers -->
 		<remap from="/cmd_vel" to="$(arg twist_topic)" />
 		<remap from="/wheel_vel" to="$(arg wheel_vel_topic)" />

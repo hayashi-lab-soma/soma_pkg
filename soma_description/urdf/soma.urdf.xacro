@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+	<link name="base_link">
+		<visual>
+			<origin xyz="0.45 0.0 0.0" rpy="0.0 0.0 0.0" />
+			<geometry>
+				<box size="1.4 0.9 1.2" />
+			</geometry>
+		</visual>
+	</link>
+	<!-- Base footprint is on the ground under the robot -->
+	<link name="base_footprint" />
+	<joint name="base_footprint_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="base_footprint" />
+		<origin xyz="0.0 0.0 -0.45" rpy="0.0 0.0 0.0" />
+	</joint>
+	<!-- IMU link -->
+	<link name="imu_link" />
+	<joint name="imu_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="imu_link" />
+		<origin xyz="0 0 1.45" rpy="0.0 0.0 0.0" />
+	</joint>
+	<!-- LiDAR link (velodyne) -->
+	<link name="velodyne" />
+	<joint name="velodyne_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="velodyne" />
+		<origin xyz="0.5 0 1.0" rpy="0.0 0.0 0.0" />
+	</joint>
+	<!-- realsense link (front side) -->
+	<link name="camera_f_depth_optical_frame" />
+	<joint name="camera_f_joint" type="fixed">
+		<parent link="base_link" />
+		<child link="camera_f_depth_optical_frame" />
+		<origin xyz="0.85 0 0.8" rpy="0.0 0.2617 0.0" />
+	</joint>
+</robot>

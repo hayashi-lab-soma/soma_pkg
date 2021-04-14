@@ -2,19 +2,19 @@
 <launch>
 	<!-- arguments -->
 	<!-- frame names -->
-	<arg name="base_frame_id" default="soma_link" />
+	<arg name="base_frame_id" default="base_link" />
 	<arg name="lidar_link" default="velodyne" />
 	<!-- flags -->
-	<arg name="enable_manager" default="false" />
+	<arg name="enable_manager" default="true" />
 	<arg name="enable_tf_base2lidar" default="false" />
 	<arg name="enable_floor_detection" default="true" />
 	<arg name="enable_gps" default="false" />
 	<arg name="enable_imu_acc" default="false" />
-	<arg name="enable_imu_ori" default="true" />
+	<arg name="enable_imu_ori" default="false" />
 	<arg name="use_distance_filter" default="true" />
 	<!-- nodelet manager -->
 	<arg name="nodelet_manager" default="velodyne_nodelet_manager" />
-	<arg name="manager_threads" default="12" />
+	<arg name="manager_threads" default="4" />
 	<!-- filtering parameters -->
 	<arg name="distance_near_thresh" default="0.1" />
 	<arg name="distance_far_thresh" default="20.0" />
@@ -29,15 +29,19 @@
 	if enable_manager=true,
 	-->
 	<node if="$(arg enable_manager)" pkg="nodelet" type="nodelet" name="$(arg nodelet_manager)" args="manager" output="screen">
-		<param name="num_worker_threads" value="$(arg manager_threads)" />
+		<!-- <param name="num_worker_threads" value="$(arg manager_threads)" /> -->
 	</node>
 	<!--  -->
 	<!--
 	static transfrom publisher
 	if enable_tf_base2lidear=true,
 	-->
+	<!--
 	<node if="$(arg enable_tf_base2lidar)" name="base2lidar" pkg="tf2_ros" type="static_transform_publisher" args="0.5 0 0.86 0 0 0 $(arg base_frame_id) $(arg lidar_link)" />
 	<node if="$(arg enable_tf_base2lidar)" name="imu2baselink" pkg="tf2_ros" type="static_transform_publisher" args="$0 0 1.45 0 0 0 $(arg base_frame_id) imu" />
+	-->
+	<node if="$(arg enable_tf_base2lidar)" name="base2lidar" pkg="tf" type="static_transform_publisher" args="0.5 0 0.86 0 0 0 $(arg base_frame_id) $(arg lidar_link) 10" />
+	<node if="$(arg enable_tf_base2lidar)" name="imu2baselink" pkg="tf" type="static_transform_publisher" args="$0 0 1.45 0 0 0 $(arg base_frame_id) imu 10" />
 	<!--
 	Run prefiltering_nodelet of hdl_graph_slam pkg
 	for point cloud prefiltering, distance_filter, down sampling, noise filter
@@ -47,7 +51,7 @@
 	/filtered_points : PointCloud2
 	-->
 	<node if="true" name="prefiltering_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)">
-		<!-- <remap from="/velodyne_points" to="/velodyne_points" /> -->
+		<remap from="/velodyne_points" to="/velodyne_points" />
 		<!-- in case base_link_frame is blank, mapping will be performed in the lidar frame -->
 		<param name="base_link_frame" value="$(arg base_frame_id)" />
 		<!-- distance filter -->
@@ -66,7 +70,7 @@
 	</node>
 	<!-- Run scan_matching_odometry_nodelet in hdl_graph_slam pkg -->
 	<node name="scan_matching_odometry_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/ScanMatchingOdometryNodelet $(arg nodelet_manager)">
-		<remap from="/odom" to="/odom"/>
+		<remap from="/odom" to="/odom" />
 		<param name="points_topic" value="/filtered_points" />
 		<param name="odom_frame_id" value="odom" />
 		<param name="keyframe_delta_trans" value="1.0" />
@@ -84,19 +88,19 @@
 		<param name="use_reciprocal_correspondences" value="false" />
 		<param name="gicp_correspondence_randomness" value="20" />
 		<param name="gicp_max_optimizer_iterations" value="20" />
-		<param name="ndt_resolution" value="5.0" />
+		<param name="ndt_resolution" value="10.0" />
 		<param name="ndt_num_threads" value="0" />
 		<param name="ndt_nn_search_method" value="DIRECT7" />
 	</node>
 	<!-- Run floor_detection_nodelet in hdl_graph_slam pkg -->
-	<node name="floor_detection_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/FloorDetectionNodelet $(arg nodelet_manager)" if="$(arg enable_floor_detection)">
-		<param name="points_topic" value="/filtered_points" />
+	<node if="$(arg enable_floor_detection)" name="floor_detection_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/FloorDetectionNodelet $(arg nodelet_manager)">
+		<param name="points_topic" value="/velodyne_points" />
 		<param name="tilt_deg" value="0.0" />
-		<param name="sensor_height" value="0.86" />
+		<param name="sensor_height" value="1.0" />
 		<param name="height_clip_range" value="1.5" />
 		<param name="floor_pts_thresh" value="512" />
 		<param name="use_normal_filtering" value="true" />
-		<param name="normal_filter_thresh" value="20.0" />
+		<param name="normal_filter_thresh" value="10.0" />
 	</node>
 	<!--
 	hdl_graph_slam_nodelet in hdl_graph_slam pkg
@@ -182,7 +186,7 @@
 	Run octomap server nodelet
 	for make octotree map & 2D grid map
 	-->
-	<node if="true" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
+	<node if="false" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
 		<remap from="cloud_in" to="/hdl_graph_slam/map_points" />
 		<param name="frame_id" value="map" />
 		<param name="base_frame_id" value="$(arg base_frame_id)" />
