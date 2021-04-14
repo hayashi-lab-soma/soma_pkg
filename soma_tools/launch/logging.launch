@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="prefix" default="/home/soma1/pd_control" />
+	<arg name="prefix" default="/home/soma1/remote_mirais" />
 	<arg name="is_lidar_topics" default="true" doc="" />
 	<arg name="is_camera_topics" default="true" doc="" />
 	<arg name="is_imu_topics" default="true" doc="" />
@@ -13,7 +13,7 @@
 	<arg if="$(arg is_lidar_topics)" name="lidar_topics" default="/velodyne_points" doc="" />
 	<arg unless="$(arg is_lidar_topics)" name="lidar_topics" default="" doc="" />
 	<!-- camera topics -->
-	<arg if="$(arg is_camera_topics)" name="camera_topics" default="/camera_F/color/image_raw /camera_F/color/camera_info /camera_F/depth/image_rect_raw /camera_F/aligned_depth_to_color/image_raw /camera_F/depth/camera_info" />
+	<arg if="$(arg is_camera_topics)" name="camera_topics" default="/camera_f/color/image_raw /camera_f/color/camera_info /camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw /camera_f/depth/camera_info /depth/color/points /color/image_raw /depth/image_rect_raw /color/camera_info /depth/camera_info" />
 	<arg unless="$(arg is_camera_topics)" name="camera_topics" default="" />
 	<!-- IMU topics -->
 	<arg if="$(arg is_imu_topics)" name="imu_topics" default="/imu/data" doc="" />
