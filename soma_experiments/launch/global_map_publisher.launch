@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="test" default="true" doc="" />
+	<arg name="raw_map_points" default="$(find soma_localization)/data/Mirais-3DMap-imu-cliped.pcd" doc="" />
+	<arg name="tree_map_points" default="$(find soma_localization)/data/Mirais-3DMap-imu-non-ground-adjusted.pcd" doc="" />
+	<arg name="enable_clustering" default="false" />
+	<!--
+	PCD file to PointCloud2
+	1. raw map points, for global localization
+	2. tree map points, for global path planning
+	-->
+	<group ns="global_map">
+		<include file="$(find soma_tools)/launch/pcd_publish.launch">
+			<arg name="file" value="$(arg raw_map_points)" doc="" />
+			<arg name="interval" value="3.0" doc="" />
+			<arg name="frame_id" value="map" doc="" />
+			<arg name="output" value="points" doc="" />
+		</include>
+	</group>
+	<!-- 2D tree map publish -->
+	<group ns="tree_map">
+		<include file="$(find soma_tools)/launch/pcd_publish.launch">
+			<arg name="file" value="$(arg tree_map_points)" />
+			<arg name="interval" value="10.0" doc="" />
+			<arg name="frame_id" value="map" doc="" />
+			<arg name="output" value="points" doc="" />
+		</include>
+		<node name="octomap_nodelet" pkg="nodelet" type="nodelet" args="standalone octomap_server/OctomapServerNodelet" output="screen">
+			<param name="resolution" value="0.2" />
+			<param name="frame_id" value="map" />
+			<param name="pointcloud_min_z" value="0.1" />
+			<param name="pointcloud_max_z" value="2.5" />
+			<remap from="cloud_in" to="points" />
+			<param name="filter_ground" value="false" />
+		</node>
+		<node if="$(arg test)" name="base2map" pkg="tf" type="static_transform_publisher" args="0 0 0 0 0 0 base_link map 2000" />
+		<!-- <node name="global_costmap_node" pkg="soma_samples" type="sample_local_costmap" output="screen">
+			<param name="costmap_ns" value="global_costmap" />
+			<rosparam command="load" file="$(find soma_samples)/config/global_costmap.yaml" />
+		</node> -->
+		<!-- Euclidean clustering -->
+		<node if="$(arg enable_clustering)" name="clustering" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl/EuclideanClustering ">
+			<remap from="~input" to="octomap_point_cloud_centers" />
+			<param name="tolerance" value="0.6" />
+			<param name="min_size" value="10" />
+		</node>
+		<node if="$(arg enable_clustering)" name="cluster_decomposer" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl/ClusterPointIndicesDecomposerZAxis">
+			<remap from="~input" to="octomap_point_cloud_centers" />
+			<remap from="~target" to="clustering/output" />
+		</node>
+	</group>
+</launch>

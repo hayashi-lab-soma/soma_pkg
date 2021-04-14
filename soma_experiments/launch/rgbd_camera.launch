@@ -2,20 +2,19 @@
 <launch>
 	<!-- arguments -->
 	<arg name="base_link" default="base_link" doc="robot base link name" />
-	<arg name="camera_name" default="camera_f" doc="unique camera name (group name)" />
+	<arg name="camera_name" default="camera" doc="unique camera name (group name)" />
 	<arg name="serial_no" default="" doc="serial number" />
 	<arg name="color_fps" default="15" />
 	<arg name="depth_fps" default="15" />
-	<arg name="tf_publish_rate" default="1" doc="" />
 	<!--  -->
 	<!-- transform argumanets -->
 	<arg name="use_center_frame" default="true" />
 	<arg name="pan_angle" default="0" />
-	<arg name="tilt_angle" default="15" />
+	<arg name="tilt_angle" default="0" />
 	<arg name="role_angle" default="0" />
-	<arg name="tx" default="0.85" />
-	<arg name="ty" default="0.0" />
-	<arg name="tz" default="0.8" />
+	<arg name="tx" default="0" />
+	<arg name="ty" default="0" />
+	<arg name="tz" default="0" />
 	<!--  -->
 	<!-- launch realsense camera device nodelet and nodelet manager -->
 	<!-- namespace is followed with camera_name -->
@@ -23,7 +22,7 @@
 		<arg name="camera" value="$(arg camera_name)" />
 		<arg name="serial_no" value="$(arg serial_no)" />
 		<arg name="external_manager" value="false" />
-		<!-- <arg name="manager" value="realsense2_manager" /> -->
+		<arg name="manager" value="realsense2_manager_$(arg camera_name)" />
 		<arg name="enable_fisheye" value="false" />
 		<arg name="enable_infra1" value="false" />
 		<arg name="enable_infra2" value="false" />
@@ -34,7 +33,7 @@
 		<arg name="color_fps" value="$(arg color_fps)" />
 		<arg name="depth_fps" value="$(arg depth_fps)" />
 		<arg name="publish_tf" value="true" />
-		<arg name="tf_publish_rate" value="$(arg tf_publish_rate)" />
+		<arg name="tf_publish_rate" value="0" />
 		<arg name="align_depth" value="true" />
 	</include>
 	<!--  -->
@@ -46,11 +45,11 @@
 		<arg name="tf_param1" default="0 $(arg ty) 0 $(arg pan) $(arg tilt) $(arg role)" />
 		<arg name="tf_param2" default="$(arg tx) 0 $(arg tz) 0 0 0" />
 		<group if="$(arg use_center_frame)">
-			<node pkg="tf2_ros" type="static_transform_publisher" name="camera2center" args="$(arg tf_param1) camera_center_link $(arg camera_name)_link" />
-			<node pkg="tf2_ros" type="static_transform_publisher" name="center2base" args="$(arg tf_param2) $(arg base_link) camera_center_link" />
+			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Center" args="$(arg tf_param1) camera_center_link $(arg camera_name)_link" />
+			<node pkg="tf2_ros" type="static_transform_publisher" name="Center2Base" args="$(arg tf_param2) $(arg base_link) camera_center_link" />
 		</group>
 		<group unless="$(arg use_center_frame)">
-			<node pkg="tf2_ros" type="static_transform_publisher" name="camera2base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
+			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
 		</group>
 		<!--
 		<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">

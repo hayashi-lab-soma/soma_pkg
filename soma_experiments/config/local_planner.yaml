@@ -1,0 +1,19 @@
+dwa_local_planner:
+  acc_lim_x: 2.5
+  acc_lim_y: 0.0
+  acc_lim_th: 5.0
+  max_vel_x: 1.0
+  min_vel_x: -1.0
+  max_rot_val: 3.14 #rad/s
+  min_rot_val: -3.14 #rad/s
+  yaw_goal_tolerance: 0.05
+  xy_goal_tolerance: 0.3
+  sim_time: 2.0
+  sim_granularity: 0.02
+  vx_samples: 30
+  vth_samples: 30
+  controller_frequency: 2.0
+  path_distance_bias: 32.0
+  goal_distance_bias: 24.0
+  occdist_scale: 0.01
+  publish_cost_grid: true
