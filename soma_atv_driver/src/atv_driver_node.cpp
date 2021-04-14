@@ -99,9 +99,9 @@ public:
     //============================================================
     // subscribers
     sub_cmd_vel = nh.subscribe<geometry_msgs::Twist>(
-        "/cmd_vel", 3, &ATVDriver::callback_cmd_vel, this);
+        "/soma/cmd_vel", 3, &ATVDriver::callback_cmd_vel, this);
     sub_wheel_vel = nh.subscribe<std_msgs::Float32>(
-        "/wheel_vel", 3, &ATVDriver::callback_wheel_vel, this);
+        "/soma/wheel_vel", 3, &ATVDriver::callback_wheel_vel, this);
     sub_motor_states = nh.subscribe<maxon_epos_msgs::MotorStates>(
         "/motor_states", 3, &ATVDriver::callback_motor_states, this);
     //============================================================
