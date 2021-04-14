@@ -49,7 +49,7 @@
 	<node if="true" name="prefiltering_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)">
 		<!-- <remap from="/velodyne_points" to="/velodyne_points" /> -->
 		<!-- in case base_link_frame is blank, mapping will be performed in the lidar frame -->
-		<!-- <param name="base_link_frame" value="$(arg base_frame_id)" /> -->
+		<param name="base_link_frame" value="$(arg base_frame_id)" />
 		<!-- distance filter -->
 		<param name="use_distance_filter" value="$(arg use_distance_filter)" />
 		<param name="distance_near_thresh" value="$(arg distance_near_thresh)" />
@@ -172,8 +172,8 @@
 		<param name="min_stddev_q" value="0.05" />
 		<param name="max_stddev_q" value="0.2" />
 		<!-- update params -->
-		<param name="graph_update_interval" value="1.0" />
-		<param name="map_cloud_update_interval" value="1.0" />
+		<param name="graph_update_interval" value="2.0" />
+		<param name="map_cloud_update_interval" value="2.0" />
 		<param name="map_cloud_resolution" value="0.05" />
 	</node>
 	<!-- Run map2odom publisher node in hdl_graph_slam -->
@@ -182,14 +182,13 @@
 	Run octomap server nodelet
 	for make octotree map & 2D grid map
 	-->
-	<node if="false" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
-		<remap from="cloud_in" to="/filtered_points" />
+	<node if="true" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
+		<remap from="cloud_in" to="/hdl_graph_slam/map_points" />
 		<param name="frame_id" value="map" />
 		<param name="base_frame_id" value="$(arg base_frame_id)" />
-		<param name="resolution" value="0.03" />
-		<param name="sensor_model/max_range" value="20.0" />
-		<param name="pointcloud_max_z" value="10.0" />
-		<param name="pointcloud_min_z" value="0.1" />
+		<param name="resolution" value="0.05" />
+		<param name="pointcloud_max_z" value="2.5" />
+		<param name="pointcloud_min_z" value="0.3" />
 	</node>
 	<!--  -->
 	<node if="$(arg gui)" pkg="rviz" name="rviz_slam" type="rviz" args="-d $(arg rviz_config)" />
