@@ -9,8 +9,8 @@ global_costmap:
 
   static_layer:
     map_topic: "/projected_map" # should set same of SLAM output
-    track_unknown_space: true
+    track_unknown_space: false
     subscribe_to_updates: true
   
   inflation_layer:
-    inflation_radius: 0.1
+    inflation_radius: 0.5

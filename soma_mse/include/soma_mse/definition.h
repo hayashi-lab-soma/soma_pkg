@@ -58,6 +58,8 @@ struct Data_t
   int command; //command variavle (Command::Stop, ...)
 
   geo_msgs::PointStamped pg; //global target position
+  geo_msgs::PoseStamped goal;
+  std::vector<geo_msgs::PoseStamped> goal_plan;
   geo_msgs::Twist u_t;       //control input
   geo_msgs::Pose x_t;        //current pose
 };
