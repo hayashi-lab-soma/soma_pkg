@@ -1,12 +1,16 @@
 global_costmap:
   plugins:
     - {name: static_layer, type: "costmap_2d::StaticLayer"}
+    - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
   global_frame: map
-  robot_base_frame: soma_link
+  robot_base_frame: base_link
   update_frequency: 2.0
   publish_frequency: 2.0
 
   static_layer:
-    map_topic: "mymap" # should set same of SLAM output
+    map_topic: "/projected_map" # should set same of SLAM output
     track_unknown_space: false
     subscribe_to_updates: true
+  
+  inflation_layer:
+    inflation_radius: 0.5

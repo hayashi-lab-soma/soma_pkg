@@ -14,7 +14,8 @@ int MoveTo::_Transition(Data_t *data)
     return State::Stop;
 
   // reach global target position?
-  if (Dist(data->pg.point, data->x_t.position) <= lim_d)
+  // if (Dist(data->pg.point, data->x_t.position) <= lim_d)
+  if(data->local_planner->isGoalReached())
   {
     data->command = Command::Stop;
   }
@@ -43,7 +44,9 @@ int MoveTo::_Process(Data_t *data)
   std::vector<geometry_msgs::PoseStamped> local_path;
   local_path.push_back(data->fixed_start);  // start pose
   local_path.push_back(out);                // target pose
-  data->local_planner->setPlan(local_path); // planning start to gall
+
+  // data->local_planner->setPlan(local_path); // planning start to gall
+  // data->local_planner->setPlan(data->goal_plan);
 
   geometry_msgs::Twist _cmd_vel;
   data->local_planner->computeVelocityCommands(_cmd_vel);

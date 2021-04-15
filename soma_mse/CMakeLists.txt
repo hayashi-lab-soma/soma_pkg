@@ -8,6 +8,8 @@ find_package(catkin REQUIRED COMPONENTS
     tf
     nav_msgs
     geometry_msgs
+    costmap_2d
+    navfn
     )
 
 catkin_package(

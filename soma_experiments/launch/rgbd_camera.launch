@@ -1,7 +1,7 @@
 <!-- basic launch file for realsense camera (D435 or i) -->
 <launch>
 	<!-- arguments -->
-	<arg name="base_link" default="soma_link" doc="robot base link name" />
+	<arg name="base_link" default="base_link" doc="robot base link name" />
 	<arg name="camera_name" default="camera_f" doc="unique camera name (group name)" />
 	<arg name="serial_no" default="" doc="serial number" />
 	<arg name="color_fps" default="15" />
@@ -45,13 +45,13 @@
 		<arg name="tf_param1" default="0 $(arg ty) 0 $(arg pan) $(arg tilt) $(arg role)" />
 		<arg name="tf_param2" default="$(arg tx) 0 $(arg tz) 0 0 0" />
 		<!--  -->
-		<group if="$(arg use_center_frame)">
+		<!-- <group if="$(arg use_center_frame)">
 			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Center" args="$(arg tf_param1) camera_center_link $(arg camera_name)_link" />
 			<node pkg="tf2_ros" type="static_transform_publisher" name="Center2Base" args="$(arg tf_param2) $(arg base_link) camera_center_link" />
 		</group>
 		<group unless="$(arg use_center_frame)">
 			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
-		</group>
+		</group> -->
 		<!--
 		<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
 		<remap from="~input" to="/$(arg camera_name)/depth_registered/points" />

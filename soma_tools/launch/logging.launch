@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="prefix" default="/home/soma1/remote_mirais" />
+	<arg name="prefix" default="/home/soma1/wifi" />
 	<arg name="is_lidar_topics" default="true" doc="" />
 	<arg name="is_camera_topics" default="true" doc="" />
 	<arg name="is_imu_topics" default="true" doc="" />
@@ -28,6 +28,6 @@
 	<!--  -->
 	<!--  -->
 	<!-- Run logging -->
-	<node pkg="rosbag" type="record" name="soma_logging" output="screen" args="-o $(arg prefix) $(arg topics) $(arg add_topics)">
+	<node pkg="rosbag" type="record" name="soma_logging" output="screen" args="-o $(arg prefix) $(arg topics) $(arg add_topics) --size 5000 ">
 	</node>
 </launch>

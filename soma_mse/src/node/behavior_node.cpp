@@ -33,6 +33,7 @@ private:
 
   //Subscriber
   ros::Subscriber clicked_point_sub;
+  ros::Subscriber goal_sub;
   ros::Subscriber command_sub;
   ros::Subscriber odom_sub;
 
@@ -62,6 +63,8 @@ public:
     //Subscriber
     clicked_point_sub = nh.subscribe<geo_msgs::PointStamped>("/clicked_point", 1,
                                                              &Behavior::clicked_point_callback, this);
+    goal_sub = nh.subscribe<geo_msgs::PoseStamped>("/move_base_simple/goal", 3,
+    &Behavior::callback_goal, this);
 
     command_sub = nh.subscribe<std_msgs::String>("/soma_command", 1,
                                                  &Behavior::command_callback, this);
@@ -83,7 +86,7 @@ public:
     ROS_INFO("Wait for tf between base_link and map");
     try
     {
-      data.transform_map2base = data.tfBuf->lookupTransform(base_link_id,
+      data.transform_map2base = data.tfBuf->lookupTransform("base_link",
                                                             map_frame_id,
                                                             ros::Time(0),
                                                             ros::Duration(5.0));
@@ -96,6 +99,9 @@ public:
     data.local_costmap = new costmap_2d::Costmap2DROS("local_costmap", *data.tfBuf);
     data.local_planner = new dwa_local_planner::DWAPlannerROS();
     data.local_planner->initialize("dwa_local_planner", data.tfBuf, data.local_costmap);
+    data.global_costmap = new costmap_2d::Costmap2DROS("global_costmap", *data.tfBuf);
+    data.global_planner = new navfn::NavfnROS();
+    data.global_planner->initialize("global_planner", data.global_costmap);
     data.fixed_start.header.frame_id = base_link_id;
     data.fixed_start.pose.position.x = 0.0;
     data.fixed_start.pose.position.y = 0.0;
@@ -180,6 +186,33 @@ private:
     data.pg.header.frame_id = msg->header.frame_id;
     data.pg.header.stamp = ros::Time::now();
     return;
+  }
+  void callback_goal(const geometry_msgs::PoseStampedConstPtr &msg)
+  {
+    data.goal = *msg;
+
+    geometry_msgs::PoseStamped source_pose;
+    geometry_msgs::PoseStamped start_pose;
+    source_pose.header.frame_id = "base_link";
+    source_pose.header.stamp = ros::Time(0);
+    source_pose.pose.orientation.w = 1.0;
+
+    try{
+      start_pose = data.tfBuf->transform(source_pose, "map");
+    }
+    catch(...){
+      ROS_WARN("Error");
+    }
+
+    if(!data.global_planner->makePlan(
+      start_pose,
+        data.goal,
+        data.goal_plan)){
+      ROS_WARN("Failure global plann");
+      exit(1);
+    };
+
+        data.local_planner->setPlan(data.goal_plan);
   }
 
   void command_callback(const std_msgs::StringConstPtr &msg)
