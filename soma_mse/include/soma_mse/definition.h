@@ -9,6 +9,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <dwa_local_planner/dwa_planner_ros.h>
+#include <navfn/navfn_ros.h>
 #include <string>
 #include <map>
 
@@ -48,6 +49,8 @@ struct Data_t
   //maps
   costmap_2d::Costmap2DROS *local_costmap;
   dwa_local_planner::DWAPlannerROS *local_planner;
+  costmap_2d::Costmap2DROS *global_costmap;
+  navfn::NavfnROS *global_planner;
   geometry_msgs::TransformStamped transform_map2base;
   geometry_msgs::PoseStamped fixed_start, fixed_target;
 

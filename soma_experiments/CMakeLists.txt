@@ -13,6 +13,10 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  costmap_2d
+  dwa_local_planner
+  nav_core
+  navfn_ros
 )
 
 ## System dependencies are found with CMake's conventions

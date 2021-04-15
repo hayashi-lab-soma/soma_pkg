@@ -12,7 +12,7 @@
   <arg name="role" value="$(eval arg('role_angle')/180.0*arg('PI'))" />
   <arg name="tf_param1" default="0 $(arg ty) 0 $(arg pan) $(arg tilt) $(arg role)" />
   <arg name="tf_param2" default="$(arg tx) 0 $(arg tz) 0 0 0" />
-  <node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) soma_link camera_f_link" />
+  <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) soma_link camera_f_link" /> -->
 
   <arg name="serial_no" default=""/>
   <arg name="usb_port_id" default=""/>

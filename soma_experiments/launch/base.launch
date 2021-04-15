@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	<!-- arguments -->
-	<arg name="base_frame_id" default="soma_link" />
+	<arg name="base_frame_id" default="base_link" />
 	<arg name="odom_frame_id" default="odom" />
 	<arg name="map_frame_id" default="map" />
 	<!--  -->
@@ -12,12 +12,10 @@
 		<param name="map_frame_id" value="$(arg map_frame_id)" />
 		<!--  -->
 		<!-- load local costmap parameters from yaml -->
-		<!-- <rosparam command="load" file="$(find soma_experiments)/config/global_costmap.yaml" /> -->
+		<rosparam command="load" file="$(find soma_experiments)/config/global_costmap.yaml" />
 		<rosparam command="load" file="$(find soma_experiments)/config/local_costmap.yaml" />
 		<rosparam command="load" file="$(find soma_experiments)/config/local_planner.yaml" />
 		<!-- load global costmap parameters from yaml -->
-		<!-- when launch simulator -->
-		<!-- <remap from="/soma_ut" to="/dtw_robot/diff_drive_controller/cmd_vel" /> -->
 	</node>
 	<!--  -->
 	<node pkg="rqt_ez_publisher" type="rqt_ez_publisher" name="command_publisher" />

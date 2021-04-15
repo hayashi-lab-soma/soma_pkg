@@ -83,7 +83,7 @@ public:
     ROS_INFO("Wait for tf between base_link and map");
     try
     {
-      data.transform_map2base = data.tfBuf->lookupTransform(base_link_id,
+      data.transform_map2base = data.tfBuf->lookupTransform("base_link",
                                                             map_frame_id,
                                                             ros::Time(0),
                                                             ros::Duration(5.0));
@@ -96,6 +96,9 @@ public:
     data.local_costmap = new costmap_2d::Costmap2DROS("local_costmap", *data.tfBuf);
     data.local_planner = new dwa_local_planner::DWAPlannerROS();
     data.local_planner->initialize("dwa_local_planner", data.tfBuf, data.local_costmap);
+    data.global_costmap = new costmap_2d::Costmap2DROS("global_costmap", *data.tfBuf);
+    data.global_planner = new navfn::NavfnROS();
+    data.global_planner->initialize("global_planner", data.global_costmap);
     data.fixed_start.header.frame_id = base_link_id;
     data.fixed_start.pose.position.x = 0.0;
     data.fixed_start.pose.position.y = 0.0;
