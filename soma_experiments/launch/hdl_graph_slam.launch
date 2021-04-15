@@ -5,7 +5,7 @@
 	<arg name="base_frame_id" default="base_link" />
 	<arg name="lidar_link" default="velodyne" />
 	<!-- flags -->
-	<arg name="enable_manager" default="true" />
+	<arg name="enable_manager" default="false" />
 	<arg name="enable_tf_base2lidar" default="false" />
 	<arg name="enable_floor_detection" default="true" />
 	<arg name="enable_gps" default="false" />
@@ -186,12 +186,12 @@
 	Run octomap server nodelet
 	for make octotree map & 2D grid map
 	-->
-	<node if="false" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
+	<node if="true" name="octomap_server_nodelet" pkg="nodelet" type="nodelet" args="load octomap_server/OctomapServerNodelet $(arg nodelet_manager)">
 		<remap from="cloud_in" to="/hdl_graph_slam/map_points" />
 		<param name="frame_id" value="map" />
 		<param name="base_frame_id" value="$(arg base_frame_id)" />
 		<param name="resolution" value="0.05" />
-		<param name="pointcloud_max_z" value="2.5" />
+		<param name="pointcloud_max_z" value="2.0" />
 		<param name="pointcloud_min_z" value="0.3" />
 	</node>
 	<!--  -->
