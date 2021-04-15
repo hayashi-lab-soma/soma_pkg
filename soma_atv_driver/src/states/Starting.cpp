@@ -87,13 +87,16 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
 
   T += data->dt; //spent time measurement
 
-  if (T >= 2.0)
+  if (T >= 1.0)
   {
     if (abs(data->wheel_vel) <= 0.1)
     {
       //increase throttle position
-      data->target_positions[3] = data->current_positions[3] + 0.3;
+      data->target_positions[3] = data->current_positions[3] + 0.5;
     }
+  }
+  else{
+     data->target_positions[3] = data->motor_params.throttle_regular; //set throttle (deg)
   }
   return 0;
 }

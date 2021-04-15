@@ -16,13 +16,13 @@
 		<param name="loop_rate" value="$(arg loop_rate)" />
 		<remap from="/soma/atv_driver/set_motor_states" to="/maxon_bringup/set_all_states" />
 		<!-- subscribers -->
-		<remap from="/soma/cmd_vel" to="/cmd_vel" />
+		<remap from="/soma/cmd_vel" to="/soma/cmd_vel" />
 		<!-- <remap from="/wheel_vel" to="$(arg wheel_vel_topic)" /> -->
 		<remap from="/motor_states" to="$(arg motor_states_topic)" />
 		<!-- control parameters -->
-		<param name="target_vel" value="0.8" />
-		<param name="steering_pos_min" value="-25.0" />
-		<param name="steering_pos_max" value="25.0" />
+		<param name="target_vel" value="0.4" />
+		<param name="steering_pos_min" value="-30.0" />
+		<param name="steering_pos_max" value="30.0" />
 		<param name="rear_brake_pos_min" value="0.0" />
 		<param name="rear_brake_pos_max" value="9.0" />
 		<param name="front_brake_pos_min" value="0.0" />
@@ -31,9 +31,9 @@
 		<param name="throttle_pos_max" value="13.0" />
 		<!-- starting state parameters -->
 		<param name="rear_brake_starting_state_low_rpm" value="100" />
-		<param name="throttle_regular" value="6.5" />
+		<param name="throttle_regular" value="7.0" />
 		<!--  -->
-		<param name="P" value="0.01" />
+		<param name="P" value="0.6" />
 		<param name="D" value="0.01" />
 	</node>
 </launch>

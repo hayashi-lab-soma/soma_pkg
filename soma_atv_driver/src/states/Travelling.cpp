@@ -65,6 +65,10 @@ int Travelling::_Process(soma_atv_driver::Data_t *data)
   data->target_positions[3] = std::max<double>(data->target_positions[3], data->motor_params.throttle_regular);
   data->target_positions[3] = std::min<double>(data->target_positions[3], data->motor_params.throttle.Max);
 
+  // if(data->wheel_vel>=0.8){
+  //   data->target_positions[1] = Motors::
+  // }
+
   return 0;
 }
 int Travelling::_Exit(soma_atv_driver::Data_t *data)
