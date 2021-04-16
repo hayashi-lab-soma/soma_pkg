@@ -19,15 +19,15 @@ int Braking::_Transition(soma_atv_driver::Data_t *data)
 }
 int Braking::_Enter(soma_atv_driver::Data_t *data)
 {
-  data->target_positions[0] = 0.0;
-  data->target_positions[1] = data->motor_params.rear_brake.Max;
-  data->target_positions[3] = 0.0;
+  data->motors.steer_pos.In = 0.0;
+  data->motors.rear_pos.In = data->motors.rear_brake.Max;
+  data->motors.front_pos.In = 0.0;
 }
 int Braking::_Process(soma_atv_driver::Data_t *data)
 {
-  data->target_positions[1] = data->motor_params.rear_brake.Max;
+  data->motors.rear_pos.In = data->motors.rear_brake.Max;
 }
 int Braking::_Exit(soma_atv_driver::Data_t *data)
 {
-  data->target_positions[2] = data->motor_params.rear_brake.Max;
+  data->motors.rear_pos.In = data->motors.rear_brake.Max;
 }

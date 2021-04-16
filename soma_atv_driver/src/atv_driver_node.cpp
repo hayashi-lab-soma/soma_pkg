@@ -10,9 +10,11 @@
 #include <map>
 #include <signal.h>
 #include <string>
+#include <math.h>
 //
 #include <qudpsocket.h>
 //
+#include <soma_msgs/SOMAStatus.h>
 #include "atv_driver/definitions.h"
 #include "atv_driver/states/Braking.h"
 #include "atv_driver/states/Starting.h"
@@ -39,8 +41,9 @@ private:
   ros::Subscriber sub_motor_states;
 
   // publihsers
-  ros::Publisher pub_action;
-  ros::Publisher pub_action_str; // State::Start,...
+  // ros::Publisher pub_action;
+  // ros::Publisher pub_action_str; // State::Start,...
+  ros::Publisher pub_soma_status;
   ros::Publisher pub_motor_states;
 
   // networks
@@ -70,27 +73,27 @@ public:
     data->dt = pnh.param<double>("loop_rate", 0.1);
 
     data->target_vel = pnh.param<double>("target_vel", 0.8);
-    data->motor_params.steering.Min = pnh.param<double>("steering_pos_min", -25.0);
-    data->motor_params.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
-    data->motor_params.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
-    data->motor_params.rear_brake.Max = pnh.param<double>("rear_brake_pos_max", 10.0);
-    data->motor_params.front_brake.Min = pnh.param<double>("front_brake_pos_min", 0.0);
-    data->motor_params.front_brake.Max = pnh.param<double>("front_brake_pos_max", 10.0);
-    data->motor_params.throttle.Min = pnh.param<double>("throttle_pos_min", 0.0);
-    data->motor_params.throttle.Max = pnh.param<double>("throttle_pos_max", 12.0);
-    data->motor_params.rear_brake_starting_state_low_rpm =
+    data->motors.steering.Min = pnh.param<double>("steering_pos_min", -25.0);
+    data->motors.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
+    data->motors.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
+    data->motors.rear_brake.Max = pnh.param<double>("rear_brake_pos_max", 10.0);
+    data->motors.front_brake.Min = pnh.param<double>("front_brake_pos_min", 0.0);
+    data->motors.front_brake.Max = pnh.param<double>("front_brake_pos_max", 10.0);
+    data->motors.throttle.Min = pnh.param<double>("throttle_pos_min", 0.0);
+    data->motors.throttle.Max = pnh.param<double>("throttle_pos_max", 12.0);
+    data->motors.rear_brake_starting_state_low_rpm =
         pnh.param<double>("rear_brake_starting_state_low_rpm", 100.0);
-    data->motor_params.throttle_regular = pnh.param<double>("throttle_regular", 5.0);
+    data->motors.throttle_regular = pnh.param<double>("throttle_regular", 5.0);
     data->Kp = pnh.param<double>("P", 0.1);
     data->Kd = pnh.param<double>("D", 0.1);
 
     data->state = State::Stop; // initial state
     data->u_in.v = 0.0;
     data->u_in.phi = 0.0;
-    data->current_positions = new double[4]{0.0};
-    data->target_positions = new double[4]{0.0};
-    data->target_velocity = new long[4]{3500};
-    data->clutch = data->clutch_cmd = Clutch::Free;
+    // data->current_positions = new double[4]{0.0};
+    // data->target_positions = new double[4]{0.0};
+    // data->motors = new long[4]{3500};
+    // data->clutch = data->clutch.in = Clutch::Free;
     data->wheel_vel = 0.0;
     data->ev = new double[3]{0.0};
 
@@ -108,8 +111,9 @@ public:
 
     //============================================================
     // publishers
-    pub_action = nh.advertise<std_msgs::Int32>("/soma/atv_driver/action", 3);
-    pub_action_str = nh.advertise<std_msgs::String>("/soma/atv_driver/action_str", 3);
+    // pub_action = nh.advertise<std_msgs::Int32>("/soma/atv_driver/action", 3);
+    // pub_action_str = nh.advertise<std_msgs::String>("/soma/atv_driver/action_str", 3);
+    pub_soma_status = nh.advertise<soma_msgs::SOMAStatus>("/soma/status", 3);
     pub_motor_states =
         nh.advertise<maxon_epos_msgs::MotorStates>("/soma/atv_driver/set_motor_states", 3);
     //============================================================
@@ -214,20 +218,27 @@ private:
 
     //====================================================================
     // publish current states
-    std_msgs::Int32 action;
-    action.data = data->state;
-    pub_action.publish(action);
-    //
-    std_msgs::String action_str;
-    std::stringstream ss;
-    ss << State::Str.at(data->state);
-    ss << "," << data->target_vel;
-    ss << "," << data->Kp;
-    ss << "," << data->Kd;
-    ss << "," << data->ev[0] << "," << data->ev[1] << "," << data->ev[2];
-    ss << "," << data->target_positions[3]; //deg
-    action_str.data = std::string(ss.str());
-    pub_action_str.publish(action_str);
+    soma_msgs::SOMAStatus soma_status;
+    soma_status.header.stamp = ros::Time::now();
+
+    soma_status.status = data->state;
+    soma_status.status_str = State::Str.at(data->state);
+
+    soma_status.target_vel = data->target_vel;
+    soma_status.wheel_vel = data->wheel_vel;
+    soma_status.vel_errors.resize(3);
+    soma_status.vel_errors[0] = data->ev[0];
+    soma_status.vel_errors[1] = data->ev[1];
+    soma_status.vel_errors[2] = data->ev[2];
+    soma_status.PGain = data->Kp;
+    soma_status.DGain = data->Kd;
+
+    soma_status.steering_pos = data->motors.steer_pos.Out;    //degree
+    soma_status.rear_pos = data->motors.rear_pos.Out;         //degree
+    soma_status.front_pos = data->motors.front_pos.Out;       //degree
+    soma_status.throttle_pos = data->motors.throttle_pos.Out; //degree
+
+    pub_soma_status.publish(soma_status);
 
     // publish motor target states
     maxon_epos_msgs::MotorStates motor_cmd;
@@ -235,18 +246,18 @@ private:
     motor_cmd.header.stamp = ros::Time::now();
 
     motor_cmd.states[0].position =
-        DEG2RAD(data->target_positions[0]); // steering
+        DEG2RAD(data->motors.steer_pos.In); // steering
     motor_cmd.states[1].position =
-        DEG2RAD(data->target_positions[1]); // rear brake
+        DEG2RAD(data->motors.rear_pos.In); // rear brake
     motor_cmd.states[2].position =
-        DEG2RAD(data->target_positions[2]); // front brake
+        DEG2RAD(data->motors.front_pos.In); // front brake
     motor_cmd.states[3].position =
-        DEG2RAD(data->target_positions[3]); // throttle
+        DEG2RAD(data->motors.throttle_pos.In); // throttle
 
-    motor_cmd.states[0].velocity = data->target_velocity[0];
-    motor_cmd.states[1].velocity = data->target_velocity[1];
-    motor_cmd.states[2].velocity = data->target_velocity[2];
-    motor_cmd.states[3].velocity = data->target_velocity[3];
+    motor_cmd.states[0].velocity = data->motors.steer_vel.In;
+    motor_cmd.states[1].velocity = data->motors.rear_vel.In;
+    motor_cmd.states[2].velocity = data->motors.front_vel.In;
+    motor_cmd.states[3].velocity = data->motors.throttle_vel.In;
 
     pub_motor_states.publish(motor_cmd);
     //====================================================================
@@ -266,8 +277,8 @@ private:
     data->u_in.phi = angular_vel_to_steering_angle(
         cmd_vel->linear.x,
         cmd_vel->angular.z); // defined in definitions.h
-    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motor_params.steering.Min));
-    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motor_params.steering.Max));
+    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
+    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
 
     return;
   }
@@ -305,10 +316,10 @@ private:
     // ROS_INFO(str_motor_states.c_str());
 
     // store position value to local member
-    data->current_positions[0] = RAD2DEG(motor_states->states[0].position);
-    data->current_positions[1] = RAD2DEG(motor_states->states[1].position);
-    data->current_positions[2] = RAD2DEG(motor_states->states[2].position);
-    data->current_positions[3] = RAD2DEG(motor_states->states[3].position);
+    data->motors.steer_pos.Out = RAD2DEG(motor_states->states[0].position);
+    data->motors.rear_pos.Out = RAD2DEG(motor_states->states[1].position);
+    data->motors.front_pos.Out = RAD2DEG(motor_states->states[2].position);
+    data->motors.throttle_pos.Out = RAD2DEG(motor_states->states[3].position);
   }
   //-------------------------
   // recv_clutch_state
@@ -323,7 +334,7 @@ private:
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
       // ROS_INFO("Clutch state: %d", recv);
-      data->clutch = recv;
+      data->clutch.out = recv;
     }
     else
     {
@@ -337,7 +348,7 @@ private:
   //-------------------------
   void send_clutch_state(soma_atv_driver::Data_t *data)
   {
-    clutch_send->writeDatagram((char *)&data->clutch_cmd, sizeof(int),
+    clutch_send->writeDatagram((char *)&data->clutch.in, sizeof(int),
                                QHostAddress(QString(Clutch::IP.c_str())),
                                Clutch::SendPort);
   }

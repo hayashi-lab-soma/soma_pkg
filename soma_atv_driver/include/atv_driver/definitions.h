@@ -86,18 +86,37 @@ namespace soma_atv_driver
     double phi; //steering angle (rad)
   };
 
-  struct Motors
+  struct Motors_t
   {
+    struct Pos_t
+    {
+      double In;
+      double Out;
+      Pos_t() : In(0.0), Out(0.0) {}
+    } steer_pos, rear_pos, front_pos, throttle_pos; //degrees
+
+    struct Vel_t
+    {
+      double In;
+      double Out;
+      Vel_t() : In(0), Out(0) {}
+    } steer_vel, rear_vel, front_vel, throttle_vel; //rpm
+
     struct PositionLimit
     {
       double Min, Max;
       PositionLimit() : Min(0.0), Max(0.0) {}
-    };
-    //
-    PositionLimit steering, rear_brake, front_brake, throttle;
-    //starting parameters
+    } steering, rear_brake, front_brake, throttle;
+
+    //starting state sparameters
     double rear_brake_starting_state_low_rpm;
     double throttle_regular;
+  };
+
+  struct Clutch_t
+  {
+    int in, out;
+    Clutch_t() : in(Clutch::Free), out(Clutch::Free) {}
   };
 
   /**
@@ -107,18 +126,20 @@ namespace soma_atv_driver
   struct Data_t
   {
     //parameters
-    double dt;           //loop duration time (sec)
-    double target_vel;   //target velocity (m/s)
-    Motors motor_params; //motor control parameter
+    double dt;         //loop duration time (sec)
+    double target_vel; //target velocity (m/s)
+
+    Motors_t motors; //motor control parameter
+    Clutch_t clutch;
 
     int state; //state variable (State namespace)
     U_t u_in;  //controll input
-    int clutch;
-    int clutch_cmd;
+    // int clutch;
+    // int clutch_cmd;
     //
-    double *current_positions; //motor current positions (deg)
-    double *target_positions;  //motor target positions (deg)
-    long *target_velocity;     //motor target velocity (rmp)
+    // double *current_positions; //motor current positions (deg)
+    // double *target_positions;  //motor target positions (deg)
+    // long *target_velocity; //motor target velocity (rmp)
     //
     double wheel_vel; //current velocity of wheel (m/s)
     double *ev;       //error of velocity

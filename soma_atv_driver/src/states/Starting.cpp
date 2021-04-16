@@ -29,8 +29,7 @@ int Starting::_Transition(soma_atv_driver::Data_t *data)
   {
     return State::Braking;
   }
-  if ((data->clutch==Clutch::Forward && data->u_in.v < 0.0)
-  || (data->clutch==Clutch::Reverse && data->u_in.v >= 0.0))
+  if ((data->clutch.out == Clutch::Forward && data->u_in.v < 0.0) || (data->clutch.out == Clutch::Reverse && data->u_in.v >= 0.0))
   {
     //if input move direction was changed ... it's dangerous situation!
     return State::Braking;
@@ -51,20 +50,20 @@ int Starting::_Enter(soma_atv_driver::Data_t *data)
 {
   if (data->u_in.v > 0.001)
   {
-    data->clutch_cmd = Clutch::Forward;
+    data->clutch.in = Clutch::Forward;
   }
   else if (data->u_in.v < -0.001)
   {
-    data->clutch_cmd = Clutch::Reverse;
+    data->clutch.in = Clutch::Reverse;
   }
 
   //rear brake open (slowly)
-  data->target_velocity[1] = (long)data->motor_params.rear_brake_starting_state_low_rpm; //change max rpm of rear brake
-  data->target_positions[1] = data->motor_params.rear_brake.Min;                         //open rear brake
+  data->motors.rear_vel.In = (long)data->motors.rear_brake_starting_state_low_rpm; //change max rpm of rear brake
+  data->motors.rear_pos.In = data->motors.rear_brake.Min;                          //open rear brake
   //front open
-  data->target_positions[2] = data->motor_params.front_brake.Min;                        //open front brake
+  data->motors.front_pos.In = data->motors.front_brake.Min; //open front brake
   //throttle to regular
-  data->target_positions[3] = data->motor_params.throttle_regular;                       //set throttle (deg)
+  data->motors.throttle_pos.In = data->motors.throttle_regular; //set throttle (deg)
 
   T = 0.0;
 }
@@ -77,13 +76,13 @@ int Starting::_Enter(soma_atv_driver::Data_t *data)
 int Starting::_Process(soma_atv_driver::Data_t *data)
 {
   //wait for clutch state changed
-  if (data->clutch != data->clutch_cmd)
+  if (data->clutch.out != data->clutch.in)
     return 0;
 
-  data->target_positions[0] = RAD2DEG(data->u_in.phi);             //degrees
-  data->target_positions[1] = data->motor_params.rear_brake.Min;   //open rear brake
-  data->target_positions[2] = data->motor_params.front_brake.Min;  //open front brake
-  data->target_positions[3] = data->motor_params.throttle_regular; //set throttle (deg)
+  data->motors.steer_pos.In = RAD2DEG(data->u_in.phi);          //degrees
+  data->motors.rear_pos.In = data->motors.rear_brake.Min;       //open rear brake
+  data->motors.front_pos.In = data->motors.front_brake.Min;     //open front brake
+  data->motors.throttle_pos.In = data->motors.throttle_regular; //set throttle (deg)
 
   T += data->dt; //spent time measurement
 
@@ -92,7 +91,7 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
     if (abs(data->wheel_vel) <= 0.1)
     {
       //increase throttle position
-      data->target_positions[3] = data->current_positions[3] + 0.3;
+      data->motors.throttle_pos.In = data->motors.throttle_pos.Out + 0.3;
     }
   }
   return 0;
@@ -106,7 +105,7 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
 int Starting::_Exit(soma_atv_driver::Data_t *data)
 {
   //change max velocity to default
-  data->target_velocity[1] = 3500;
+  data->motors.rear_vel.In = 3500;
 
   T = 0.0;
 }
