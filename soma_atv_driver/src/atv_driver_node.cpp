@@ -189,13 +189,15 @@ private:
    */
   void main(const ros::TimerEvent &e)
   {
+    //====================================================================
     //calculate velocity errors
-    data->ev[2] = data->ev[1]; //error(t-2)
-    data->ev[1] = data->ev[0]; //error(t-1)
-    // data->ev[0] = data->u_in.v - data->wheel_vel; //error(t)
-    data->ev[0] = data->target_vel - abs(data->wheel_vel);
+    data->ev[2] = data->ev[1];                             //error(t-2)
+    data->ev[1] = data->ev[0];                             //error(t-1)
+    data->ev[0] = data->target_vel - abs(data->wheel_vel); //error(t)
+    //====================================================================
 
     //====================================================================
+    // clutch state recieve
     recv_clutch_state(data);
     //====================================================================
 
@@ -213,6 +215,7 @@ private:
     }
 
     //====================================================================
+    // clutch command send
     send_clutch_state(data);
     //====================================================================
 
@@ -237,6 +240,14 @@ private:
     soma_status.rear_pos = data->motors.rear_pos.Out;         //degree
     soma_status.front_pos = data->motors.front_pos.Out;       //degree
     soma_status.throttle_pos = data->motors.throttle_pos.Out; //degree
+
+    soma_status.steering_target_pos = data->motors.steer_pos.In;    //degree
+    soma_status.rear_target_pos = data->motors.rear_pos.In;         //degree
+    soma_status.front_target_pos = data->motors.front_pos.In;       //degree
+    soma_status.throttle_target_pos = data->motors.throttle_pos.In; //degree
+
+    soma_status.clutch_status = data->clutch.out;
+    soma_status.clutch_status_str = Clutch::Str.at(data->clutch.out);
 
     pub_soma_status.publish(soma_status);
 
@@ -369,11 +380,11 @@ int main(int argc, char **argv)
 
   signal(SIGINT, SignalHander);
 
-  ros::Rate rate(5);
-  ros::Duration loop_duration(0.2); //(sec)
+  ros::Rate rate(10);
+  // ros::Duration loop_duration(0.2); //(sec)
   while (1)
   {
-    ROS_INFO("%f", ros::Time::now().toSec());
+    ROS_DEBUG("%f", ros::Time::now().toSec());
 
     if (isShutdown)
     {
