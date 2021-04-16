@@ -41,8 +41,6 @@ private:
   ros::Subscriber sub_motor_states;
 
   // publihsers
-  // ros::Publisher pub_action;
-  // ros::Publisher pub_action_str; // State::Start,...
   ros::Publisher pub_soma_status;
   ros::Publisher pub_motor_states;
 
@@ -90,14 +88,8 @@ public:
     data->state = State::Stop; // initial state
     data->u_in.v = 0.0;
     data->u_in.phi = 0.0;
-    // data->current_positions = new double[4]{0.0};
-    // data->target_positions = new double[4]{0.0};
-    // data->motors = new long[4]{3500};
-    // data->clutch = data->clutch.in = Clutch::Free;
     data->wheel_vel = 0.0;
     data->ev = new double[3]{0.0};
-
-    // get_parameters(pnh);
 
     //============================================================
     // subscribers
@@ -111,17 +103,18 @@ public:
 
     //============================================================
     // publishers
-    // pub_action = nh.advertise<std_msgs::Int32>("/soma/atv_driver/action", 3);
-    // pub_action_str = nh.advertise<std_msgs::String>("/soma/atv_driver/action_str", 3);
     pub_soma_status = nh.advertise<soma_msgs::SOMAStatus>("/soma/status", 3);
     pub_motor_states =
         nh.advertise<maxon_epos_msgs::MotorStates>("/soma/atv_driver/set_motor_states", 3);
     //============================================================
 
+    //============================================================
+    // clutch control client
     clutch_recv = new QUdpSocket();
     clutch_recv->bind(Clutch::RecvPort);
     clutch_send = new QUdpSocket();
 
+    //============================================================
     //make state machine
     stop = new Stop();
     starting = new Starting();
