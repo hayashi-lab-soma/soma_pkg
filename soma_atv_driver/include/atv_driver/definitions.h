@@ -9,6 +9,15 @@
 
 #define WHEEL_BASE 1.04 //(m)
 
+static double angular_vel_to_steering_angle(double v, double omega)
+{
+  if (abs(omega) <= 0.001)
+    return 0; //zero radian
+
+  double radius = v / omega;
+  return atan((double)WHEEL_BASE / radius); //radian
+}
+
 namespace State
 {
   const int Stop = 0;
@@ -22,31 +31,6 @@ namespace State
       {Travelling, "Travelling"},
       {Braking, "Braking"}};
 } // namespace State
-
-// namespace Motor
-// {
-//   namespace Steering
-//   {
-//     const double Min = -25.0;
-//     const double Max = 25.0;
-//   }
-//   namespace RearBrake
-//   {
-//     const double Min = 0.0;
-//     const double Max = 10.0;
-//   }
-//   namespace FrontBrake
-//   {
-//     const double Min = 0.0;
-//     const double Max = 15.0;
-//   }
-//   namespace Throttle
-//   {
-//     const double Min = 0.0;
-//     const double Max = 20.0;
-//   }
-
-// }
 
 namespace Clutch
 {
@@ -134,24 +118,10 @@ namespace soma_atv_driver
 
     int state; //state variable (State namespace)
     U_t u_in;  //controll input
-    // int clutch;
-    // int clutch_cmd;
-    //
-    // double *current_positions; //motor current positions (deg)
-    // double *target_positions;  //motor target positions (deg)
-    // long *target_velocity; //motor target velocity (rmp)
-    //
+
     double wheel_vel; //current velocity of wheel (m/s)
     double *ev;       //error of velocity
     double Kp, Kd;    //control gain
   };
 }
 
-static double angular_vel_to_steering_angle(double v, double omega)
-{
-  if (v == 0 || omega == 0)
-    return 0; //zero radian
-
-  double radius = v / omega;
-  return atan((double)WHEEL_BASE / radius); //radian
-}

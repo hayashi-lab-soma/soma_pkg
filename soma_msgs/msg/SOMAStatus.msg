@@ -7,13 +7,15 @@ string status_str
 
 # motor positions (degree)
 float32 steering_pos
-float32 rear_pos
-float32 front_pos
-float32 throttle_pos
-
 float32 steering_target_pos
+
+float32 rear_pos
 float32 rear_target_pos
+
+float32 front_pos
 float32 front_target_pos
+
+float32 throttle_pos
 float32 throttle_target_pos
 
 # cluch status

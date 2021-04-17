@@ -277,13 +277,15 @@ private:
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
   {
     // set commands
-    data->u_in.v = cmd_vel->linear.x;
+    data->u_in.v = cmd_vel->linear.x; //入力に従う意味はない
+    data->u_in.v = data->target_vel;  //constant velocity value
     data->u_in.phi = angular_vel_to_steering_angle(
-        cmd_vel->linear.x,
+        data->u_in.v,
         cmd_vel->angular.z); // defined in definitions.h
+
+    // min max limit
     data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
     data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
-
     return;
   }
 
@@ -337,11 +339,11 @@ private:
       {
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
-      // ROS_INFO("Clutch state: %d", recv);
       data->clutch.out = recv;
     }
     else
     {
+      ROS_WARN("%s", clutch_recv->errorString().toStdString().c_str());
     }
     return;
   }

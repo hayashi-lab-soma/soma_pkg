@@ -59,10 +59,19 @@ int Travelling::_Process(soma_atv_driver::Data_t *data)
   double UP = data->Kp * (data->ev[0] - data->ev[1]);
   // double UD = data->Kd / data->dt * (data->ev[0] - 2 * data->ev[1] + data->ev[2]);
   double UD = data->Kd * ((data->ev[0] - data->ev[1]) - (data->ev[1] - data->ev[2]));
-  double M = UP + UD;                                              //deff operation value
-  data->motors.throttle_pos.In = data->motors.throttle_pos.In + M; //add operation value
+  double M = UP + UD;                //deff operation value
+  data->motors.throttle_pos.In += M; //add operation value
   data->motors.throttle_pos.In = std::max<double>(data->motors.throttle_pos.In, data->motors.throttle_regular);
   data->motors.throttle_pos.In = std::min<double>(data->motors.throttle_pos.In, data->motors.throttle.Max);
+
+  // if wheel velocity is higher
+  if (abs(data->wheel_vel) >= 1.5)
+  {
+    data->motors.rear_pos.In = data->motors.rear_brake.Max;
+  }
+  else{
+    data->motors.rear_pos.In = data->motors.rear_brake.Min;
+  }
 
   return 0;
 }
