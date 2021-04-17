@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   maxon_epos_msgs
+  soma_msgs
 )
 
 ## System dependencies are found with CMake's conventions

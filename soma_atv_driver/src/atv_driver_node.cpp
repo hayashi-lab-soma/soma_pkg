@@ -8,27 +8,26 @@
 #include <tf2_ros/transform_listener.h>
 //
 #include <map>
+#include <math.h>
 #include <signal.h>
 #include <string>
-#include <math.h>
 //
 #include <qudpsocket.h>
 //
-#include <soma_msgs/SOMAStatus.h>
 #include "atv_driver/definitions.h"
 #include "atv_driver/states/Braking.h"
 #include "atv_driver/states/Starting.h"
 #include "atv_driver/states/StateBase.h"
 #include "atv_driver/states/Stop.h"
 #include "atv_driver/states/Travelling.h"
+#include <soma_msgs/SOMAStatus.h>
 //
 
 /**
- * @brief 
- * 
+ * @brief
+ *
  */
-class ATVDriver
-{
+class ATVDriver {
 private:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
@@ -60,10 +59,9 @@ private:
 public:
   /**
    * @brief Construct a new ATVDriver object
-   * 
+   *
    */
-  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~"))
-  {
+  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~")) {
     //============================================================
     // get parameters
     data = new soma_atv_driver::Data_t();
@@ -75,8 +73,10 @@ public:
     data->motors.steering.Max = pnh.param<double>("steering_pos_max", 25.0);
     data->motors.rear_brake.Min = pnh.param<double>("rear_brake_pos_min", 0.0);
     data->motors.rear_brake.Max = pnh.param<double>("rear_brake_pos_max", 10.0);
-    data->motors.front_brake.Min = pnh.param<double>("front_brake_pos_min", 0.0);
-    data->motors.front_brake.Max = pnh.param<double>("front_brake_pos_max", 10.0);
+    data->motors.front_brake.Min =
+        pnh.param<double>("front_brake_pos_min", 0.0);
+    data->motors.front_brake.Max =
+        pnh.param<double>("front_brake_pos_max", 10.0);
     data->motors.throttle.Min = pnh.param<double>("throttle_pos_min", 0.0);
     data->motors.throttle.Max = pnh.param<double>("throttle_pos_max", 12.0);
     data->motors.rear_brake_starting_state_low_rpm =
@@ -85,7 +85,7 @@ public:
     data->Kp = pnh.param<double>("P", 0.1);
     data->Kd = pnh.param<double>("D", 0.1);
 
-    data->state = State::Stop; // initial state
+    data->state = State::Init; // initial state
     data->u_in.v = 0.0;
     data->u_in.phi = 0.0;
     data->wheel_vel = 0.0;
@@ -104,8 +104,8 @@ public:
     //============================================================
     // publishers
     pub_soma_status = nh.advertise<soma_msgs::SOMAStatus>("/soma/status", 3);
-    pub_motor_states =
-        nh.advertise<maxon_epos_msgs::MotorStates>("/soma/atv_driver/set_motor_states", 3);
+    pub_motor_states = nh.advertise<maxon_epos_msgs::MotorStates>(
+        "/soma/atv_driver/set_motor_states", 3);
     //============================================================
 
     //============================================================
@@ -115,7 +115,7 @@ public:
     clutch_send = new QUdpSocket();
 
     //============================================================
-    //make state machine
+    // make state machine
     stop = new Stop();
     starting = new Starting();
     travelling = new Travelling();
@@ -131,16 +131,15 @@ public:
 
   /**
    * @brief Destroy the ATVDriver object
-   * 
+   *
    */
   ~ATVDriver() {}
 
   /**
-   * @brief 
-   * 
+   * @brief
+   *
    */
-  void shutdown()
-  {
+  void shutdown() {
     ROS_INFO("ATV Driver shutdown process");
 
     timer.stop();
@@ -167,8 +166,8 @@ public:
 private:
   /**
    * @brief Get the parameters object
-   * 
-   * @param pnh 
+   *
+   * @param pnh
    */
   // void get_parameters(ros::NodeHandle pnh)
   // {
@@ -176,17 +175,16 @@ private:
   // }
 
   /**
-   * @brief 
-   * 
-   * @param e 
+   * @brief
+   *
+   * @param e
    */
-  void main(const ros::TimerEvent &e)
-  {
+  void main(const ros::TimerEvent &e) {
     //====================================================================
-    //calculate velocity errors
-    data->ev[2] = data->ev[1];                             //error(t-2)
-    data->ev[1] = data->ev[0];                             //error(t-1)
-    data->ev[0] = data->target_vel - abs(data->wheel_vel); //error(t)
+    // calculate velocity errors
+    data->ev[2] = data->ev[1];                             // error(t-2)
+    data->ev[1] = data->ev[0];                             // error(t-1)
+    data->ev[0] = data->target_vel - abs(data->wheel_vel); // error(t)
     //====================================================================
 
     //====================================================================
@@ -194,17 +192,19 @@ private:
     recv_clutch_state(data);
     //====================================================================
 
-    // finite state machine
-    int new_state = states[data->state]->Transition(data);
-    if (new_state != data->state)
-    {
-      states[data->state]->Exit(data);
-      states[new_state]->Enter(data);
-      data->state = new_state;
-    }
-    else
-    {
-      states[data->state]->Process(data);
+    if (data->state == State::Init) {
+      states[State::Stop]->Enter(data);
+      data->state = State::Stop;
+    } else {
+      // finite state machine
+      int new_state = states[data->state]->Transition(data);
+      if (new_state != data->state) {
+        states[data->state]->Exit(data);
+        states[new_state]->Enter(data);
+        data->state = new_state;
+      } else {
+        states[data->state]->Process(data);
+      }
     }
 
     //====================================================================
@@ -229,15 +229,15 @@ private:
     soma_status.PGain = data->Kp;
     soma_status.DGain = data->Kd;
 
-    soma_status.steering_pos = data->motors.steer_pos.Out;    //degree
-    soma_status.rear_pos = data->motors.rear_pos.Out;         //degree
-    soma_status.front_pos = data->motors.front_pos.Out;       //degree
-    soma_status.throttle_pos = data->motors.throttle_pos.Out; //degree
+    soma_status.steering_pos = data->motors.steer_pos.Out;    // degree
+    soma_status.rear_pos = data->motors.rear_pos.Out;         // degree
+    soma_status.front_pos = data->motors.front_pos.Out;       // degree
+    soma_status.throttle_pos = data->motors.throttle_pos.Out; // degree
 
-    soma_status.steering_target_pos = data->motors.steer_pos.In;    //degree
-    soma_status.rear_target_pos = data->motors.rear_pos.In;         //degree
-    soma_status.front_target_pos = data->motors.front_pos.In;       //degree
-    soma_status.throttle_target_pos = data->motors.throttle_pos.In; //degree
+    soma_status.steering_target_pos = data->motors.steer_pos.In;    // degree
+    soma_status.rear_target_pos = data->motors.rear_pos.In;         // degree
+    soma_status.front_target_pos = data->motors.front_pos.In;       // degree
+    soma_status.throttle_target_pos = data->motors.throttle_pos.In; // degree
 
     soma_status.clutch_status = data->clutch.out;
     soma_status.clutch_status_str = Clutch::Str.at(data->clutch.out);
@@ -268,49 +268,47 @@ private:
   }
 
   /**
-   * @brief 
+   * @brief
    * set control input for car-like robot
-   * 
-   * @param cmd_vel 
+   *
+   * @param cmd_vel
    * Input Twist message
    */
-  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
-  {
+  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel) {
     // set commands
     data->u_in.v = cmd_vel->linear.x;
     data->u_in.phi = angular_vel_to_steering_angle(
         cmd_vel->linear.x,
         cmd_vel->angular.z); // defined in definitions.h
-    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
-    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
+    data->u_in.phi =
+        std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
+    data->u_in.phi =
+        std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
 
     return;
   }
 
   /**
-   * @brief 
+   * @brief
    * call back function for wheel rotate speed (m/s)
-   * 
+   *
    * @param d
-   * Float32 message containing front wheel rotation speed (m/s) 
+   * Float32 message containing front wheel rotation speed (m/s)
    */
-  void callback_wheel_vel(const std_msgs::Float32ConstPtr &d)
-  {
+  void callback_wheel_vel(const std_msgs::Float32ConstPtr &d) {
     ROS_INFO("wheel rotate velocity: %.2f", d->data);
     data->wheel_vel = d->data; // store
   }
 
   /**
-   * @brief 
-   * 
-   * @param motor_states 
+   * @brief
+   *
+   * @param motor_states
    */
   void callback_motor_states(
-      const maxon_epos_msgs::MotorStatesConstPtr &motor_states)
-  {
+      const maxon_epos_msgs::MotorStatesConstPtr &motor_states) {
     std::string str_motor_states = "";
-    for (int i = 0; i < (int)motor_states->states.size(); i++)
-    {
+    for (int i = 0; i < (int)motor_states->states.size(); i++) {
 
       str_motor_states += motor_states->states[i].motor_name;
       str_motor_states += ": ";
@@ -328,20 +326,15 @@ private:
   //-------------------------
   // recv_clutch_state
   //-------------------------
-  void recv_clutch_state(soma_atv_driver::Data_t *data)
-  {
-    if (clutch_recv->waitForReadyRead(33))
-    {
+  void recv_clutch_state(soma_atv_driver::Data_t *data) {
+    if (clutch_recv->waitForReadyRead(33)) {
       int recv; // Integer type 4byte date
-      while (clutch_recv->bytesAvailable() > 0)
-      {
+      while (clutch_recv->bytesAvailable() > 0) {
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
       // ROS_INFO("Clutch state: %d", recv);
       data->clutch.out = recv;
-    }
-    else
-    {
+    } else {
     }
     return;
   }
@@ -350,8 +343,7 @@ private:
   // send_clutch_state
   //
   //-------------------------
-  void send_clutch_state(soma_atv_driver::Data_t *data)
-  {
+  void send_clutch_state(soma_atv_driver::Data_t *data) {
     clutch_send->writeDatagram((char *)&data->clutch.in, sizeof(int),
                                QHostAddress(QString(Clutch::IP.c_str())),
                                Clutch::SendPort);
@@ -365,8 +357,7 @@ void SignalHander(int sig) { isShutdown = true; }
 //-------------------------
 // main
 //-------------------------
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   ros::init(argc, argv, "atv_driver", ros::init_options::NoSigintHandler);
   ROS_INFO("Start ATV driver node");
   ATVDriver driver;
@@ -374,15 +365,14 @@ int main(int argc, char **argv)
   signal(SIGINT, SignalHander);
 
   ros::Rate rate(10);
-  // ros::Duration loop_duration(0.2); //(sec)
-  while (1)
-  {
+  ros::Duration shutdown_wait(2.0);//(sec)
+  while (1) {
     ROS_DEBUG("%f", ros::Time::now().toSec());
 
-    if (isShutdown)
-    {
+    if (isShutdown) {
       driver.shutdown();
       ros::spinOnce();
+      shutdown_wait.sleep();
       break;
     }
     ros::spinOnce();

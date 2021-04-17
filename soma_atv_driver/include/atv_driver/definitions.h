@@ -11,6 +11,7 @@
 
 namespace State
 {
+  const int Init = -1;
   const int Stop = 0;
   const int Starting = 1;
   const int Travelling = 2;
