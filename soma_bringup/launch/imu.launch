@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="baudrate" default="0" doc="baudrate of the IMU" />
+	<arg name="timeout" default="0.002" doc="timeout for the IMU communication" />
+	<arg name="angular_velocity_covariance_diagonal" default="[0.0004, 0.0004, 0.0004]" doc="Diagonal elements of angular velocity covariance matrix" />
+	<arg name="linear_acceleration_covariance_diagonal" default="[0.0004, 0.0004, 0.0004]" doc="Diagonal elements of linear acceleration covariance matrix" />
+	<arg name="orientation_covariance_diagonal" default="[0.01745, 0.01745, 0.15708]" doc="Diagonal elements of the orientation covariance matrix" />
+	<!--
+	launch xsense driver
+	...
+	-->
+	<node pkg="xsens_driver" type="mtnode.py" name="xsens_driver" output="log">
+		<!-- <param name="device" value="$(arg device)" /> -->
+		<param name="baudrate" value="$(arg baudrate)" />
+		<param name="timeout" value="$(arg timeout)" />
+		<!-- <param name="initial_wait" value="$(arg initial_wait)" /> -->
+		<param name="frame_id" value="imu" />
+		<param name="frame_local" value="ENU" />
+		<param name="no_rotation_duration" value="0" />
+		<rosparam param="angular_velocity_covariance_diagonal" subst_value="True">$(arg angular_velocity_covariance_diagonal)</rosparam>
+		<rosparam param="linear_acceleration_covariance_diagonal" subst_value="True">$(arg linear_acceleration_covariance_diagonal)</rosparam>
+		<rosparam param="orientation_covariance_diagonal" subst_value="True">$(arg orientation_covariance_diagonal)</rosparam>
+	</node>
+</launch>

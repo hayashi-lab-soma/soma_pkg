@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-	<node name="wheel_odometry" pkg="soma_bringup" type="wheel_odometry_node.py">
+	<node name="wheel_odometry" pkg="soma_bringup" type="wheel_odom_node.py" output="log">
 		<remap from="/wheel_vel" to="/soma/wheel_vel" />
 		<remap from="/maxon/steering/state" to="/maxon_bringup/steering/get_state" />
+		<param name="wheel_base" value="1.04" />
+		<param name="publish_duration" value="0.1" />
 	</node>
 </launch>

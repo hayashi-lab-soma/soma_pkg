@@ -23,10 +23,10 @@
 		<origin xyz="0.0 0.0 -0.45" rpy="0.0 0.0 0.0" />
 	</joint>
 	<!-- IMU link -->
-	<link name="imu_link" />
+	<link name="imu" />
 	<joint name="imu_joint" type="fixed">
 		<parent link="base_link" />
-		<child link="imu_link" />
+		<child link="imu" />
 		<origin xyz="0 0 1.45" rpy="0.0 0.0 0.0" />
 	</joint>
 	<!-- LiDAR link (velodyne) -->

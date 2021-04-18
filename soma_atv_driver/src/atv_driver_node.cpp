@@ -27,7 +27,8 @@
  * @brief
  *
  */
-class ATVDriver {
+class ATVDriver
+{
 private:
   ros::NodeHandle nh;
   ros::NodeHandle pnh;
@@ -61,7 +62,8 @@ public:
    * @brief Construct a new ATVDriver object
    *
    */
-  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~")) {
+  ATVDriver() : nh(ros::NodeHandle()), pnh(ros::NodeHandle("~"))
+  {
     //============================================================
     // get parameters
     data = new soma_atv_driver::Data_t();
@@ -139,7 +141,8 @@ public:
    * @brief
    *
    */
-  void shutdown() {
+  void shutdown()
+  {
     ROS_INFO("ATV Driver shutdown process");
 
     timer.stop();
@@ -179,14 +182,18 @@ private:
    *
    * @param e
    */
-  void main(const ros::TimerEvent &e) {
+  void main(const ros::TimerEvent &e)
+  {
     //====================================================================
     // calculate velocity errors
     data->ev[2] = data->ev[1]; // error(t-2)
     data->ev[1] = data->ev[0]; // error(t-1)
-    if (abs(data->u_in.v) >= 0.001) {
+    if (abs(data->u_in.v) >= 0.001)
+    {
       data->ev[0] = data->target_vel - abs(data->wheel_vel); // error(t)
-    } else {
+    }
+    else
+    {
       data->ev[0] = 0.0 - abs(data->wheel_vel); // error(t)
     }
 
@@ -197,17 +204,23 @@ private:
     recv_clutch_state(data);
     //====================================================================
 
-    if (data->state == State::Init) {
+    if (data->state == State::Init)
+    {
       states[State::Stop]->Enter(data);
       data->state = State::Stop;
-    } else {
+    }
+    else
+    {
       // finite state machine
       int new_state = states[data->state]->Transition(data);
-      if (new_state != data->state) {
+      if (new_state != data->state)
+      {
         states[data->state]->Exit(data);
         states[new_state]->Enter(data);
         data->state = new_state;
-      } else {
+      }
+      else
+      {
         states[data->state]->Process(data);
       }
     }
@@ -279,7 +292,8 @@ private:
    * @param cmd_vel
    * Input Twist message
    */
-  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel) {
+  void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel)
+  {
     // set commands
     data->u_in.v = cmd_vel->linear.x; //
     // data->u_in.v = data->target_vel;  //constant velocity value
@@ -301,7 +315,8 @@ private:
    * @param d
    * Float32 message containing front wheel rotation speed (m/s)
    */
-  void callback_wheel_vel(const std_msgs::Float32ConstPtr &d) {
+  void callback_wheel_vel(const std_msgs::Float32ConstPtr &d)
+  {
     ROS_INFO("wheel rotate velocity: %.2f", d->data);
     data->wheel_vel = d->data; // store
   }
@@ -312,7 +327,8 @@ private:
    * @param motor_states
    */
   void callback_motor_states(
-      const maxon_epos_msgs::MotorStatesConstPtr &motor_states) {
+      const maxon_epos_msgs::MotorStatesConstPtr &motor_states)
+  {
     // store position value to local member
     data->motors.steer_pos.Out = RAD2DEG(motor_states->states[0].position);
     data->motors.rear_pos.Out = RAD2DEG(motor_states->states[1].position);
@@ -322,14 +338,19 @@ private:
   //-------------------------
   // recv_clutch_state
   //-------------------------
-  void recv_clutch_state(soma_atv_driver::Data_t *data) {
-    if (clutch_recv->waitForReadyRead(33)) {
+  void recv_clutch_state(soma_atv_driver::Data_t *data)
+  {
+    if (clutch_recv->waitForReadyRead(33))
+    {
       int recv; // Integer type 4byte date
-      while (clutch_recv->bytesAvailable() > 0) {
+      while (clutch_recv->bytesAvailable() > 0)
+      {
         clutch_recv->readDatagram((char *)&recv, sizeof(int));
       }
       data->clutch.out = recv;
-    } else {
+    }
+    else
+    {
       ROS_WARN("%s", clutch_recv->errorString().toStdString().c_str());
     }
     return;
@@ -339,7 +360,8 @@ private:
   // send_clutch_state
   //
   //-------------------------
-  void send_clutch_state(soma_atv_driver::Data_t *data) {
+  void send_clutch_state(soma_atv_driver::Data_t *data)
+  {
     clutch_send->writeDatagram((char *)&data->clutch.in, sizeof(int),
                                QHostAddress(QString(Clutch::IP.c_str())),
                                Clutch::SendPort);
@@ -353,29 +375,36 @@ void SignalHander(int sig) { isShutdown = true; }
 //-------------------------
 // main
 //-------------------------
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "atv_driver", ros::init_options::NoSigintHandler);
   ROS_INFO("Start ATV driver node");
-  ATVDriver driver;
 
   signal(SIGINT, SignalHander);
 
-  ros::Rate rate(5);
-  ros::Duration shutdown_wait(5.0); //(sec)
+  ros::AsyncSpinner spinner(0);
+  spinner.start();
+  ATVDriver driver;
+  ros::waitForShutdown();
 
-  while (1) {
-    ROS_DEBUG("%f", ros::Time::now().toSec());
+  // ros::Rate rate(5);
+  // ros::Duration shutdown_wait(5.0); //(sec)
 
-    if (isShutdown) {
-      driver.shutdown();
-      ros::spinOnce();
-      shutdown_wait.sleep();
-      break;
-    }
-    ros::spinOnce();
-    rate.sleep();
-    // loop_duration.sleep();
-  }
+  // while (1)
+  // {
+  //   ROS_DEBUG("%f", ros::Time::now().toSec());
+
+  //   if (isShutdown)
+  //   {
+  //     driver.shutdown();
+  //     ros::spinOnce();
+  //     shutdown_wait.sleep();
+  //     break;
+  //   }
+  //   ros::spinOnce();
+  //   rate.sleep();
+  //   // loop_duration.sleep();
+  // }
 
   return 0;
 }
