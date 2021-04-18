@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="to_pointcloud" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/point_cloud_xyz">
+		<remap from="camera_info" to="/depth/camera_info" />
+		<remap from="image_rect" to="/depth/image_rect_raw" />
+		<remap from="points" to="/depth/points" />
+	</node>
+	<!--
+	point cloud filtering process
+	if you need, ...
+	-->
+	<node pkg="nodelet" type="nodelet" name="vg_filter" args="standalone pcl/VoxelGrid">
+		<remap from="~input" to="/depth/points" />
+		<!-- <remap from="~output" to="/depth/filtered_points" /> -->
+		<param name="input_frame" value="base_link" />
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="-10.0" />
+		<param name="filter_limit_max" value="10.0" />
+		<param name="leaf_size" value="0.03" />
+		<param name="filter_limit_negative" value="false" />
+	</node>
+	<node pkg="nodelet" type="nodelet" name="sor_filter" args="standalone pcl/StatisticalOutlierRemoval">
+		<remap from="~input" to="/vg_filter/output" />
+		<remap from="~output" to="/depth/filtered_points" />
+		<param name="input_frame" value="base_link" />
+		<!-- <param name="filter_limit_min" value="-10.0" /> -->
+		<!-- <param name="filter_limit_max" value="10.0" /> -->
+		<param name="mean_k" value="20" />
+		<param name="stddev" value="0.05" />
+	</node>
+</launch>

@@ -1,0 +1,22 @@
+local_costmap:
+  plugins:
+    - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+  global_frame: lidar_odom
+  robot_base_frame: base_link
+  rolling_window: true
+  width: 15
+  height: 15
+  resolution: 0.3
+  update_frequency: 3.0
+  publish_frequency: 3.0
+  always_send_full_costmap: true
+  transform_tolerance: 2.0
+
+  obstacle_layer:
+    observation_sources: realsense_camera
+    realsense_camera:
+      sensor_frame: base_link
+      topic: /depth/points
+      data_type: PointCloud2
+
+
