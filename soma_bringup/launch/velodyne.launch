@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="max_range" default="100" doc="Max range (m)" />
+	<arg name="min_range" default="0.4" doc="Min range (m)" />
+	<!--  -->
+	<!-- launch VLP16 nodelet -->
+	<include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch">
+		<arg name="device_ip" value="192.168.1.201" />
+		<arg name="max_range" value="$(arg max_range)" />
+		<arg name="min_range" value="$(arg min_range)" />
+	</include>
+</launch>
