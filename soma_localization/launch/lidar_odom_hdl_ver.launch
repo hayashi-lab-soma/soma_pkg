@@ -6,7 +6,7 @@
 	bagfileから点群をパブリッシュしてやるなら
 	-->
 	<!-- arguments -->
-	<arg name="base_frame_id" default="soma_link" />
+	<arg name="base_frame_id" default="base_link" />
 	<arg name="lidar_link" default="velodyne" />
 	<arg name="odom_frame_id" default="lidar_odom" doc="" />
 	<arg name="points_topic" default="/velodyne_points" doc="input points for odometory" />
@@ -20,7 +20,7 @@
 	-->
 	<arg name="use_distance_filter" default="true" />
 	<arg name="distance_near_thresh" default="0.1" />
-	<arg name="distance_far_thresh" default="15.0" />
+	<arg name="distance_far_thresh" default="20.0" />
 	<arg name="down_sampling_resolution" default="0.3" />
 	<!--  -->
 	<node if="$(arg enable_manager)" pkg="nodelet" type="nodelet" name="$(arg nodelet_manager)" args="manager" output="screen">

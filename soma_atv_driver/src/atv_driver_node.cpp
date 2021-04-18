@@ -182,9 +182,14 @@ private:
   void main(const ros::TimerEvent &e) {
     //====================================================================
     // calculate velocity errors
-    data->ev[2] = data->ev[1];                             // error(t-2)
-    data->ev[1] = data->ev[0];                             // error(t-1)
-    data->ev[0] = data->target_vel - abs(data->wheel_vel); // error(t)
+    data->ev[2] = data->ev[1]; // error(t-2)
+    data->ev[1] = data->ev[0]; // error(t-1)
+    if (abs(data->u_in.v) >= 0.001) {
+      data->ev[0] = data->target_vel - abs(data->wheel_vel); // error(t)
+    } else {
+      data->ev[0] = 0.0 - abs(data->wheel_vel); // error(t)
+    }
+
     //====================================================================
 
     //====================================================================
@@ -229,15 +234,15 @@ private:
     soma_status.PGain = data->Kp;
     soma_status.DGain = data->Kd;
 
-    soma_status.steering_pos = data->motors.steer_pos.Out;    // degree
-    soma_status.rear_pos = data->motors.rear_pos.Out;         // degree
-    soma_status.front_pos = data->motors.front_pos.Out;       // degree
-    soma_status.throttle_pos = data->motors.throttle_pos.Out; // degree
-
     soma_status.steering_target_pos = data->motors.steer_pos.In;    // degree
     soma_status.rear_target_pos = data->motors.rear_pos.In;         // degree
     soma_status.front_target_pos = data->motors.front_pos.In;       // degree
     soma_status.throttle_target_pos = data->motors.throttle_pos.In; // degree
+
+    soma_status.steering_pos = data->motors.steer_pos.Out;    // degree
+    soma_status.rear_pos = data->motors.rear_pos.Out;         // degree
+    soma_status.front_pos = data->motors.front_pos.Out;       // degree
+    soma_status.throttle_pos = data->motors.throttle_pos.Out; // degree
 
     soma_status.clutch_status = data->clutch.out;
     soma_status.clutch_status_str = Clutch::Str.at(data->clutch.out);
@@ -276,15 +281,16 @@ private:
    */
   void callback_cmd_vel(const geometry_msgs::TwistConstPtr &cmd_vel) {
     // set commands
-    data->u_in.v = cmd_vel->linear.x; //入力に従う意味はない
-    data->u_in.v = data->target_vel;  //constant velocity value
+    data->u_in.v = cmd_vel->linear.x; //
+    // data->u_in.v = data->target_vel;  //constant velocity value
     data->u_in.phi = angular_vel_to_steering_angle(
-        data->u_in.v,
+        cmd_vel->linear.x,
         cmd_vel->angular.z); // defined in definitions.h
-
     // min max limit
-    data->u_in.phi = std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
-    data->u_in.phi = std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
+    data->u_in.phi =
+        std::max(data->u_in.phi, DEG2RAD(data->motors.steering.Min));
+    data->u_in.phi =
+        std::min(data->u_in.phi, DEG2RAD(data->motors.steering.Max));
     return;
   }
 
@@ -307,16 +313,6 @@ private:
    */
   void callback_motor_states(
       const maxon_epos_msgs::MotorStatesConstPtr &motor_states) {
-    std::string str_motor_states = "";
-    for (int i = 0; i < (int)motor_states->states.size(); i++) {
-
-      str_motor_states += motor_states->states[i].motor_name;
-      str_motor_states += ": ";
-      str_motor_states += std::to_string(motor_states->states[i].position);
-      str_motor_states += "\n";
-    }
-    // ROS_INFO(str_motor_states.c_str());
-
     // store position value to local member
     data->motors.steer_pos.Out = RAD2DEG(motor_states->states[0].position);
     data->motors.rear_pos.Out = RAD2DEG(motor_states->states[1].position);
@@ -334,9 +330,6 @@ private:
       }
       data->clutch.out = recv;
     } else {
-    }
-    else
-    {
       ROS_WARN("%s", clutch_recv->errorString().toStdString().c_str());
     }
     return;
@@ -367,8 +360,9 @@ int main(int argc, char **argv) {
 
   signal(SIGINT, SignalHander);
 
-  ros::Rate rate(10);
-  ros::Duration shutdown_wait(2.0);//(sec)
+  ros::Rate rate(5);
+  ros::Duration shutdown_wait(5.0); //(sec)
+
   while (1) {
     ROS_DEBUG("%f", ros::Time::now().toSec());
 

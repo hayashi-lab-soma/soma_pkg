@@ -59,7 +59,7 @@ int Starting::_Enter(soma_atv_driver::Data_t *data)
 
   //rear brake open (slowly)
   data->motors.rear_vel.In = (long)data->motors.rear_brake_starting_state_low_rpm; //change max rpm of rear brake
-  data->motors.rear_pos.In = data->motors.rear_brake.Min;                          //open rear brake
+  // data->motors.rear_pos.In = data->motors.rear_brake.Min;                          //open rear brake
   //front open
   data->motors.front_pos.In = data->motors.front_brake.Min; //open front brake
   //throttle to regular
@@ -75,7 +75,7 @@ int Starting::_Enter(soma_atv_driver::Data_t *data)
  */
 int Starting::_Process(soma_atv_driver::Data_t *data)
 {
-  //wait for clutch state changed
+  //wait for clutch state changed/
   if (data->clutch.out != data->clutch.in)
     return 0;
 
@@ -86,12 +86,12 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
 
   T += data->dt; //spent time measurement
 
-  if (T >= 2.0)
+  if (T >= 1.0)
   {
     if (abs(data->wheel_vel) <= 0.1)
     {
       //increase throttle position
-      data->motors.throttle_pos.In = data->motors.throttle_pos.Out + 0.3;
+      data->motors.throttle_pos.In = data->motors.throttle_pos.Out + 0.5;
     }
   }
   return 0;
@@ -106,6 +106,5 @@ int Starting::_Exit(soma_atv_driver::Data_t *data)
 {
   //change max velocity to default
   data->motors.rear_vel.In = 3500;
-
   T = 0.0;
 }

@@ -60,5 +60,5 @@ soma_link 2 lidarのtfを設定してください
 	</include>
 	-->
 	<!-- tf soma2lidar -->
-	<node pkg="tf2_ros" type="static_transform_publisher" name="lidar2base" args="$(arg tfargs) $(arg base_link) $(arg frame_id)" />
+	<!-- <node pkg="tf2_ros" type="static_transform_publisher" name="lidar2base" args="$(arg tfargs) $(arg base_link) $(arg frame_id)" /> -->
 </launch>
