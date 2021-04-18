@@ -34,6 +34,6 @@
 	<joint name="camera_f_joint" type="fixed">
 		<parent link="base_link" />
 		<child link="camera_f_depth_optical_frame" />
-		<origin xyz="0.85 0 0.8" rpy="0.0 0.2617 0.0" />
+		<origin xyz="0.85 0.1 0.8" rpy="0.0 0.2617 0.0" />
 	</joint>
 </robot>

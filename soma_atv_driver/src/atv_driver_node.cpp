@@ -186,7 +186,13 @@ private:
     //calculate velocity errors
     data->ev[2] = data->ev[1];                             //error(t-2)
     data->ev[1] = data->ev[0];                             //error(t-1)
-    data->ev[0] = data->target_vel - abs(data->wheel_vel); //error(t)
+    if(abs(data->u_in.v) >= 0.001){
+      data->ev[0] = data->target_vel - abs(data->wheel_vel); //error(t)
+    }
+    else{
+        data->ev[0] = 0.0 - abs(data->wheel_vel); //error(t)
+    }
+
     //====================================================================
 
     //====================================================================
@@ -278,6 +284,7 @@ private:
   {
     // set commands
     data->u_in.v = cmd_vel->linear.x;
+
     data->u_in.phi = angular_vel_to_steering_angle(
         cmd_vel->linear.x,
         cmd_vel->angular.z); // defined in definitions.h
