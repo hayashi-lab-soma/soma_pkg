@@ -177,11 +177,15 @@ private:
   //   return;
   // }
 
-  /**
-   * @brief
-   *
-   * @param e
-   */
+  /*!
+  * @fn main
+  * @brief 
+  * main timer call back function
+  * @param
+  * - e: ros::TimerEvent
+  * @return
+  * none
+  */
   void main(const ros::TimerEvent &e)
   {
     //====================================================================
@@ -194,9 +198,8 @@ private:
     }
     else
     {
-      data->ev[0] = 0.0 - abs(data->wheel_vel); // error(t)
+      data->ev[0] = 0.0 - abs(data->wheel_vel); // error(t) at stop cmd
     }
-
     //====================================================================
 
     //====================================================================
@@ -204,6 +207,8 @@ private:
     recv_clutch_state(data);
     //====================================================================
 
+    //====================================================================
+    // Finite State Machine
     if (data->state == State::Init)
     {
       states[State::Stop]->Enter(data);
@@ -388,7 +393,6 @@ int main(int argc, char **argv)
   // ros::waitForShutdown();
 
   ros::Rate rate(5);
-  ros::Duration shutdown_wait(5.0); //(sec)
 
   while (1)
   {
@@ -398,7 +402,9 @@ int main(int argc, char **argv)
     {
       driver.shutdown();
       ros::spinOnce();
-      shutdown_wait.sleep();
+
+      ros::Duration _wait(5.0);
+      _wait.sleep();
       break;
     }
     ros::spinOnce();

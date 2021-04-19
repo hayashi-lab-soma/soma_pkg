@@ -108,7 +108,7 @@
 		<remap from="points" to="depth/points" />
 	</node>
 	<!-- filtering -->
-	<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid  $(arg manager)">
+	<node pkg="nodelet" type="nodelet" name="vg" args="load pcl/VoxelGrid  $(arg manager)">
 		<remap from="~input" to="depth/points" />
 		<!-- <remap from="~output" to="/depth/filtered_points" /> -->
 		<param name="input_frame" value="base_link" />
@@ -119,7 +119,7 @@
 		<param name="filter_limit_negative" value="false" />
 	</node>
 	<node pkg="nodelet" type="nodelet" name="sor_filter" args="load pcl/StatisticalOutlierRemoval $(arg manager)">
-		<remap from="~input" to="vg_filter/output" />
+		<remap from="~input" to="vg/output" />
 		<remap from="~output" to="depth/filtered_points" />
 		<param name="input_frame" value="base_link" />
 		<param name="filter_limit_min" value="-10.0" />
