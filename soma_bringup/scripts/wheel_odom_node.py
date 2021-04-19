@@ -63,8 +63,8 @@ def timer_callback(event):
   # odom.pose.pose.position.z = 0.0  # 2D
   # q = quaternion_from_euler(0.0, 0.0, theta)
   # odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
-  odom.twist.twist.linear.x = _x
-  odom.twist.twist.linear.y = _y
+  odom.twist.twist.linear.x = wheel_vel
+  # odom.twist.twist.linear.y = _y
   q = quaternion_from_euler(0.0, 0.0, _theta)
   odom.twist.twist.angular = Quaternion(q[0], q[1], q[2], q[3])
   # set coveriance

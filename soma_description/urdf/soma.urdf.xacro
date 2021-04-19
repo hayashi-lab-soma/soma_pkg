@@ -50,7 +50,7 @@
 	<origin xyz="0.85 0.1 0.61" rpy="0.0 0.2617 0.0" />
 	</joint>
 	-->
-	<sensor_d435 parent="base_link" name="camera_f_link">
+	<sensor_d435 parent="base_link" name="camera_f">
 		<origin xyz="0.85 0.1 0.61" rpy="0.0 0.2617 0.0" />
 	</sensor_d435>
 </robot>

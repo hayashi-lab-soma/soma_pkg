@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <launch>
+	<!-- launch wheel odometry node -->
 	<include file="$(find soma_bringup)/launch/wheel_odometry.launch">
 	</include>
+	<!-- launch ekf sensor fusion node -->
 	<node name="ekf_gyrodometry" pkg="robot_localization" type="ekf_localization_node">
 		<rosparam command="load" file="$(find soma_bringup)/config/ekf_gyrodometry.yaml" />
 	</node>
