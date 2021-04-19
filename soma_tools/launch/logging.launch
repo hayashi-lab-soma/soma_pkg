@@ -13,7 +13,7 @@
 	<arg if="$(arg is_lidar_topics)" name="lidar_topics" default="/velodyne_points /filtered_points" doc="" />
 	<arg unless="$(arg is_lidar_topics)" name="lidar_topics" default="" doc="" />
 	<!-- camera topics -->
-	<arg if="$(arg is_camera_topics)" name="camera_topics" default="/camera_f/color/image_raw /camera_f/color/camera_info /camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw /camera_f/depth/camera_info /depth/color/points /color/image_raw /depth/image_rect_raw /color/camera_info /depth/camera_info" />
+	<arg if="$(arg is_camera_topics)" name="camera_topics" default="/camera_f/color/image_raw /camera_f/color/camera_info /camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw /camera_f/depth/camera_info /camera_f/depth/color/points /camera_f/depth/filtered_points /camera_r/color/image_raw /camera_r/color/camera_info /camera_r/depth/image_rect_raw /camera_r/aligned_depth_to_color/image_raw /camera_r/depth/camera_info /camera_r/depth/color/points /camera_r/depth/filtered_points" />
 	<arg unless="$(arg is_camera_topics)" name="camera_topics" default="" />
 	<!-- IMU topics -->
 	<arg if="$(arg is_imu_topics)" name="imu_topics" default="/imu/data" doc="" />

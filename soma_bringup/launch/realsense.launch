@@ -122,8 +122,8 @@
 		<remap from="~input" to="vg_filter/output" />
 		<remap from="~output" to="depth/filtered_points" />
 		<param name="input_frame" value="base_link" />
-		<!-- <param name="filter_limit_min" value="-10.0" /> -->
-		<!-- <param name="filter_limit_max" value="10.0" /> -->
+		<param name="filter_limit_min" value="-10.0" />
+		<param name="filter_limit_max" value="10.0" />
 		<param name="mean_k" value="10" />
 		<param name="stddev" value="0.01" />
 	</node>
