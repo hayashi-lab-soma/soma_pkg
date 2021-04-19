@@ -2,6 +2,6 @@
 <launch>
 	<node name="local_costmap" pkg="soma_samples" type="sample_local_costmap">
 		<rosparam command="load" file="$(find soma_samples)/config/sample_local_costmap_realsense_camera.yaml" />
-		<param name="costmap_ns" value="local_costmap"/>
+		<param name="costmap_ns" value="local_costmap" />
 	</node>
 </launch>

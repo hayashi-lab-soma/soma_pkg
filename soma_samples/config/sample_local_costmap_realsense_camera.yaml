@@ -1,19 +1,21 @@
 local_costmap:
   plugins:
     - {name: obstacle_layer, type: 'costmap_2d::ObstacleLayer'}
+    - {name: inflation_layer, type: 'costmap_2d::InflationLayer'}
   global_frame: lidar_odom
   robot_base_frame: base_link
   rolling_window: true
   width: 15
   height: 15
-  resolution: 0.2
-  update_frequency: 3.0
-  publish_frequency: 3.0
+  resolution: 0.1
+  update_frequency: 5.0
+  publish_frequency: 5.0
   always_send_full_costmap: true
   transform_tolerance: 2.0
 
   obstacle_layer:
-    observation_sources: camera_f camera_r lidar
+    # observation_sources: camera_f camera_r camera_f_scan
+    observation_sources: camera_r camera_f_scan lidar
     camera_f:
       sensor_frame: base_link
       topic: /camera_f/depth/filtered_points
@@ -22,21 +24,29 @@ local_costmap:
       raytrace_range: 7.5
       min_obstacle_height: 0.5
       max_obstacle_height: 2.0
+    camera_f_scan:
+      sensor_frame: base_link
+      topic: /camera_f/scan
+      data_type: LaserScan
+      obstacle_range: 7.0
+      raytrace_range: 7.5
     camera_r:
       sensor_frame: base_link
       topic: /camera_r/depth/filtered_points
       data_type: PointCloud2
-      obstacle_range: 7.0
-      raytrace_range: 7.5
+      obstacle_range: 5.0
+      raytrace_range: 5.5
       min_obstacle_height: 0.5
       max_obstacle_height: 1.0
     lidar:
       sensor_frame: base_link
       topic: /velodyne_points
       data_type: PointCloud2
-      obstacle_range: 7.0
-      raytrace_range: 7.5
+      obstacle_range: 8.0
+      raytrace_range: 8.5
       min_obstacle_height: 0.5
       max_obstacle_height: 2.0
 
-
+  inflation_layer:
+    inflation_radius: 0.5
+    cost_scaling_factor: 1.0
