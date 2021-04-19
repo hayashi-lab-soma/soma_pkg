@@ -7,7 +7,7 @@
 	<arg name="tf_prefix" default="camera" />
 	<arg name="external_manager" default="false" />
 	<arg name="manager" default="realsense2_camera_manager" />
-	<arg name="base_frame_id" default="camera_link" />
+	<arg name="base_frame_id" default="$(arg tf_prefix)_link" />
 	<arg name="fisheye_width" default="640" />
 	<arg name="fisheye_height" default="480" />
 	<arg name="enable_fisheye" default="false" />
@@ -96,4 +96,35 @@
 		<arg name="publish_odom_tf" value="$(arg publish_odom_tf)" />
 		<arg name="allow_no_texture_points" value="$(arg allow_no_texture_points)" />
 	</include>
+	<!--  -->
+	<!-- launch nodelet manager -->
+	<!-- <node pkg="nodelet" type="nodelet" name="realsense_manager" args="manager">
+		<arg name="num_worker_threads" default="4"/>
+	</node> -->
+	<!-- launch depth image to point cloud xzy -->
+	<node name="depth_to_point_cloud" pkg="nodelet" type="nodelet" args="load depth_image_proc/point_cloud_xyz $(arg manager)">
+		<remap from="camera_info" to="depth/camera_info" />
+		<remap from="image_rect" to="depth/image_rect_raw" />
+		<remap from="points" to="depth/points" />
+	</node>
+	<!-- filtering -->
+	<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid  $(arg manager)">
+		<remap from="~input" to="depth/points" />
+		<!-- <remap from="~output" to="/depth/filtered_points" /> -->
+		<param name="input_frame" value="base_link" />
+		<param name="filter_field_name" value="z" />
+		<param name="filter_limit_min" value="-10.0" />
+		<param name="filter_limit_max" value="10.0" />
+		<param name="leaf_size" value="0.03" />
+		<param name="filter_limit_negative" value="false" />
+	</node>
+	<node pkg="nodelet" type="nodelet" name="sor_filter" args="load pcl/StatisticalOutlierRemoval $(arg manager)">
+		<remap from="~input" to="vg_filter/output" />
+		<remap from="~output" to="depth/filtered_points" />
+		<param name="input_frame" value="base_link" />
+		<!-- <param name="filter_limit_min" value="-10.0" /> -->
+		<!-- <param name="filter_limit_max" value="10.0" /> -->
+		<param name="mean_k" value="10" />
+		<param name="stddev" value="0.01" />
+	</node>
 </launch>

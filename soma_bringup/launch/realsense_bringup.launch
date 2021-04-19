@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="enable_front" default="true"/>
+  <arg name="enable_rear" default="true"/>
+  <group if="$(arg enable_front)" ns="camera_f">
+    <include file="$(find soma_bringup)/launch/realsense.launch">
+      <arg name="serial_no" value="939622073512" />
+      <arg name="tf_prefix" value="camera_f" />
+    </include>
+  </group>
+  <group if="$(arg enable_rear)" ns="camera_r">
+    <include file="$(find soma_bringup)/launch/realsense.launch">
+      <arg name="serial_no" value="843112071843" />
+      <arg name="tf_prefix" value="camera_r" />
+    </include>
+  </group>
+</launch>

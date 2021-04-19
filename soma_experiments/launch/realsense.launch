@@ -4,10 +4,10 @@
 	<arg name="usb_port_id" default="" />
 	<arg name="device_type" default="" />
 	<arg name="json_file_path" default="" />
-	<arg name="tf_prefix" default="camera_f" />
+	<arg name="tf_prefix" default="" />
 	<arg name="external_manager" default="false" />
 	<arg name="manager" default="realsense2_camera_manager" />
-	<arg name="base_frame_id" default="camera_f_link" />
+	<arg name="base_frame_id" default="camera_f" />
 	<!--
 	arguments for frame parameters
 	fisheye,depth,infra,color
