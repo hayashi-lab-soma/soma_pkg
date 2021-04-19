@@ -6,17 +6,37 @@ local_costmap:
   rolling_window: true
   width: 15
   height: 15
-  resolution: 0.3
+  resolution: 0.2
   update_frequency: 3.0
   publish_frequency: 3.0
   always_send_full_costmap: true
   transform_tolerance: 2.0
 
   obstacle_layer:
-    observation_sources: realsense_camera
-    realsense_camera:
+    observation_sources: camera_f camera_r lidar
+    camera_f:
       sensor_frame: base_link
-      topic: /depth/points
+      topic: /camera_f/depth/filtered_points
       data_type: PointCloud2
+      obstacle_range: 7.0
+      raytrace_range: 7.5
+      min_obstacle_height: 0.5
+      max_obstacle_height: 2.0
+    camera_r:
+      sensor_frame: base_link
+      topic: /camera_r/depth/filtered_points
+      data_type: PointCloud2
+      obstacle_range: 7.0
+      raytrace_range: 7.5
+      min_obstacle_height: 0.5
+      max_obstacle_height: 1.0
+    lidar:
+      sensor_frame: base_link
+      topic: /velodyne_points
+      data_type: PointCloud2
+      obstacle_range: 7.0
+      raytrace_range: 7.5
+      min_obstacle_height: 0.5
+      max_obstacle_height: 2.0
 
 
