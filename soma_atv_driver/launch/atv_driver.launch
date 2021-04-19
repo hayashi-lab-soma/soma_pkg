@@ -16,20 +16,20 @@
 		<remap from="/wheel_vel" to="$(arg wheel_vel_topic)" />
 		<remap from="/motor_states" to="$(arg motor_states_topic)" />
 		<!-- control parameters -->
-		<param name="target_vel" value="0.8" />
+		<param name="target_vel" value="0.5" />
 		<param name="steering_pos_min" value="-28.0" />
 		<param name="steering_pos_max" value="28.0" />
 		<param name="rear_brake_pos_min" value="0.0" />
 		<param name="rear_brake_pos_max" value="9.0" />
 		<param name="front_brake_pos_min" value="0.0" />
-		<param name="front_brake_pos_max" value="15.0" />
+		<param name="front_brake_pos_max" value=".0" />
 		<param name="throttle_pos_min" value="0.0" />
 		<param name="throttle_pos_max" value="13.0" />
 		<!-- starting state parameters -->
 		<param name="rear_brake_starting_state_low_rpm" value="100" />
-		<param name="throttle_regular" value="8.0" />
+		<param name="throttle_regular" value="7.3" />
 		<!--  -->
-		<param name="P" value="0.6" />
-		<param name="D" value="0.1" />
+		<param name="P" value="1.0" />
+		<param name="D" value="0.5" />
 	</node>
 </launch>

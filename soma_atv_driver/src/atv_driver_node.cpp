@@ -382,29 +382,29 @@ int main(int argc, char **argv)
 
   signal(SIGINT, SignalHander);
 
-  ros::AsyncSpinner spinner(0);
-  spinner.start();
+  // ros::AsyncSpinner spinner(0);
+  // spinner.start();
   ATVDriver driver;
-  ros::waitForShutdown();
+  // ros::waitForShutdown();
 
-  // ros::Rate rate(5);
-  // ros::Duration shutdown_wait(5.0); //(sec)
+  ros::Rate rate(5);
+  ros::Duration shutdown_wait(5.0); //(sec)
 
-  // while (1)
-  // {
-  //   ROS_DEBUG("%f", ros::Time::now().toSec());
+  while (1)
+  {
+    ROS_DEBUG("%f", ros::Time::now().toSec());
 
-  //   if (isShutdown)
-  //   {
-  //     driver.shutdown();
-  //     ros::spinOnce();
-  //     shutdown_wait.sleep();
-  //     break;
-  //   }
-  //   ros::spinOnce();
-  //   rate.sleep();
-  //   // loop_duration.sleep();
-  // }
+    if (isShutdown)
+    {
+      driver.shutdown();
+      ros::spinOnce();
+      shutdown_wait.sleep();
+      break;
+    }
+    ros::spinOnce();
+    rate.sleep();
+    // loop_duration.sleep();
+  }
 
   return 0;
 }
