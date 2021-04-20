@@ -54,7 +54,7 @@
 		<child link="camera_r_mount_link" />
 		<origin xyz="-0.2 0.0 0.35" rpy="0.0 0.0 -3.1415" />
 	</joint>
-	<sensor_d435 parent="base_link" name="camera_r">
+	<sensor_d435 parent="camera_r_mount_link" name="camera_r">
 		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
 	</sensor_d435>
 </robot>

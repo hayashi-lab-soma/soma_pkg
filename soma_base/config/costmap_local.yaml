@@ -1,0 +1,19 @@
+global_frame: lidar_odom
+rolling_window: true
+robot_base_frame: base_link
+update_frequency: 4.0
+publish_frequency: 3.0
+transform_tolerance: 0.5
+resolution: 0.05
+
+plugins:
+  - {name: obstacle_layer, type: "costmap_2d::ObstacleLayer"}
+  - {name: inflation_layer, type: "costmap_2d::InflationLayer"}
+
+obstacles_laser:
+  observation_sources: camera_f_laser camera_r_laser
+  camera_f_laser: {data_type: LaserScan, clearing: true, marking: true, topic: /camera_f/scan, inf_is_valid: true}
+  camera_r_laser: {data_type: LaserScan, clearing: true, marking: true, topic: /camera_r/scan, inf_is_valid: true}
+
+inflation:
+  inflation_radius: 1.0

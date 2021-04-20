@@ -36,7 +36,7 @@
 	<arg name="align_depth" default="false" />
 	<arg name="publish_tf" default="true" />
 	<arg name="tf_publish_rate" default="0" />
-	<arg name="filters" default="" />
+	<arg name="filters" default="disparity,spatial,decimation" />
 	<arg name="clip_distance" default="6.0" doc="important!! for CPU load decreasing" />
 	<arg name="linear_accel_cov" default="0.01" />
 	<arg name="initial_reset" default="false" />
@@ -45,6 +45,8 @@
 	<arg name="calib_odom_file" default="" />
 	<arg name="publish_odom_tf" default="false" />
 	<arg name="allow_no_texture_points" default="false" />
+	<arg name="scan_frame_id" default="base_link" doc=""/>
+
 	<!--
 	launch realsense camera nodelet
 	...
@@ -127,4 +129,29 @@
 		<param name="mean_k" value="10" />
 		<param name="stddev" value="0.01" />
 	</node>
+	<!-- 
+		point cloud to laser scan
+		...
+	 -->
+	<node name="to_laserscan" pkg="nodelet" type="nodelet" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet $(arg manager)" output="log">
+		<remap from="cloud_in" to="depth/filtered_points" />
+		<remap from="scan" to="scan" />
+		<param name="target_frame" value="$(arg scan_frame_id)" />
+		<!--  -->
+		<param name="tolerance" value="1.0" />
+		<param name="min_height" value="0.5" />
+		<param name="max_height" value="2.0" />
+		<!-- <param name="angle_min" value="-0.7592182246175333" />
+		<param name="angle_max" value="0.7592182246175333" /> -->
+		<param name="angle_min" value="-3.14159265" />
+		<param name="angle_max" value="3.14159265" />
+		<!-- <param name="angle_increment" value="0.005" /> -->
+		<param name="angle_increment" value="0.001" />
+		<param name="scan_time" value="0.3333" />
+		<param name="range_min" value="0.2" />
+		<param name="range_max" value="6.0" />
+		<param name="use_inf" value="true" />
+		<param name="concurrency_level" value="1" />
+	</node>
+
 </launch>

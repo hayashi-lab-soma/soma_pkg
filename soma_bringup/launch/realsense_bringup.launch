@@ -6,12 +6,15 @@
     <include file="$(find soma_bringup)/launch/realsense.launch">
       <arg name="serial_no" value="939622073512" />
       <arg name="tf_prefix" value="camera_f" />
+      <arg name="scan_frame_id" value="camera_f_mount_link"/>
+
     </include>
   </group>
   <group if="$(arg enable_rear)" ns="camera_r">
     <include file="$(find soma_bringup)/launch/realsense.launch">
       <arg name="serial_no" value="843112071843" />
       <arg name="tf_prefix" value="camera_r" />
+      <arg name="scan_frame_id" value="camera_r_mount_link"/>
     </include>
   </group>
 </launch>
