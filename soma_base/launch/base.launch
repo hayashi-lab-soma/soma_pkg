@@ -1,9 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="no_static_map" default="true"/>
-
+	<!-- arguments -->
+	<arg name="no_static_map" default="true" />
 	<arg name="base_global_planner" default="navfn/NavfnROS" />
-	<arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS" />
+	<!-- <arg name="base_local_planner" default="dwa_local_planner/DWAPlannerROS" /> -->
+	<arg name="base_local_planner" default="teb_local_planner/TebLocalPlannerROS" />
+	<!--
+	...
+	...
+	-->
 	<node name="soma_base" pkg="move_base" type="move_base" output="screen" respawn="false" respawn_delay="0">
 		<!-- planner set -->
 		<param name="base_global_planner" value="$(arg base_global_planner)" />
@@ -12,14 +17,14 @@
 		<!-- <rosparam file="$(find soma_base)/config/costmap_common.yaml" command="load" ns="global_costmap" /> -->
 		<!-- <rosparam file="$(find soma_base)/config/costmap_common.yaml" command="load" ns="local_costmap" /> -->
 		<!--  -->
-		<rosparam file="$(find soma_base)/config/planner.yaml" command="load"/>
+		<rosparam file="$(find soma_base)/config/planner.yaml" command="load" />
 		<!--  -->
 		<rosparam file="$(find soma_base)/config/costmap_local.yaml" command="load" ns="local_costmap" />
-		<param name="local_costmap/width" value="15.0"/>
-		<param name="local_costmap/height" value="15.0"/>
+		<param name="local_costmap/width" value="15.0" />
+		<param name="local_costmap/height" value="15.0" />
 		<!--  -->
-		<rosparam file="$(find soma_base)/config/costmap_global_laser.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)"/>
-		<param name="global_costmap/width" value="100.0" if="$(arg no_static_map)"/>
-		<param name="global_costmap/height" value="100.0" if="$(arg no_static_map)"/>
+		<rosparam file="$(find soma_base)/config/costmap_global_laser.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)" />
+		<param name="global_costmap/width" value="100.0" if="$(arg no_static_map)" />
+		<param name="global_costmap/height" value="100.0" if="$(arg no_static_map)" />
 	</node>
 </launch>
