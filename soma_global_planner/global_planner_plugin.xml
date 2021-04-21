@@ -1,0 +1,5 @@
+<library path="lib/libgraph_based_planner">
+  <class name="graph_based_planner/GraphBasedPlanner" type="graph_based_planner::GraphBasedPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>soma graph based planner</description>
+  </class>
+</library>
