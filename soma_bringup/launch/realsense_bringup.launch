@@ -7,6 +7,8 @@
       <arg name="serial_no" value="939622073512" />
       <arg name="tf_prefix" value="camera_f" />
       <arg name="scan_frame_id" value="camera_f_mount_link"/>
+      <arg name="scan_min_height" value="-0.5"/>
+      <arg name="scan_max_height" value="0.5"/>
 
     </include>
   </group>
@@ -15,6 +17,8 @@
       <arg name="serial_no" value="843112071843" />
       <arg name="tf_prefix" value="camera_r" />
       <arg name="scan_frame_id" value="camera_r_mount_link"/>
+      <arg name="scan_min_height" value="-0.3"/>
+      <arg name="scan_max_height" value="1.0"/>
     </include>
   </group>
 </launch>
