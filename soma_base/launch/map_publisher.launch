@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+	<!--
+	publish 2D static map using .pgm file
+	We should make and modify the pgm file to represent the 2D costmap by hand ...
+	-->
+	<arg name="map_file" default="$(find soma_base)/maps/mirais_map.yaml" />
+	<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+	<!--  -->
+	<!--
+	- publish 3D map point cloud for global localization
+	- publish 3D trees point cloud for global localization
+	...
+	-->
+	<!-- <arg name="map_pcd" default="$(find soma_base)/maps/Mirais-3DMap-imu-non-ground-adjusted.pcd" /> -->
+	<arg name="map_pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-cliped.pcd" />
+	<!-- <arg name="map_pcd" default="$(find soma_base)/maps/Mirais-3DMap-imu-raw.pcd" /> -->
+	<arg name="treemap_pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-non-ground-adjusted.pcd" />
+	<!--  -->
+	<node if="false" name="map_points_publisher" pkg="pcl_ros" type="pcd_to_pointcloud">
+		<remap from="/cloud_pcd" to="/map_points" />
+		<param name="file_name" value="$(arg map_pcd_file)" />
+		<param name="interval" value="0" />
+		<param name="frame_id" value="map" />
+		<param name="latch" value="true" />
+	</node>
+	<node if="true" pkg="nodelet" type="nodelet" name="globalmap_server_nodelet" args="standalone hdl_localization/GlobalmapServerNodelet">
+		<remap from="globalmap" to="map_points" />
+		<param name="globalmap_pcd" value="$(arg map_pcd_file)" />
+		<param name="convert_utm_to_local" value="false" />
+		<param name="downsample_resolution" value="0.01" />
+	</node>
+	<node name="treemap_points_publisher" pkg="pcl_ros" type="pcd_to_pointcloud">
+		<remap from="/cloud_pcd" to="/treemap_points" />
+		<param name="file_name" value="$(arg treemap_pcd_file)" />
+		<param name="interval" value="0" />
+		<param name="frame_id" value="map" />
+		<param name="latch" value="true" />
+	</node>
+	<arg name="enable_clustering" default="true" />
+	<node name="clustering" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl/EuclideanClustering" if="$(arg enable_clustering)">
+		<remap from="~input" to="/treemap_points" />
+		<param name="tolerance" value="0.6" />
+		<param name="min_size" value="10" />
+	</node>
+	<node name="cluster_decomposer" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl/ClusterPointIndicesDecomposerZAxis" if="$(arg enable_clustering)">
+		<remap from="~input" to="/treemap_points" />
+		<remap from="~target" to="clustering/output" />
+	</node>
+</launch>

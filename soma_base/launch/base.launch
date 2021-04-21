@@ -23,7 +23,8 @@
 		<param name="local_costmap/width" value="15.0" />
 		<param name="local_costmap/height" value="15.0" />
 		<!--  -->
-		<rosparam file="$(find soma_base)/config/costmap_global_laser.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)" />
+		<!-- <rosparam file="$(find soma_base)/config/costmap_global_laser.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)" /> -->
+		<rosparam file="$(find soma_base)/config/costmap_global_static.yaml" command="load" ns="global_costmap" if="$(arg no_static_map)" />
 		<param name="global_costmap/width" value="100.0" if="$(arg no_static_map)" />
 		<param name="global_costmap/height" value="100.0" if="$(arg no_static_map)" />
 	</node>
