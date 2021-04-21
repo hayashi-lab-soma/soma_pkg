@@ -6,6 +6,8 @@ update_frequency: 4.0
 publish_frequency: 3.0
 transform_tolerance: 0.5
 resolution: 0.05
+footprint: [[-0.2, 0.4], [1.2, 0.4], [1.4, 0.0], [1.2, -0.4], [-0.2, -0.4]]
+footprint_padding: 0.05
 
 plugins:
   - {name: obstacles_laser,           type: "costmap_2d::ObstacleLayer"}
@@ -21,6 +23,8 @@ obstacles_laser:
     inf_is_valid: true
     min_obstacle_height: 0.5
     max_obstacle_height: 2.5
+    obstacle_range: 30.0
+    raytrace_range: 35.0
 
 
 inflation:

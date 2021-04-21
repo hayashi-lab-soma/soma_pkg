@@ -34,7 +34,7 @@ int Starting::_Transition(soma_atv_driver::Data_t *data)
     //if input move direction was changed ... it's dangerous situation!
     return State::Braking;
   }
-  if (abs(data->wheel_vel) >= 0.1) //completed starting
+  if (abs(data->wheel_vel) > 0.1) //completed starting
   {
     return State::Travelling;
   }
@@ -84,14 +84,20 @@ int Starting::_Process(soma_atv_driver::Data_t *data)
   data->motors.front_pos.In = data->motors.front_brake.Min;     //open front brake
   data->motors.throttle_pos.In = data->motors.throttle_regular; //set throttle (deg)
 
-  T += data->dt; //spent time measurement
-
-  if (T >= 1.0)
+  if (abs(data->wheel_vel) <= 0.1)
   {
-    if (abs(data->wheel_vel) <= 0.1)
+
+    T += data->dt; //spent time measurement
+    // printf("%f\n", T);
+    if (T >= 1.0)
     {
+      printf("%f\n", T);
       //increase throttle position
-      data->motors.throttle_pos.In = data->motors.throttle_pos.Out + 0.5;
+      data->motors.throttle_pos.In = data->motors.throttle_pos.Out + 0.1;
+      data->motors.throttle_pos.In = std::min(data->motors.throttle_pos.In, data->motors.throttle.Max);
+    }
+    else{
+      data->motors.throttle_pos.In = data->motors.throttle_regular;
     }
   }
   return 0;
@@ -107,4 +113,5 @@ int Starting::_Exit(soma_atv_driver::Data_t *data)
   //change max velocity to default
   data->motors.rear_vel.In = 3500;
   T = 0.0;
+  data->motors.throttle_pos.In = data->motors.throttle_regular;
 }

@@ -44,10 +44,10 @@ private:
   // publihsers
   ros::Publisher pub_soma_status;
   ros::Publisher pub_motor_states;
-  ros::Publisher pub_steering_states;
-    ros::Publisher pub_rearbrake_states;
-      ros::Publisher pub_frontbrake_states;
-        ros::Publisher pub_throttle_states;
+  // ros::Publisher pub_steering_states;
+  //   ros::Publisher pub_rearbrake_states;
+  //     ros::Publisher pub_frontbrake_states;
+  //       ros::Publisher pub_throttle_states;
 
   // networks
   QUdpSocket *clutch_recv;
@@ -113,10 +113,10 @@ public:
     pub_soma_status = nh.advertise<soma_msgs::SOMAStatus>("/soma/status", 3);
     pub_motor_states = nh.advertise<maxon_epos_msgs::MotorStates>(
         "/soma/atv_driver/set_motor_states", 3);
-    pub_steering_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/steering/set_state",3);
-            pub_rearbrake_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/rear_brake/set_state",3);
-                    pub_frontbrake_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/front_brake/set_state",3);
-                            pub_throttle_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/throttle/set_state",3);
+    // pub_steering_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/steering/set_state",3);
+    //         pub_rearbrake_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/rear_brake/set_state",3);
+    //                 pub_frontbrake_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/front_brake/set_state",3);
+    //                         pub_throttle_states = nh.advertise<maxon_epos_msgs::MotorState>("/maxon_bringup/throttle/set_state",3);
     //============================================================
 
     //============================================================
@@ -298,16 +298,15 @@ private:
     pub_motor_states.publish(motor_cmd);
 
 
-
-    maxon_epos_msgs::MotorState steer_msg, rear_msg, front_msg, throttle_msg;
-    steer_msg.position = DEG2RAD(data->motors.steer_pos.In); // steering
-    steer_msg.velocity = data->motors.steer_vel.In;
-    rear_msg.position =         DEG2RAD(data->motors.rear_pos.In); // rear brake
-    rear_msg.velocity = data->motors.rear_vel.In;
-    front_msg.position = DEG2RAD(data->motors.front_pos.In); // front brake
-    front_msg.velocity = data->motors.front_vel.In;
-    throttle_msg.position = DEG2RAD(data->motors.throttle_pos.In); // throttle
-    throttle_msg.velocity = data->motors.throttle_vel.In;
+    // maxon_epos_msgs::MotorState steer_msg, rear_msg, front_msg, throttle_msg;
+    // steer_msg.position = DEG2RAD(data->motors.steer_pos.In); // steering
+    // steer_msg.velocity = data->motors.steer_vel.In;
+    // rear_msg.position =         DEG2RAD(data->motors.rear_pos.In); // rear brake
+    // rear_msg.velocity = data->motors.rear_vel.In;
+    // front_msg.position = DEG2RAD(data->motors.front_pos.In); // front brake
+    // front_msg.velocity = data->motors.front_vel.In;
+    // throttle_msg.position = DEG2RAD(data->motors.throttle_pos.In); // throttle
+    // throttle_msg.velocity = data->motors.throttle_vel.In;
 
     // pub_steering_states.publish(steer_msg);
     // pub_rearbrake_states.publish(rear_msg);
@@ -360,6 +359,7 @@ private:
   void callback_motor_states(
       const maxon_epos_msgs::MotorStatesConstPtr &motor_states)
   {
+    // ROS_INFO("maxon states callback");
     // store position value to local member
     data->motors.steer_pos.Out = RAD2DEG(motor_states->states[0].position);
     data->motors.rear_pos.Out = RAD2DEG(motor_states->states[1].position);

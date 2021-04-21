@@ -42,6 +42,7 @@ int Travelling::_Transition(soma_atv_driver::Data_t *data)
  */
 int Travelling::_Enter(soma_atv_driver::Data_t *data)
 {
+  data->motors.throttle_pos.In = data->motors.throttle_regular;
   return 0;
 }
 /**
@@ -65,7 +66,7 @@ int Travelling::_Process(soma_atv_driver::Data_t *data)
   data->motors.throttle_pos.In = std::min<double>(data->motors.throttle_pos.In, data->motors.throttle.Max);
 
   // if wheel velocity is higher
-  if (abs(data->wheel_vel) >= data->target_vel+0.3)
+  if (abs(data->wheel_vel) >= data->target_vel + 0.3)
   {
     data->motors.rear_pos.In = data->motors.rear_brake.Max;
   }
