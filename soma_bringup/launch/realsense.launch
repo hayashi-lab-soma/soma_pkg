@@ -36,8 +36,8 @@
 	<arg name="align_depth" default="false" />
 	<arg name="publish_tf" default="true" />
 	<arg name="tf_publish_rate" default="0" />
-	<arg name="filters" default="disparity,spatial,decimation" />
-	<arg name="clip_distance" default="6.0" doc="important!! for CPU load decreasing" />
+	<arg name="filters" default="disparity,spatial,decimation,temporal" />
+	<arg name="clip_distance" default="5.5" doc="important!! for CPU load decreasing" />
 	<arg name="linear_accel_cov" default="0.01" />
 	<arg name="initial_reset" default="false" />
 	<arg name="unite_imu_method" default="" />
@@ -46,6 +46,10 @@
 	<arg name="publish_odom_tf" default="false" />
 	<arg name="allow_no_texture_points" default="false" />
 	<arg name="scan_frame_id" default="base_link" doc=""/>
+	<arg name="scan_min_height" default="-0.5"/>
+	<arg name="scan_max_height" default="0.5"/>
+
+
 
 	<!--
 	launch realsense camera nodelet
@@ -139,8 +143,8 @@
 		<param name="target_frame" value="$(arg scan_frame_id)" />
 		<!--  -->
 		<param name="tolerance" value="1.0" />
-		<param name="min_height" value="0.5" />
-		<param name="max_height" value="2.0" />
+		<param name="min_height" value="$(arg scan_min_height)" />
+		<param name="max_height" value="$(arg scan_max_height)" />
 		<!-- <param name="angle_min" value="-0.7592182246175333" />
 		<param name="angle_max" value="0.7592182246175333" /> -->
 		<param name="angle_min" value="-3.14159265" />
