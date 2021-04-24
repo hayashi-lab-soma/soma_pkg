@@ -60,8 +60,8 @@
 		<param name="keyframe_delta_angle" value="1.0" />
 		<param name="keyframe_delta_time" value="3000.0" />
 		<param name="transform_thresholding" value="false" />
-		<param name="max_acceptable_trans" value="1.0" />
-		<param name="max_acceptable_angle" value="1.0" />
+		<param name="max_acceptable_trans" value="5.0" />
+		<param name="max_acceptable_angle" value="10.0" />
 		<param name="downsample_method" value="NONE" />
 		<param name="downsample_resolution" value="0.05" />
 		<!-- ICP, GICP, NDT, GICP_OMP, or NDT_OMP(recommended) -->

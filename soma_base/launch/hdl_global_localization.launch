@@ -6,27 +6,91 @@
   <arg name="invert_imu_gyro" default="false" />
   <arg name="use_global_localization" default="true" />
   <arg name="imu_topic" default="/imu/data" />
-  <arg name="enable_robot_odometry_prediction" default="false" />
+  <arg name="enable_robot_odometry_prediction" default="true" />
   <arg name="plot_estimation_errors" value="false" />
   <arg name="odom_child_frame_id" default="base_link" />
   <arg name="robot_odom_frame_id" default="lidar_odom" />
 
   <arg name="nodelet_manager" default="velodyne_nodelet_manager" doc="" />
-  <arg name="global_map_pcd" default="$(find soma_base)/maps/Mirais-3DMap-cliped.pcd" />
+  <!-- <arg name="global_map_pcd" default="$(find soma_base)/maps/Mirais-3DMap-cliped.pcd" /> -->
+	<!-- <arg name="map_pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-cliped.pcd" /> -->
+  	<arg name="map_pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-raw.pcd" />
+  <!--
+	prefiltering arguments
+	distance filter
+	down sampling (voxel grid)
+	-->
+  <arg name="use_distance_filter" default="true" />
+  <arg name="distance_near_thresh" default="0.1" />
+  <arg name="distance_far_thresh" default="20.0" />
+  <arg name="down_sampling_resolution" default="0.3" />
 
-  <!-- load global map in 3D -->
-  <node if="true" pkg="nodelet" type="nodelet" name="globalmap_server_nodelet" args="load hdl_localization/GlobalmapServerNodelet $(arg nodelet_manager)">
-    <param name="globalmap_pcd" value="$(arg global_map_pcd)" />
-    <param name="convert_utm_to_local" value="false" />
+  <!-- prefiltering_nodelet -->
+  <node name="prefiltering_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/PrefilteringNodelet $(arg nodelet_manager)">
+    <!-- <remap from="/velodyne_points" to="$(arg points_topic)" /> -->
+    <!-- in case base_link_frame is blank, mapping will be performed in the lidar frame -->
+    <param name="base_link_frame" value="$(arg odom_child_frame_id)" />
+    <!-- distance filter -->
+    <param name="use_distance_filter" value="$(arg use_distance_filter)" />
+    <param name="distance_near_thresh" value="$(arg distance_near_thresh)" />
+    <param name="distance_far_thresh" value="$(arg distance_far_thresh)" />
+    <!-- NONE, VOXELGRID, or APPROX_VOXELGRID -->
+    <param name="downsample_method" value="VOXELGRID" />
+    <param name="downsample_resolution" value="$(arg down_sampling_resolution)" />
+    <!-- NONE, RADIUS, or STATISTICAL -->
+    <param name="outlier_removal_method" value="RADIUS" />
+    <param name="statistical_mean_k" value="30" />
+    <param name="statistical_stddev" value="1.0" />
+    <param name="radius_radius" value="0.5" />
+    <param name="radius_min_neighbors" value="2" />
+  </node>
+  <!--  -->
+
+  <!-- Run scan_matching_odometry_nodelet in hdl_graph_slam pkg -->
+  <node name="scan_matching_odometry_nodelet" pkg="nodelet" type="nodelet" args="load hdl_graph_slam/ScanMatchingOdometryNodelet $(arg nodelet_manager)">
+    <param name="points_topic" value="/filtered_points" />
+    <param name="odom_frame_id" value="$(arg robot_odom_frame_id)" />
+    <param name="keyframe_delta_trans" value="1.0" />
+    <param name="keyframe_delta_angle" value="1.0" />
+    <param name="keyframe_delta_time" value="3000.0" />
+    <param name="transform_thresholding" value="false" />
+    <param name="max_acceptable_trans" value="1.0" />
+    <param name="max_acceptable_angle" value="1.0" />
+    <param name="downsample_method" value="NONE" />
     <param name="downsample_resolution" value="0.05" />
+    <!-- ICP, GICP, NDT, GICP_OMP, or NDT_OMP(recommended) -->
+    <param name="registration_method" value="GICP_OMP" />
+    <param name="transformation_epsilon" value="0.01" />
+    <param name="maximum_iterations" value="64" />
+    <param name="use_reciprocal_correspondences" value="false" />
+    <!--  -->
+    <param name="gicp_correspondence_randomness" value="20" />
+    <param name="gicp_max_optimizer_iterations" value="20" />
+    <!--  -->
+    <param name="ndt_resolution" value="5.0" />
+    <param name="ndt_num_threads" value="0" />
+    <param name="ndt_nn_search_method" value="DIRECT7" />
+    <!--  -->
+    <remap from="odom" to="/lidar_odom" />
   </node>
 
-  <include file="$(find hdl_global_localization)/launch/hdl_global_localization.launch" if="$(arg use_global_localization)" />
+  <include file="$(find hdl_global_localization)/launch/hdl_global_localization.launch" if="true" />
+
+  <node if="true" pkg="nodelet" type="nodelet" name="globalmap_server_nodelet" args="load hdl_localization/GlobalmapServerNodelet $(arg nodelet_manager)" output="screen">
+    <!-- <remap from="globalmap" to="/globalmap" /> -->
+    <param name="globalmap_pcd" value="$(arg map_pcd_file)" />
+    <param name="convert_utm_to_local" value="false" />
+    <param name="downsample_resolution" value="0.01" />
+  </node>
 
   <node if="true" pkg="nodelet" type="nodelet" name="hdl_localization_nodelet" args="load hdl_localization/HdlLocalizationNodelet $(arg nodelet_manager)" output="screen">
+    <!-- <remap from="globalmap" to="/globalmap" /> -->
     <remap from="/velodyne_points" to="$(arg points_topic)" />
+    <!-- <remap from="/velodyne_points" to="/filtered_points"/> -->
+    
     <remap from="/gpsimu_driver/imu_data" to="$(arg imu_topic)" />
-    <!-- odometry frame_id -->
+    <!-- odometry frame -->
+    <remap from="odom" to="/lidar_odom"/>
     <param name="odom_child_frame_id" value="$(arg odom_child_frame_id)" />
     <!-- imu settings -->
     <!-- during "cool_time", imu inputs are ignored -->
@@ -44,14 +108,14 @@
     <param name="ndt_neighbor_search_method" value="DIRECT7" />
     <!-- <param name="ndt_neighbor_search_method" value="DIRECT1" /> -->
     <param name="ndt_neighbor_search_radius" value="2.0" />
-    <param name="ndt_resolution" value="5.0" />
+    <param name="ndt_resolution" value="10.0" />
     <param name="downsample_resolution" value="0.1" />
     <!-- if "specify_init_pose" is true, pose estimator will be initialized with the following params -->
     <!-- otherwise, you need to input an initial pose with "2D Pose Estimate" on rviz" -->
     <param name="specify_init_pose" value="true" />
-    <param name="init_pos_x" value="9.0" />
-    <param name="init_pos_y" value="17.0" />
-    <param name="init_pos_z" value="1.0" />
+    <param name="init_pos_x" value="0.0" />
+    <param name="init_pos_y" value="0.0" />
+    <param name="init_pos_z" value="0.0" />
     <param name="init_ori_x" value="0.0" />
     <param name="init_ori_y" value="0.0" />
     <param name="init_ori_z" value="0.0" />
@@ -59,4 +123,6 @@
     <param name="use_global_localization" value="$(arg use_global_localization)" />
   </node>
 
+  <node name="plot_estimation_errors" pkg="hdl_lcalization" type="plot_status.py"/>
+  
 </launch>
