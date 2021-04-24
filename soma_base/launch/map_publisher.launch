@@ -24,12 +24,12 @@
 		<param name="frame_id" value="map" />
 		<param name="latch" value="true" />
 	</node>
-	<node if="true" pkg="nodelet" type="nodelet" name="globalmap_server_nodelet" args="standalone hdl_localization/GlobalmapServerNodelet">
-		<remap from="globalmap" to="map_points" />
+	<!-- <node if="true" pkg="nodelet" type="nodelet" name="globalmap_server_nodelet" args="standalone hdl_localization/GlobalmapServerNodelet">
+		<remap from="globalmap" to="/map_points" />
 		<param name="globalmap_pcd" value="$(arg map_pcd_file)" />
 		<param name="convert_utm_to_local" value="false" />
 		<param name="downsample_resolution" value="0.01" />
-	</node>
+	</node> -->
 	<node name="treemap_points_publisher" pkg="pcl_ros" type="pcd_to_pointcloud">
 		<remap from="/cloud_pcd" to="/treemap_points" />
 		<param name="file_name" value="$(arg treemap_pcd_file)" />
