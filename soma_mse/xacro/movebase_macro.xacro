@@ -8,6 +8,10 @@
 	</material>
 	<!--  -->
 	<macro name="wheel_macro" params="parent prefix xyz">
+		<property name="mass" value="0.5" />
+		<property name="radius" value="0.2" />
+		<property name="length" value="0.1" />
+		<!--  -->
 		<joint name="${prefix}_joint" type="continuous">
 			<origin xyz="${xyz}" rpy="${radians(-90)} 0.0 0.0" />
 			<parent link="${parent}" />
@@ -37,18 +41,21 @@
 		<link name="${prefix}_link">
 			<inertial>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-				<mass value="0.5" />
-				<inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+				<mass value="${mass}" />
+				<inertia ixx="${mass / 12 * (3 * radius ** 2 + length ** 2)}" ixy="0.0" 
+						 ixz="0.0" iyy="${mass / 12 * (3 * radius ** 2 + length ** 2)}" 
+						 iyz="0.0" izz="${mass / 2 * radius ** 2}" />
+				<!-- Old values: ixx = iyy = izz = 0.0001 -->
 			</inertial>
 			<visual>
 				<geometry>
-					<cylinder radius="0.2" length="0.1" />
+					<cylinder radius="${radius}" length="${length}" />
 				</geometry>
 				<material name="red" />
 			</visual>
 			<collision>
 				<geometry>
-					<cylinder radius="0.2" length="0.1" />
+					<cylinder radius="${radius}" length="${length}" />
 				</geometry>
 			</collision>
 		</link>
@@ -65,6 +72,11 @@
 	<!--  -->
 	<!--  -->
 	<macro name="body_macro" params="parent">
+		<property name="mass" value="1.0" />
+		<property name="width" value="0.6" />
+		<property name="depth" value="0.40" />
+		<property name="height" value="0.6" />
+		<!--  -->
 		<joint name="body_joint" type="fixed">
 			<parent link="${parent}" />
 			<child link="body_link" />
@@ -73,20 +85,23 @@
 		<link name="body_link">
 			<inertial>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-				<mass value="1.0" />
-				<inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+				<mass value="${mass}" />
+				<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0"
+						 ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" 
+						 iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 			<visual>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
-					<box size="0.6 0.40 0.6" />
+					<box size="${width} ${depth} ${height}" />
 				</geometry>
 				<material name="gray" />
 			</visual>
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
-					<box size="0.6 0.40 0.6" />
+					<box size="${width} ${depth} ${height}" />
 				</geometry>
 			</collision>
 		</link>
