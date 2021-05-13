@@ -1,17 +1,24 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dtw_robot">
+
+	<!-- Materials -->
 	<material name="gray">
 		<color rgba="0.5 0.5 0.5 2.5" />
 	</material>
 	<material name="red">
 		<color rgba="1.0 0.0 0.0 2.5" />
 	</material>
-	<!--  -->
+
+
+	<!-- Wheel macro -->
 	<macro name="wheel_macro" params="parent prefix xyz">
+		
+		<!-- General properties used for inertia computation -->
 		<property name="mass" value="0.5" />
 		<property name="radius" value="0.2" />
 		<property name="length" value="0.1" />
-		<!--  -->
+
+		<!-- Joint -->
 		<joint name="${prefix}_joint" type="continuous">
 			<origin xyz="${xyz}" rpy="${radians(-90)} 0.0 0.0" />
 			<parent link="${parent}" />
@@ -20,15 +27,21 @@
 			<limit velocity="12.0" effort="0.4" />
 			<dynamics damping="0.1" />
 		</joint>
+
+		<!-- Transmission -->
 		<transmission name="${prefix}_trans">
 			<type>
 				transmission_interface/SimpleTransmission
 			</type>
+		
+			<!-- Joint -->
 			<joint name="${prefix}_joint">
 				<hardwareInterface>
 					hardware_interface/VelocityJointInterface
 				</hardwareInterface>
 			</joint>
+
+			<!-- Actuator -->
 			<actuator name="${prefix}_motor">
 				<hardwareInterface>
 					hardware_interface/VelocityJointInterface
@@ -37,28 +50,44 @@
 					1
 				</mechanismReduction>
 			</actuator>
+			
 		</transmission>
+		<!-- END transmission -->
+
+		<!-- Link -->
 		<link name="${prefix}_link">
+			
+			<!-- Inertia part -->
 			<inertial>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<mass value="${mass}" />
+				
+				<!-- Inertia matrix of a cylinder -->
 				<inertia ixx="${mass / 12 * (3 * radius ** 2 + length ** 2)}" ixy="0.0" 
 						 ixz="0.0" iyy="${mass / 12 * (3 * radius ** 2 + length ** 2)}" 
 						 iyz="0.0" izz="${mass / 2 * radius ** 2}" />
 				<!-- Old values: ixx = iyy = izz = 0.0001 -->
 			</inertial>
+
+			<!-- Visual part -->
 			<visual>
 				<geometry>
 					<cylinder radius="${radius}" length="${length}" />
 				</geometry>
 				<material name="red" />
 			</visual>
+
+			<!-- Collision part -->
 			<collision>
 				<geometry>
 					<cylinder radius="${radius}" length="${length}" />
 				</geometry>
 			</collision>
+
 		</link>
+		<!-- END link -->
+
+		<!-- Gazebo additional parameters -->
 		<gazebo reference="${prefix}_link">
 			<material>
 				Gazebo/Red
@@ -68,29 +97,43 @@
 			<kp value="50000" />
 			<kd value="10" />
 		</gazebo>
+
 	</macro>
-	<!--  -->
-	<!--  -->
+	<!-- END wheel macro -->
+	
+
+	<!-- Body and ball macro -->
 	<macro name="body_macro" params="parent">
+
+		<!-- General properties used for inertia computation -->
 		<property name="mass" value="1.0" />
 		<property name="width" value="0.6" />
 		<property name="depth" value="0.40" />
 		<property name="height" value="0.6" />
-		<!--  -->
+		
+		<!-- Body joint -->
 		<joint name="body_joint" type="fixed">
 			<parent link="${parent}" />
 			<child link="body_link" />
 			<origin xyz="0 0 0.4" rpy="0.0 0.0 0.0" />
 		</joint>
+		
+		<!-- Body link -->
 		<link name="body_link">
+			
+			<!-- Inertial part -->
 			<inertial>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<mass value="${mass}" />
+				
+				<!-- Inertia matrix of a parallelepiped -->
 				<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0"
 						 ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" 
 						 iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
+			
+			<!-- Visual part -->
 			<visual>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
@@ -98,26 +141,36 @@
 				</geometry>
 				<material name="gray" />
 			</visual>
+			
+			<!-- Collision part -->
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
 					<box size="${width} ${depth} ${height}" />
 				</geometry>
 			</collision>
+
 		</link>
+		<!-- END link -->
+
+		<!-- Gazebo additional parameters -->
 		<gazebo reference="body_link">
 			<material>
 				Gazebo/Gray
 			</material>
 		</gazebo>
-		<!--  -->
-		<!--  -->
+
+		<!-- Ball joint -->
 		<joint name="ball_joint" type="fixed">
 			<parent link="${parent}" />
 			<child link="ball_link" />
 			<origin xyz="-0.14 0 0.1" rpy="0.0 0.0 0.0" />
 		</joint>
+
+		<!-- Ball link -->
 		<link name="ball_link">
+
+			<!-- Visual part -->
 			<visual>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
@@ -125,6 +178,8 @@
 				</geometry>
 				<material name="gray" />
 			</visual>
+
+			<!-- Collision part -->
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
@@ -132,7 +187,11 @@
 				</geometry>
 				<material name="gray" />
 			</collision>
+
 		</link>
+		<!-- END link -->
+
+		<!-- Gazebo aditionnal parameters -->
 		<gazebo reference="ball_link">
 			<material>
 				Gazebo/Gray
@@ -140,5 +199,8 @@
 			<mu1 value="0.5" />
 			<mu2 value="0.5" />
 		</gazebo>
+
 	</macro>
+	<!-- END body and ball macro -->
+
 </robot>
