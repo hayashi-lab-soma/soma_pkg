@@ -203,6 +203,7 @@
 	</macro>
 	<!-- END body and ball macro -->
 	
+
 	<!-- IMU macro -->
 	<macro name="imu_macro" params="parent">
 
@@ -216,7 +217,7 @@
 		<joint name="imu_joint" type="fixed">
 			<parent link="${parent}" />
 			<child link="imu_link" />
-			<origin xyz="-0.1 0 0.7" rpy="0.0 0.0 0.0" />
+			<origin xyz="0 0 1.45" rpy="0.0 0.0 0.0" />
 		</joint>
 		
 		<!-- Link -->
@@ -262,15 +263,15 @@
 	
 	</macro>
 
-	<gazebo>
-    	<plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
-      		<alwaysOn>true</alwaysOn>
-      		<bodyName>base_footprint</bodyName>
-      		<topicName>imu</topicName>
-      		<serviceName>imu_service</serviceName>
-      		<gaussianNoise>0.0</gaussianNoise>
-      		<updateRate>20.0</updateRate>
-    	</plugin>
-  	</gazebo>
+
+	<macro name="realsense_macro" params="parent prefix *origin">
+		<link name="camera_${prefix}_mount_link" />
+	
+		<joint name="camera_${prefix}_mount_joint" type="fixed">
+			<parent link="${parent}" />
+			<child link="camera_${prefix}_mount_link" />
+		</joint>
+
+	</macro>
 
 </robot>

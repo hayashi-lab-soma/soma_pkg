@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-	<param name="robot_description" command="$(find xacro)/xacro '$(find soma_description)/urdf/soma.urdf.xacro'" />
+	<arg name="model" default="$(find soma_description)/urdf/movebase_vlp16.xacro" />
+
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+	
 	<!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen" /> -->
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
 		<param name="use_tf_static" value="true" />
