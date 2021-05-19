@@ -19,8 +19,7 @@
 		<property name="length" value="0.1" />
 
 		<!-- Joint -->
-		<!--joint name="${prefix}_joint" type="continuous"-->
-		<joint name="${prefix}_joint" type="fixed">
+		<joint name="${prefix}_joint" type="continuous">
 			<origin xyz="${xyz}" rpy="${radians(-90)} 0.0 0.0" />
 			<parent link="${parent}" />
 			<child link="${prefix}_link" />

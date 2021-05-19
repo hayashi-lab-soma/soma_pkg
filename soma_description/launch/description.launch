@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="model" default="$(find soma_description)/urdf/movebase_vlp16.xacro" />
 
+	<!-- Arguments -->
+	<arg name="model" default="$(find soma_description)/urdf/movebase_vlp16.xacro" />
+	<arg name="gui" default="true" />
+
+	<!-- Parameters -->
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	
-	<!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" output="screen" /> -->
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
-		<param name="use_tf_static" value="true" />
-	</node>
+	<!-- Nodes -->
+	<node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  	<node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+	<node name="rviz" pkg="rviz" type="rviz" />
+
 </launch>
