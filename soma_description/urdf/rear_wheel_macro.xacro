@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dtw_robot">
+
+    <!-- Rear wheel macro -->
+	<macro name="rear_wheel_macro" params="parent prefix xyz">
+		
+		<!-- General properties used for inertia computation -->
+		<property name="mass" value="0.5" />
+		<property name="radius" value="0.2" />
+		<property name="length" value="0.1" />
+
+		<!-- Joint -->
+        <joint name="${prefix}_rear_wheel_rotate" type="continuous"> 
+            <parent link="${parent}"/> 
+            <child link="${prefix}_rear_wheel"/> 
+            <origin xyz="${xyz}" rpy="0 0 0" />  
+            <axis xyz="0 1 0" rpy="0 0 0" /> 
+            <limit effort="100" velocity="50"/> 
+            <dynamics damping="0.0" friction="0.0"/> 
+        </joint>
+
+		<!-- Link -->
+        <link name="${prefix}_rear_wheel"> 
+            
+            <!-- Collision part -->
+            <collision> 
+                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
+                <geometry> 
+                    <cylinder length="${length}" radius="${radius}"/> 
+                </geometry> 
+            </collision> 
+
+            <!-- Visual part -->
+            <visual> 
+                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
+                <geometry> 
+                    <cylinder length="${length}" radius="${radius}"/> 
+                </geometry> 
+                <material name="black"/> 
+            </visual> 		
+
+            <!-- Inertial part -->
+            <inertial> 
+                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
+                <mass value="${mass}"/> 
+                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" /> 
+            </inertial> 
+
+        </link>
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="${prefix}_rear_wheel">
+			<material>
+				Gazebo/Red
+			</material>
+			<mu1 value="2.5" />
+			<mu2 value="2.5" />
+			<kp value="50000" />
+			<kd value="10" />
+		</gazebo>
+
+	</macro>
+	<!-- END rear wheel macro -->
+
+</robot> 

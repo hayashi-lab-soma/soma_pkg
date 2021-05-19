@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+
+    <!-- Materials -->
+	<material name="gray">
+		<color rgba="0.5 0.5 0.5 2.5" />
+	</material>
+	<material name="red">
+		<color rgba="1.0 0.0 0.0 2.5" />
+	</material>
+
+    <!-- Cylinder inertia -->
+    <macro name="cylinder_inertia" params="mass radius height">
+        <inertia ixx="${mass / 12 * (3 * radius ** 2 + height ** 2)}" ixy="0.0" 
+				 ixz="0.0" iyy="${mass / 12 * (3 * radius ** 2 + height ** 2)}" 
+				 iyz="0.0" izz="${mass / 2 * radius ** 2}" />
+    </macro>
+
+    <!-- Parallelepiped inertia -->
+    <macro name="parallelepiped_inertia" params="mass width height depth">
+        <inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0"
+				 ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" 
+				 iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+    </macro>
+
+</robot>

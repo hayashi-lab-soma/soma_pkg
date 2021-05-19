@@ -2,7 +2,7 @@
 <launch>
 
 	<!-- Arguments -->
-	<arg name="model" default="$(find soma_description)/urdf/movebase_vlp16.xacro" />
+	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro" />
 	<arg name="gui" default="true" />
 
 	<!-- Parameters -->

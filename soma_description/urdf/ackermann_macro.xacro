@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+
+<!-- Based on ackermann_1.urdf in simple_ackermann repository:
+https://github.com/benwarrick/simple_ackermann.git -->
+
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+
+    <!-- Include files -->
+    <include filename="$(find soma_description)/urdf/utils.xacro" />
+    <include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
+    <include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
+
+
+	<!-- Ackermann macro -->
+	<macro name="ackermann_macro" params="parent">
+
+		<!-- General properties used for inertia computation -->
+		<property name="mass" value="1.0" />
+		<property name="width" value="0.6" />
+		<property name="depth" value="0.40" />
+		<property name="height" value="0.6" />
+		
+		<!-- Body joint -->
+		<joint name="body_joint" type="fixed">
+			<parent link="${parent}" />
+			<child link="body_link" />
+			<origin xyz="0 0 0.4" rpy="0.0 0.0 0.0" />
+		</joint>
+		
+		<!-- Body link -->
+		<link name="body_link">
+			
+			<!-- Inertial part -->
+			<inertial>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<mass value="${mass}" />
+				
+				<!-- Inertia matrix of a parallelepiped -->
+                <parallelepiped_inertia mass="${mass}" width="${width}" height="${height}" depth="${depth}" />
+				<!-- Old values: ixx = iyy = izz = 0.001 -->
+			</inertial>
+			
+			<!-- Visual part -->
+			<visual>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="${width} ${depth} ${height}" />
+				</geometry>
+				<material name="gray" />
+			</visual>
+			
+			<!-- Collision part -->
+			<collision>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="${width} ${depth} ${height}" />
+				</geometry>
+			</collision>
+
+		</link>
+		<!-- END link -->
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="body_link">
+			<material>
+				Gazebo/Gray
+			</material>
+		</gazebo>
+
+        <!-- Build wheels -->
+        <front_wheel_macro parent="body_link" prefix="left" xyz="0.2 0.3 -0.2" />
+        <front_wheel_macro parent="body_link" prefix="right" xyz="0.2 -0.3 -0.2" />
+        <rear_wheel_macro parent="body_link" prefix="left" xyz="-0.2 0.3 -0.2" />
+        <rear_wheel_macro parent="body_link" prefix="right" xyz="-0.2 -0.3 -0.2" />
+
+    </macro>
+
+</robot> 
