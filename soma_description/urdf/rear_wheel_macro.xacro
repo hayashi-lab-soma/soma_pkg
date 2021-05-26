@@ -5,9 +5,9 @@
 	<macro name="rear_wheel_macro" params="parent prefix xyz">
 		
 		<!-- General properties used for inertia computation -->
-		<property name="mass" value="0.5" />
-		<property name="radius" value="0.2" />
-		<property name="length" value="0.1" />
+		<property name="mass" value="12" />
+		<property name="radius" value="0.2286" />
+		<property name="length" value="0.0889" />
 
 		<!-- Joint -->
         <joint name="${prefix}_rear_wheel_rotate" type="continuous"> 

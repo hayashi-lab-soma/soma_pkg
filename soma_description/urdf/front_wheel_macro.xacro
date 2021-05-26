@@ -5,9 +5,9 @@
 	<macro name="front_wheel_macro" params="parent prefix xyz">
 		
 		<!-- General properties used for inertia computation -->
-		<property name="mass" value="0.5" />
-		<property name="radius" value="0.2" />
-		<property name="length" value="0.1" />
+		<property name="mass" value="12" />
+		<property name="radius" value="0.2286" />
+		<property name="length" value="0.0889" />
 
 		<!-- Joints -->
         <joint name="${prefix}_front_wheel_hinge" type="revolute"> 
@@ -36,7 +36,7 @@
             </joint>
             <actuator name="${prefix}_front_wheel_hinge_motor">
                 <hardwareInterface>EffortJointInterface</hardwareInterface>
-                <mechanicalReduction>1</mechanicalReduction>
+                <mechanicalReduction>10</mechanicalReduction>
             </actuator>
         </transmission>
 

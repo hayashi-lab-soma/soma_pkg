@@ -9,19 +9,12 @@
 	<arg name="gui_rviz" default="true" />
 	<arg name="gui_gazebo" default="true" />
 	<arg name="steering" default="true" />
-	<arg name="rqt" default="false" />
 
 
 	<!-- Parameters -->
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	<rosparam command="load" file="$(find soma_description)/config/joint_state_controller.yaml" ns="/soma" />
-	<if value="${arg steering}">
-		<rosparam command="load" file="$(find soma_description)/config/ackermann_steering_controller.yaml" ns="/soma" />
-	</if>
-	<unless value="${arg steering}">
-		<rosparam command="load" file="$(find soma_description)/config/diff_drive_controller.yaml" ns="/soma" />
-	</unless>
-	
+	<rosparam command="load" file="$(find soma_description)/config/ackermann_steering_controller.yaml" ns="/soma" />
 	
 
 	<!-- Nodes -->
@@ -29,24 +22,19 @@
 	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model soma" />
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-	<if value="${arg steering}">
-		<node name="controller_spawner" pkg="controller_manager" type="spawner" ns="/soma" args="joint_state_controller ackermann_steering_controller" />
-	</if>
-	<unless value="${arg steering}">
-		<node name="controller_spawner" pkg="controller_manager" type="spawner" ns="/soma" args="joint_state_controller diff_drive_controller" />
-	</unless>
+	<node name="controller_spawner" pkg="controller_manager" type="spawner" ns="/soma" args="joint_state_controller ackermann_steering_controller" />
 	
+
 	<!-- Gazebo -->
-	<if value="${arg gazebo}">
-		<include file="$(find gazebo_ros)/launch/empty_world.launch">
-			<arg name="use_sim_time" value="true" />
-			<arg name="gui" value="$(arg gui_gazebo)" />
-			<arg name="world_name" value="$(arg world_model)" />
-		</include>
-	</if>
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="use_sim_time" value="true" />
+		<arg name="gui" value="$(arg gui_gazebo)" />
+		<arg name="world_name" value="$(arg world_model)" />
+	</include>
+	
 
 	<!-- Rviz -->
 	<node if="$(arg gui_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
-	<node if="${arg rqt}" name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/>
+	<node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/>
 	
 </launch>
