@@ -12,7 +12,7 @@ ackermann_steering_controller:
   # These are both optional.
   # ackermann_steering_controller will attempt to read either one or both from the
   # URDF if not specified as a parameter.
-  wheel_separation_h: 1.0
+  wheel_separation_h: 0.9
   wheel_radius: 0.05
 
   # Wheel separation and radius multipliers for odometry calibration.
