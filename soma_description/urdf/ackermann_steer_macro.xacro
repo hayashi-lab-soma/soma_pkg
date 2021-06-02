@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+
+    <!-- Ackermann steer macro -->
+	<macro name="ackermann_steer_macro" params="parent xyz">
+		
+		<!-- General properties used for inertia computation -->
+		<property name="mass" value="6" />
+		<property name="radius" value="0.05" />
+		<property name="length" value="0.02" />
+
+		<!-- Joint -->
+        <joint name="ackermann_steer_rotate" type="revolute"> 
+            <parent link="${parent}"/> 
+            <child link="ackermann_steer_link"/> 
+            <origin xyz="${xyz}" rpy="0 0 0" />  
+            <axis xyz="0 0 1" rpy="0 0 0" />
+            <limit effort="0.4" velocity="12" lower="${-pi/2}" upper="${-pi/2}"/> 
+            <dynamics damping="0.1"/> 
+        </joint> 
+
+        <!-- Transmission -->
+        <transmission name="ackermann_steer_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="ackermann_steer_rotate">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="ackermann_steer_motor">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+		<!-- Link -->
+        <link name="ackermann_steer_link"> 
+            
+            <!-- Collision part -->
+            <collision> 
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry> 
+                    <cylinder length="${length}" radius="${radius}"/> 
+                </geometry> 
+            </collision> 
+
+            <!-- Visual part -->
+            <visual> 
+                <origin xyz="0 0 0" rpy="0 0 0" /> 
+                <geometry> 
+                    <cylinder length="${length}" radius="${radius}"/> 
+                </geometry> 
+                <material name="black"/> 
+            </visual> 		
+
+            <!-- Inertial part -->
+            <inertial> 
+                <origin xyz="0 0 0" rpy="0 0 0" /> 
+                <mass value="${mass}"/> 
+                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" /> 
+            </inertial> 
+
+        </link>
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="ackermann_steer_link">
+			<material>
+				Gazebo/Red
+			</material>
+		</gazebo>
+
+	</macro>
+	<!-- END Ackermann steer macro -->
+
+</robot> 

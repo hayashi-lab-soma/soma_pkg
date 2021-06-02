@@ -11,6 +11,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
     <include filename="$(find soma_description)/urdf/utils.xacro" />
     <include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
     <include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
+	<include filename="$(find soma_description)/urdf/ackermann_steer_macro.xacro" />
 
 
 	<!-- Ackermann macro -->
@@ -38,7 +39,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.8*mass}" />
 				
 				<!-- Inertia matrix of a parallelepiped -->
-                <parallelepiped_inertia mass="${mass}" width="${width}" height="0.5" depth="${depth}" />
+                <parallelepiped_inertia mass="${0.8*mass}" width="${width}" height="0.5" depth="${depth}" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 			
@@ -86,7 +87,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.19*mass}" />
 				
 				<!-- Inertia matrix of a parallelepiped -->
-                <parallelepiped_inertia mass="${mass}" width="0.85" height="0.9" depth="${depth}" />
+                <parallelepiped_inertia mass="${0.19*mass}" width="0.85" height="0.9" depth="${depth}" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 			
@@ -134,7 +135,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.01*mass}" />
 				
 				<!-- Inertia matrix of a parallelepiped -->
-                <parallelepiped_inertia mass="${mass}" width="0.05" height="0.3" depth="0.05" />
+                <parallelepiped_inertia mass="${0.01*mass}" width="0.05" height="0.3" depth="0.05" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 			
@@ -165,7 +166,9 @@ https://github.com/benwarrick/simple_ackermann.git -->
 			</material>
 		</gazebo>
 
-
+		<!-- Build links and joints for ackermann_steering_controller -->
+		<!--ackermann_steer_macro parent="body_bottom_link" xyz="${width/2} 0 ${0.5 + 0.2/2}" /-->
+		<!--rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2 - 0.5} 0 ${-0.5/2}" /-->
 
         <!-- Build wheels -->
         <front_wheel_macro parent="body_bottom_link" prefix="left" xyz="${width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
