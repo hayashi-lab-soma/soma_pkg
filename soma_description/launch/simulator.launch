@@ -10,32 +10,40 @@
 	<arg name="gui_gazebo" default="true" />
 	<arg name="steering" default="true" />
 
-
-	<!-- Parameters -->
-	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
-	<rosparam command="load" file="$(find soma_description)/config/joint_state_controller.yaml" ns="/soma" />
-	<rosparam command="load" file="$(find soma_description)/config/ackermann_steering_controller.yaml" ns="/soma" />
-	
-
-	<!-- Nodes -->
-
-	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model soma" />
-	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-	<node name="controller_spawner" pkg="controller_manager" type="spawner" ns="/soma" args="joint_state_controller ackermann_steering_controller" />
-	
-
 	<!-- Gazebo -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
 		<arg name="use_sim_time" value="true" />
 		<arg name="gui" value="$(arg gui_gazebo)" />
 		<arg name="world_name" value="$(arg world_model)" />
-		<arg name="paused" value="true"/>
+		<arg name="paused" value="false"/>
 	</include>
+
+	<!-- Parameters -->
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+	<rosparam command="load" file="$(find soma_description)/config/joint_state_controller.yaml" ns="soma_joint_state_controller" />
+	<!--rosparam command="load" file="$(find soma_description)/config/ackermann_steering_controller.yaml" ns="/soma_ackermann_steering_controller" /-->
+	<!--rosparam command="load" file="$(find soma_description)/config/diff_drive_controller.yaml" ns="soma_diff_drive_controller" /-->
+	<rosparam command="load" file="$(find soma_description)/config/ackermann_controller.yaml" ns="soma_ackermann_controller" />
+	
+	<!-- Nodes -->
+	<node name="controller_spawner" pkg="controller_manager" type="spawner"
+		args="soma_joint_state_controller soma_ackermann_controller" />
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+	<!-- <node name="keyboard_control" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" /> -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<!-- For wheels to appear in Rviz: why ? -->
+
+	<node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+		<param name="default_topic" value="/soma_ackerman_controller/cmd_vel" />
+	</node>
+
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+		args="-param robot_description -urdf -model soma" />
 
 
 	<!-- Rviz -->
 	<node if="$(arg gui_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
-	<!--node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/-->
 	
 </launch>
