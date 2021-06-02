@@ -15,27 +15,27 @@
             <child link="${prefix}_front_wheel_assembly"/> 
             <origin xyz="${xyz}" rpy="0 0 0" />  
             <axis xyz="0 0 1" rpy="0 0 0" />
-            <limit effort="100" velocity="1" lower="-1" upper="1"/> 
-            <dynamics damping="0.0" friction="0.0"/> 
+            <limit effort="1000000" velocity="1000000" lower="-1" upper="1"/>
+            <dynamics damping="0.1"/> 
         </joint> 
+        <!-- Initial values: effort=0.4 velocity=12 -->
 
         <joint name="${prefix}_front_wheel_rotate" type="continuous"> 
             <parent link="${prefix}_front_wheel_assembly"/> 
             <child link="${prefix}_front_wheel"/> 
             <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />  
             <axis xyz="0 1 0" rpy="0 0 0" /> 
-            <limit effort="100" velocity="50"/> 
-            <dynamics damping="0.0" friction="0.0"/> 
+            <dynamics damping="0.1"/> 
         </joint>
 
 		<!-- Transmissions -->
         <transmission name="${prefix}_front_wheel_hinge_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}_front_wheel_hinge">
-                <hardwareInterface>EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}_front_wheel_hinge_motor">
-                <hardwareInterface>EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
                 <mechanicalReduction>10</mechanicalReduction>
             </actuator>
         </transmission>
@@ -43,10 +43,10 @@
         <transmission name="${prefix}_front_wheel_rotate_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}_front_wheel_rotate">
-                <hardwareInterface>EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
             </joint>
             <actuator name="${prefix}_front_wheel_rotate_motor">
-                <hardwareInterface>EffortJointInterface</hardwareInterface>
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
@@ -114,7 +114,7 @@
 			</material>
 			<mu1 value="2.5" />
 			<mu2 value="2.5" />
-			<kp value="50000" />
+			<kp value="10000000" />
 			<kd value="10" />
 		</gazebo>
 
@@ -124,7 +124,7 @@
 			</material>
 			<mu1 value="2.5" />
 			<mu2 value="2.5" />
-			<kp value="50000" />
+			<kp value="10000000" />
 			<kd value="10" />
 		</gazebo>
 

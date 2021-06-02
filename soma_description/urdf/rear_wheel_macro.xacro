@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dtw_robot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
     <!-- Rear wheel macro -->
 	<macro name="rear_wheel_macro" params="parent prefix xyz">
@@ -15,9 +15,21 @@
             <child link="${prefix}_rear_wheel"/> 
             <origin xyz="${xyz}" rpy="0 0 0" />  
             <axis xyz="0 1 0" rpy="0 0 0" /> 
-            <limit effort="100" velocity="50"/> 
-            <dynamics damping="0.0" friction="0.0"/> 
+            <!--limit effort="0.4" velocity="12"/--> 
+            <dynamics damping="0.1"/> 
         </joint>
+
+        <!-- Transmission -->
+        <transmission name="${prefix}_rear_wheel_rotate_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_rear_wheel_rotate">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_rear_wheel_rotate_motor">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
 
 		<!-- Link -->
         <link name="${prefix}_rear_wheel"> 
@@ -55,7 +67,7 @@
 			</material>
 			<mu1 value="2.5" />
 			<mu2 value="2.5" />
-			<kp value="50000" />
+			<kp value="10000000" />
 			<kd value="10" />
 		</gazebo>
 
