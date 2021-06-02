@@ -1,0 +1,23 @@
+type: "ackermann_controller/AckermannController"
+
+left_front_wheel:
+  steering_link_name: left_front_wheel
+  steering_controller_name: left_front_wheel_hinge
+  axle_controller_name: left_front_wheel_rotate
+  diameter: 0.2886
+
+right_front_wheel:
+  steering_link_name: right_front_wheel
+  steering_controller_name: right_front_wheel_hinge
+  axle_controller_name: right_front_wheel_rotate
+  diameter: 0.2286
+
+left_rear_wheel:
+  link_name: left_rear_wheel
+  axle_controller_name: left_rear_wheel_rotate
+  diameter: 0.2286
+
+right_rear_wheel:
+  link_name: right_rear_wheel
+  axle_controller_name: right_rear_wheel_rotate
+  diameter: 0.2286
