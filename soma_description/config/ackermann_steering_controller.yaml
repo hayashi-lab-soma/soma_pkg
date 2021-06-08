@@ -1,53 +1,56 @@
-type: "ackermann_steering_controller/AckermannSteeringController"
-rear_wheel: "rear_wheel_rotate"
-front_steer: "front_wheel_hinge"
-publish_rate: 50.0 # default: 50
-pose_covariance_diagonal:
-  [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
-twist_covariance_diagonal:
-  [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+ackermann_steering_controller:
+  type: "ackermann_steering_controller/AckermannSteeringController"
 
-# Wheel separation between the rear and the front, and diameter of the rear.
-# These are both optional.
-# ackermann_steering_controller will attempt to read either one or both from the
-# URDF if not specified as a parameter.
-wheel_separation_h: 1.6
-wheel_radius: 0.2
+  rear_wheel: "rear_wheel_rotate"
+  front_steer: "front_wheel_hinge"
 
-# Wheel separation and radius multipliers for odometry calibration.
-wheel_separation_h_multiplier: 1.0 # default: 1.0
-wheel_radius_multiplier: 1.0 # default: 1.0
+  publish_rate: 50.0 # default: 50
+  open_loop: false
 
-# Steer position angle multipliers for fine tuning.
-steer_pos_multiplier: 1.0
+  pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+  twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
 
-# Velocity commands timeout [s], default 0.5
-cmd_vel_timeout: 0.25
+  # Wheel separation between the rear and the front, and diameter of the rear.
+  # These are both optional.
+  # ackermann_steering_controller will attempt to read either one or both from the
+  # URDF if not specified as a parameter.
+  wheel_separation_h: 0.4
+  wheel_radius: 0.1
 
-# Base frame_id
-base_frame_id: base_link
+  # Wheel separation and radius multipliers for odometry calibration.
+  wheel_separation_h_multiplier: 1.0 # default: 1.0
+  wheel_radius_multiplier: 1.0 # default: 1.0
 
-# Odom frame_id
-odom_frame_id: odom
+  # Steer position angle multipliers for fine tuning.
+  steer_pos_multiplier: 1.0
 
-# Velocity and acceleration limits
-# Whenever a min_* is unspecified, default to -max_*
-linear:
-  x:
-    has_velocity_limits: true
-    max_velocity: 0.55 # m/s
-    min_velocity: -0.55 # m/s
-    has_acceleration_limits: true
-    max_acceleration: 1.0 # m/s^2
-    min_acceleration: -1.0 # m/s^2
-    has_jerk_limits: true
-    max_jerk: 5.0 # m/s^3
+  # Velocity commands timeout [s], default 0.5
+  cmd_vel_timeout: 0.5
 
-angular:
-  z:
-    has_velocity_limits: true
-    max_velocity: 1.5 # rad/s
-    has_acceleration_limits: true
-    max_acceleration: 1.0 # rad/s^2
-    has_jerk_limits: true
-    max_jerk: 2.5 # rad/s^3
+  # Base frame_id
+  base_frame_id: base_link
+
+  # Odom frame_id
+  odom_frame_id: odom
+
+  # Velocity and acceleration limits
+  # Whenever a min_* is unspecified, default to -max_*
+  linear:
+    x:
+      has_velocity_limits: true
+      max_velocity: 0.55 # m/s
+      min_velocity: -0.55 # m/s
+      has_acceleration_limits: true
+      max_acceleration: 1.0 # m/s^2
+      min_acceleration: -1.0 # m/s^2
+      has_jerk_limits: true
+      max_jerk: 5.0 # m/s^3
+
+  angular:
+    z:
+      has_velocity_limits: true
+      max_velocity: 1.5 # rad/s
+      has_acceleration_limits: true
+      max_acceleration: 1.0 # rad/s^2
+      has_jerk_limits: true
+      max_jerk: 2.5 # rad/s^3

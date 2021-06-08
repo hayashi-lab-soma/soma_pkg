@@ -1,0 +1,15 @@
+gazebo_ros_control/pid_gains:
+  front_wheel_hinge:
+    p: 100.0
+    i: 0.01
+    d: 10.0
+
+  front_wheel_rotate:
+    p: 1.0
+    i: 0.0
+    d: 0.0
+
+  rear_wheel_rotate:
+    p: 1.0
+    i: 0.0
+    d: 0.0

@@ -67,7 +67,7 @@
 			</material>
 			<mu1 value="2.5" />
 			<mu2 value="2.5" />
-			<kp value="10000000" />
+			<kp value="1000000" />
 			<kd value="10" />
 		</gazebo>
 

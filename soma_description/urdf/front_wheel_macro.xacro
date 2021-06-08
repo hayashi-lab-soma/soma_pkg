@@ -15,7 +15,7 @@
             <child link="${prefix}_front_wheel_assembly"/> 
             <origin xyz="${xyz}" rpy="0 0 0" />  
             <axis xyz="0 0 1" rpy="0 0 0" />
-            <limit effort="1000000" velocity="1000000" lower="-1" upper="1"/>
+            <limit effort="0.4" velocity="1" lower="-1" upper="1"/>
             <dynamics damping="0.1"/> 
         </joint> 
         <!-- Initial values: effort=0.4 velocity=12 -->
@@ -112,9 +112,9 @@
 			<material>
 				Gazebo/Red
 			</material>
-			<mu1 value="2.5" />
-			<mu2 value="2.5" />
-			<kp value="10000000" />
+			<mu1 value="200" />
+			<mu2 value="200" />
+			<kp value="1000000" />
 			<kd value="10" />
 		</gazebo>
 
@@ -122,9 +122,9 @@
 			<material>
 				Gazebo/Red
 			</material>
-			<mu1 value="2.5" />
-			<mu2 value="2.5" />
-			<kp value="10000000" />
+			<mu1 value="200" />
+			<mu2 value="200" />
+			<kp value="1000000" />
 			<kd value="10" />
 		</gazebo>
 
