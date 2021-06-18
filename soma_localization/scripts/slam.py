@@ -9,26 +9,7 @@ import time
 # Motion model
 
 def predict(pose, command, noise):
-
     #  Velocity-based (dead reckoning)
-
-    # linear_velocity_noise = noise[0][0]*command[0] + noise[0][1]*command[1]
-    # noisy_linear_velocity = command[0] + \
-    #     normalvariate(0, linear_velocity_noise)
-    # angular_velocity_noise = noise[1][0]*command[0] + noise[1][1]*command[1]
-    # noisy_angular_velocity = command[1] + \
-    #     normalvariate(0, angular_velocity_noise)
-    # heading_noise = noise[2][0]*command[0] + noise[2][1]*command[1]
-    # noisy_heading = normalvariate(0, heading_noise)
-
-    # new_x = pose[0] - noisy_linear_velocity/noisy_angular_velocity * \
-    #     sin(pose[2]) + noisy_linear_velocity/noisy_angular_velocity * \
-    #     sin(pose[2] + noisy_angular_velocity)
-    # new_y = pose[1] + noisy_linear_velocity/noisy_angular_velocity * \
-    #     cos(pose[2]) - noisy_linear_velocity/noisy_angular_velocity * \
-    #     cos(pose[2] + noisy_angular_velocity)
-    # new_theta = pose[2] + noisy_angular_velocity + noisy_heading
-
     new_x = pose[0] - command[0]/command[1] * \
         sin(pose[2]) + command[0]/command[1]*sin(pose[2] + command[1])
     new_y = pose[1] + command[0]/command[1] * \
@@ -107,7 +88,7 @@ def correspondence(features, pose, observation, noise, threshold):
     if highest_likelihood < threshold:
         corresponding_feature = None
 
-    return corresponding_feature
+    return corresponding_feature, highest_likelihood
 
 
 # EKF
@@ -180,9 +161,10 @@ def display():
             highest_weight = p[3]
             most_probable_particle = p
     if highest_weight > 0:
-        for mu, sigma in most_probable_particle[4]:
+        for i, [mu, sigma] in enumerate(most_probable_particle[4]):
             f = mu.transpose()[0]
             plt.plot(f[0], f[1], "go", markersize=feature_radius)
+            plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
 
             delta = 0.5
             window = 50
@@ -266,17 +248,7 @@ particles_sigma = [[100, 0, 0],
                    [0, 0, 1]]
 
 for i in range(particles_num):
-    # Normal distribution
-    # new_particle_x, new_particle_y, new_particle_theta = multivariate_normal.rvs(
-    # robot_pose, particles_sigma)
-
-    # Uniform distribution
-    # new_particle_x = uniform(0, map_width)
-    # new_particle_y = uniform(0, map_height)
-    # new_particle_theta = uniform(-pi, pi)
-    # new_particle_theta = robot_pose[2]
-
-    # Right pose
+    # Right initial pose
     new_particle_x = robot_pose[0]
     new_particle_y = robot_pose[1]
     new_particle_theta = robot_pose[2]
@@ -291,7 +263,7 @@ for i in range(particles_num):
 
 subplot = 200 + max_time/2*10 + 1
 ax = plt.subplot(subplot)
-# display()
+display()
 
 # Simulation
 
@@ -307,7 +279,9 @@ for i in range(max_time-1):
     new_observation = observation(robot_pose, visibility, observation_noise)
     print("Observation: " + str(new_observation))
 
-    for p in particles:
+    for j, p in enumerate(particles):
+        print("\nParticle " + str(j) + ":")
+
         # Prediction
         p[0], p[1], p[2] = predict(p, u, motion_noise)
 
@@ -315,15 +289,24 @@ for i in range(max_time-1):
         pose = np.array([[p[0]],
                          [p[1]],
                          [p[2]]])
+        print("Predicted pose: \n" + str(pose))
 
         for i in range(len(new_observation)):
             new_z = np.array([[new_observation[i][0]],
                               [new_observation[i][1]]])
+            print("Observation " + str(i) + ": \n" + str(new_z))
 
-            corresponding_feature = correspondence(
+            print("Number of features: " + str(len(p[4])))
+            corresponding_feature, highest_likelihood = correspondence(
                 p[4], pose, new_observation[i], observation_noise, 0.001)
+            print("Highest likelihood: " + str(highest_likelihood))
+            if corresponding_feature != None:
+                print("Corresponding feature: " + str(corresponding_feature))
+            else:
+                print("Previously unseen feature")
             if corresponding_feature == None:
                 mu = h_inverse(pose, new_z)
+                print("Feature estimated position :\n" + str(mu))
                 H1 = H(pose, mu)
                 H1_inverse = np.linalg.inv(H1)
                 Q1 = Q(new_z)
@@ -397,11 +380,13 @@ for i in range(max_time-1):
 
     subplot += 1
     ax = plt.subplot(subplot)
-    # display()
+    display()
 
     stop = time.time()
     print("Time: " + str(stop-start))
 
+    plt.show()
+
 
 print("\n")
-# plt.show()
+plt.show()
