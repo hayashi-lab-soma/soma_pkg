@@ -9,7 +9,7 @@ import time
 # Motion model (velocity-based or dead reckoning)
 # TODO: Odometry-based motion model
 
-def predict(pose, command, noise):
+def motion(pose, command, noise):
     x, y, theta = pose
     v, omega = command
     v_noise, omega_noise, yaw_noise = noise
@@ -210,10 +210,6 @@ omega = 0.1
 u = [v, omega]
 
 # Motion noise
-# x_noise = [0.05, 0]
-# y_noise = [0.05, 0]
-# theta_noise = [0, 0.0005]
-# motion_noise = [x_noise, y_noise, theta_noise]
 v_noise = [0.01, 0]
 omega_noise = [0, 0.01]
 yaw_noise = [0, 0.01]
@@ -225,12 +221,10 @@ phi_noise = [0.0005, 0]
 observation_noise = [d_noise, phi_noise]
 
 # Map
-
 map_width = 100
 map_height = 100
 
 # Features
-
 features_num = 10
 # Only for display (features are collapsed to their center of mass)
 feature_radius = 3
@@ -242,7 +236,6 @@ for i in range(features_num):
     features.append(new_feature)
 
 # Initial robot pose
-
 initial_x = map_width/2
 initial_y = map_height/2
 initial_theta = 0
@@ -271,8 +264,7 @@ for i in range(particles_num):
                     new_particle_theta, new_particle_w, new_particle_f]
     particles.append(new_particle)
 
-# Display
-
+# Init display
 subplot = 200 + max_time/2*10 + 1
 ax = plt.subplot(subplot)
 display()
@@ -285,17 +277,19 @@ for i in range(max_time-1):
     # Real world simulation
     print("\nStep: " + str(i+1))
     print("Command: " + str(u))
-    robot_pose[0], robot_pose[1], robot_pose[2] = predict(
+    robot_pose[0], robot_pose[1], robot_pose[2] = motion(
         robot_pose, u, motion_noise)
     print("New pose: " + str(robot_pose))
     new_observation = observation(robot_pose, visibility, observation_noise)
     print("Observation: " + str(new_observation))
 
+    # Particles update
+
     for j, p in enumerate(particles):
         # print("\nParticle " + str(j) + ":")
 
         # Prediction
-        p[0], p[1], p[2] = predict(p[:3], u, motion_noise)
+        p[0], p[1], p[2] = motion(p[:3], u, motion_noise)
 
         # Correction & mapping
         pose = np.array([[p[0]],
@@ -316,6 +310,8 @@ for i in range(max_time-1):
             # print("Corresponding feature: " + str(corresponding_feature))
             # else:
             # print("Previously unseen feature")
+
+            # Previously unseen feature
             if corresponding_feature == None:
                 mu = h_inverse(pose, new_z)
                 # print("Feature estimated position :\n" + str(mu))
@@ -324,6 +320,8 @@ for i in range(max_time-1):
                 Q1 = Q(new_z)
                 sigma = (H1_inverse.dot(Q1)).dot(H1_inverse.transpose())
                 p[4].append([mu, sigma])
+
+            # Already seen feature
             else:
                 mu, sigma = p[4][corresponding_feature]
                 f = mu.transpose()[0]
@@ -351,6 +349,7 @@ for i in range(max_time-1):
     for p in particles:
         p[3] /= weights_sum
 
+    # Find most probable pose
     max_weight = 0
     for p in particles:
         if p[3] > max_weight:

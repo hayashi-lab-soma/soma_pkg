@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from math import pi, cos, sin, sqrt, erf, atan2, acos
 import numpy as np
 from scipy.stats import multivariate_normal
+import time
 
 
 # Motion model (velocity-based or dead reckoning)
@@ -142,13 +143,16 @@ def likelihood(features, pose, visibility, z, noise):
 # Display
 
 def display():
+    # Map
     plt.plot([0, 0, map_width, map_width], [
              0, map_height, 0, map_height], "y*")
 
+    # Features
     for i, f in enumerate(features):
         plt.plot(f[0], f[1], "bo", markersize=feature_radius)
         plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
 
+    # Robot
     plt.plot(robot_pose[0], robot_pose[1], "ro", markersize=robot_radius)
     angle = np.linspace(0, 2*pi, 1000)
     x = robot_pose[0] + visibility*np.cos(angle)
@@ -157,6 +161,7 @@ def display():
     plt.arrow(robot_pose[0], robot_pose[1], 10 *
               cos(robot_pose[2]), 10*sin(robot_pose[2]), "ro")
 
+    # Particles
     for p in particles:
         plt.plot(p[0], p[1], "go", markersize=max(
             1, p[3]*min(map_width, map_height)/2))
@@ -187,13 +192,12 @@ phi_noise = [0.0005, 0]
 observation_noise = [d_noise, phi_noise]
 
 # Map
-
 map_width = 100
 map_height = 100
 
 # Features
-
 features_num = 10
+# Only for display (features are collapsed to their center of mass)
 feature_radius = 3
 features = []
 for i in range(features_num):
@@ -203,7 +207,6 @@ for i in range(features_num):
     features.append(new_feature)
 
 # Initial robot pose
-
 initial_x = map_width/2
 initial_y = map_height/2
 initial_h = 0
@@ -262,14 +265,25 @@ for t in features_triangles:
     triangle_values = features_triangles[t]
     distance = (first_side - triangle_values[0])**2 + (
         second_side - triangle_values[1])**2 + (third_side - triangle_values[2])**2
+
+    if first_angle > 0 and triangle_values[3] < 0:
+        first_angle -= 2*pi
+    elif first_angle < 0 and triangle_values[3] > 0:
+        first_angle += 2*pi
     first_angle_delta = first_angle - triangle_values[3]
+
+    if second_angle > 0 and triangle_values[4] < 0:
+        second_angle -= 2*pi
+    elif second_angle < 0 and triangle_values[4] > 0:
+        second_angle += 2*pi
     second_angle_delta = second_angle - triangle_values[4]
+
+    if third_angle > 0 and triangle_values[5] < 0:
+        third_angle -= 2*pi
+    elif third_angle < 0 and triangle_values[5] > 0:
+        third_angle += 2*pi
     third_angle_delta = third_angle - triangle_values[5]
-    for a in [first_angle_delta, second_angle_delta, third_angle_delta]:
-        if a <= -pi:
-            a += 2*pi
-        elif a > pi:
-            a -= 2*pi
+
     distance += first_angle_delta**2 + second_angle_delta**2 + third_angle_delta**2
     if distance < distance_threshold:
         near_triangles.append(t)
@@ -287,6 +301,7 @@ for t in near_triangles:
     x1, y1 = features[first_feature]
     x2, y2 = features[second_feature]
     x3, y3 = features[third_feature]
+
     assert (x2-x1) * (y3-y2) != (x3-x2) * \
         (y2-y1), "/!\ Estimated pose can't be computed !"
     estimated_pose_x = ((y2-y1) * (d3**2 - x3**2 - y3**2) + (y3-y2) * (d1**2 - x1**2 - y1**2) +
@@ -335,128 +350,7 @@ for i in range(particles_num):
                     new_particle_h, new_particle_w]
     particles.append(new_particle)
 
-# for p in particles:
-#     p[3] *= likelihood(features, p[:3], visibility,
-#                        initial_observation, observation_noise)
-
-# cumulated_weights = [0]
-# for p in particles:
-#     cumulated_weights.append(cumulated_weights[-1] + p[3])
-
-# weights_sum = 0
-# for p in particles:
-#     weights_sum += p[3]
-# assert weights_sum > 0, "/!\ Sum of weights equals 0 !"
-# for p in particles:
-#     p[3] /= weights_sum
-
-# max_weight = 0
-# for p in particles:
-#     if p[3] > max_weight:
-#         max_weight = p[3]
-#         most_probable_pose = p[:3]
-# print("Most probable pose: " + str(most_probable_pose))
-
-# old_particles = []
-# for p in particles:
-#     old_particles.append(p[:])
-# particles = []
-# for i in range(particles_num):
-#     r = random()
-#     for j in range(len(cumulated_weights)-1):
-#         if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
-#             resampling_sigma = [[5, 0, 0],
-#                                 [0, 5, 0],
-#                                 [0, 0, 0.05]]
-#             new_particle = list(multivariate_normal.rvs(
-#                 old_particles[j][:3], resampling_sigma))
-#             new_particle.append(1.0/particles_num)
-#             particles.append(new_particle)
-
-# initial_observation = observation(robot_pose, visibility, observation_sigma)
-# print("\nInitial observation: " + str(initial_observation))
-
-# visible_features_list = []
-# for p in particles:
-#     visible_features = dict()
-#     for i, f in enumerate(features):
-#         distance = sqrt((f[0] - p[0])**2 + (f[1] - p[1])**2)
-#         angle = atan2(f[1] - p[1], f[0] - p[0]) - p[2]
-#         if distance < visibility:
-#             visible_features[i] = [distance, angle]
-#     visible_features_list.append(visible_features)
-
-# features_correspondences = []
-# for o in initial_observation:
-#     features_likelihoods = dict()
-#     for i in range(len(features)):
-#         features_likelihoods[i] = 0
-
-#     for e in visible_features_list:
-#         for i in e:
-#             feature_likelihood = multivariate_normal.pdf(
-#                 o, e[i], observation_sigma)
-#             features_likelihoods[i] += feature_likelihood
-
-#     print("Observation: " + str(o))
-#     print("Features likelihoods: " + str(features_likelihoods))
-
-#     highest_likelihood = 0
-#     for i in features_likelihoods:
-#         if features_likelihoods[i] > highest_likelihood:
-#             highest_likelihood = features_likelihoods[i]
-#             corresponding_feature = i
-#     features_correspondences.append(corresponding_feature)
-
-# print("Features correspondences: " + str(features_correspondences))
-
-# for p in particles:
-#     particle_likelihood = 1
-
-#     for i, o in enumerate(initial_observation):
-#         f = features[features_correspondences[i]]
-#         distance = sqrt((f[0] - p[0])**2 + (f[1] - p[1])**2)
-#         angle = atan2(f[1] - p[1], f[0] - p[0]) - p[2]
-
-#         if distance < visibility:
-#             feature_likelihood = multivariate_normal.pdf(
-#                 o, [distance, angle], observation_sigma)
-#             particle_likelihood *= feature_likelihood
-#         else:
-#             particle_likelihood = 0
-#     p[3] = particle_likelihood
-
-# # Normalization
-# weights_sum = 0
-# for p in particles:
-#     weights_sum += p[3]
-# assert weights_sum > 0, "/!\ Sum of weights equals 0 !"
-# for p in particles:
-#     p[3] /= weights_sum
-
-# # Resampling
-# cumulated_weights = [0]
-# for p in particles:
-#     cumulated_weights.append(cumulated_weights[-1] + p[3])
-
-# old_particles = []
-# for p in particles:
-#     old_particles.append(p[:])
-# particles = []
-# for i in range(particles_num):
-#     r = random()
-#     for j in range(len(cumulated_weights)-1):
-#         if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
-#             resampling_sigma = [[500, 0, 0],
-#                                 [0, 500, 0],
-#                                 [0, 0, 5]]
-#             new_particle = list(multivariate_normal.rvs(
-#                 old_particles[j][:3], resampling_sigma))
-#             new_particle.append(1.0/particles_num)
-#             particles.append(new_particle)
-
-# Display
-
+# Init display
 subplot = 200 + max_time/2*10 + 1
 plt.subplot(subplot)
 display()
@@ -464,6 +358,8 @@ display()
 # Simulation
 
 for i in range(max_time-1):
+    start = time.time()
+
     # Real world simulation
     print("\nStep: " + str(i+1))
     print("Command: " + str(command))
@@ -472,6 +368,8 @@ for i in range(max_time-1):
     print("New pose: " + str(robot_pose))
     new_observation = observation(robot_pose, visibility, observation_noise)
     print("Observation: " + str(new_observation))
+
+    # Particles update
 
     for p in particles:
         # Prediction
@@ -490,6 +388,7 @@ for i in range(max_time-1):
     for p in particles:
         p[3] /= weights_sum
 
+    # Find most probable pose
     max_weight = 0
     for p in particles:
         if p[3] > max_weight:
@@ -531,6 +430,9 @@ for i in range(max_time-1):
     subplot += 1
     plt.subplot(subplot)
     display()
+
+    stop = time.time()
+    print("Time: " + str(stop-start))
 
 print("\n")
 plt.show()
