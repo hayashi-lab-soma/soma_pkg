@@ -8,7 +8,7 @@ from scipy.stats import multivariate_normal
 # Motion model (velocity-based or dead reckoning)
 # TODO: Odometry-based motion model
 
-def predict(pose, command, noise):
+def motion(pose, command, noise):
     x, y, theta = pose
     v, omega = command
     v_noise, omega_noise, yaw_noise = noise
@@ -41,69 +41,98 @@ def predict(pose, command, noise):
     return new_pose
 
 
-# Observation model
+# Observation model (LIDAR)
+# TODO: observation model for other sensors
 
 def observation(pose, visibility, noise):
-    d_noise, theta_noise = noise
-    observation = []
-    for i, f in enumerate(features):
-        distance = sqrt((f[0] - pose[0])**2 + (f[1] - pose[1])**2)
-        angle = atan2(f[1] - pose[1], f[0] - pose[0]) - pose[2]
+    x, y, theta = pose
+    d_noise, phi_noise = noise
 
-        if distance < visibility:
-            d_sigma = d_noise[0]*distance + d_noise[1]*angle
-            theta_sigma = theta_noise[0]*distance + theta_noise[1]*angle
+    z = []
+
+    for f in features:
+        # Distance and azimut to feature
+        xf, yf = f
+        d = sqrt((xf - x)**2 + (yf - y)**2)
+        phi = atan2(yf - y, xf - x) - theta
+
+        # Feature detected only if within the sensor visibility circle
+        if d < visibility:
+            # Covariance matrix
+            d_sigma = d_noise[0]*d + d_noise[1]*phi
+            phi_sigma = theta_noise[0]*d + theta_noise[1]*phi
             sigma = [[d_sigma, 0],
-                     [0, theta_sigma]]
+                     [0, phi_sigma]]
 
-            noisy_observation = multivariate_normal.rvs(
-                [distance, angle], sigma)
-            if noisy_observation[1] <= -pi:
-                noisy_observation[1] += 2*pi
-            elif noisy_observation[1] > pi:
-                noisy_observation -= 2*pi
-            observation.append(list(noisy_observation))
-    return observation
+            # Sensor data
+            d, phi = multivariate_normal.rvs([d, phi], sigma)
+
+            # Ensure phi in ]-pi;pi]
+            if phi <= -pi:
+                phi += 2*pi
+            elif phi > pi:
+                phi -= 2*pi
+
+            z.append([d, phi])
+
+    return z
 
 
-def likelihood(features, pose, visibility, observation, noise):
-    d_noise, theta_noise = noise
+# Likelihood based on observation
+
+def likelihood(features, pose, visibility, z, noise):
+    x, y, theta = pose
+    d_noise, phi_noise = noise
+
     likelihood = 1
 
+    # Consider only features within sensor visibility circle (to be changed ?)
     visible_features = []
     for i, f in enumerate(features):
-        distance = sqrt((f[0] - pose[0])**2 + (f[1] - pose[1])**2)
-        angle = atan2(f[1] - pose[1], f[0] - pose[0]) - pose[2]
-        if distance < visibility:
-            visible_features.append([i, [distance, angle]])
+        # Distance and azimut to feature
+        xf, yf = f
+        d = sqrt((xf - x)**2 + (yf - y)**2)
+        phi = atan2(yf - y, xf - x) - theta
 
-    if visible_features == [] and observation != []:
-        return 0
+        if d < visibility:
+            visible_features.append([i, [d, phi]])
 
-    for o in observation:
+    # For each individual observation (per feature)
+    for zi in z:
+        # If no more visible features to match to individual observation, likelihood equals 0
+        if visible_features == []:
+            return 0
+
         highest_likelihood = 0
-        for i, [d, a] in visible_features:
-            d_sigma = d_noise[0]*d + d_noise[1]*a
-            theta_sigma = theta_noise[0]*d + theta_noise[1]*a
-            sigma = [[d_sigma, 0],
-                     [0, theta_sigma]]
 
-            if o[1] > 0 and a < 0:
-                a += 2*pi
-            elif o[1] < 0 and a > 0:
-                a -= 2*pi
-            feature_likelihood = multivariate_normal.pdf(o, [d, a], sigma)
+        for i, [d, phi] in visible_features:
+            # Covariance matrix
+            d_sigma = d_noise[0]*d + d_noise[1]*a
+            phi_sigma = phi_noise[0]*d + phi_noise[1]*a
+            sigma = [[d_sigma, 0],
+                     [0, phi_sigma]]
+
+            # Ensure zi and phi are of the same sign (to be able to compare them)
+            if zi[1] > 0 and phi < 0:
+                phi += 2*pi
+            elif zi[1] < 0 and phi > 0:
+                phi -= 2*pi
+
+            # Corresponding feature is the one maximizing particle likelihood
+            feature_likelihood = multivariate_normal.pdf(zi, [d, phi], sigma)
             if feature_likelihood > highest_likelihood:
                 highest_likelihood = feature_likelihood
                 corresponding_feature = i
 
-        if highest_likelihood == 0:
-            return 0
+        # Individual likelihood are multiplied to compute global likelihood
         likelihood *= highest_likelihood
-        for i, [j, [d, a]] in enumerate(visible_features):
+
+        # Visible features already matched are removed
+        for i, [j, [d, phi]] in enumerate(visible_features):
             if j == corresponding_feature:
                 visible_features.pop(i)
 
+    # If there are still unmatched visible features, likelihood equals 0
     if visible_features != []:
         return 0
 
@@ -154,8 +183,8 @@ motion_noise = [v_noise, omega_noise, yaw_noise]
 
 # Observation noise
 d_noise = [0.05, 0]
-theta_noise = [0.0005, 0]
-observation_noise = [d_noise, theta_noise]
+phi_noise = [0.0005, 0]
+observation_noise = [d_noise, phi_noise]
 
 # Map
 
@@ -438,7 +467,7 @@ for i in range(max_time-1):
     # Real world simulation
     print("\nStep: " + str(i+1))
     print("Command: " + str(command))
-    robot_pose[0], robot_pose[1], robot_pose[2] = predict(
+    robot_pose[0], robot_pose[1], robot_pose[2] = motion(
         robot_pose, command, motion_noise)
     print("New pose: " + str(robot_pose))
     new_observation = observation(robot_pose, visibility, observation_noise)
@@ -446,7 +475,7 @@ for i in range(max_time-1):
 
     for p in particles:
         # Prediction
-        p[0], p[1], p[2] = predict(p[:3], command, motion_noise)
+        p[0], p[1], p[2] = motion(p[:3], command, motion_noise)
 
         # Correction
         weight_update = likelihood(features,
