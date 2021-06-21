@@ -10,28 +10,51 @@ import time
 
 def predict(pose, command, noise):
     #  Velocity-based (dead reckoning)
+    # new_x = pose[0] - command[0]/command[1] * \
+    #     sin(pose[2]) + command[0]/command[1]*sin(pose[2] + command[1])
+    # new_y = pose[1] + command[0]/command[1] * \
+    #     cos(pose[2]) - command[0]/command[1]*cos(pose[2] + command[1])
+    # new_theta = pose[2] + command[1]
+
+    # x_noise, y_noise, theta_noise = noise
+    # x_sigma = x_noise[0]*command[0] + x_noise[1]*command[1]
+    # y_sigma = y_noise[0]*command[0] + y_noise[1]*command[1]
+    # theta_sigma = theta_noise[0]*command[0] + theta_noise[1]*command[1]
+    # sigma = [[x_sigma, 0, 0],
+    #          [0, y_sigma, 0],
+    #          [0, 0, theta_sigma]]
+
+    # new_x, new_y, new_theta = multivariate_normal.rvs(
+    #     [new_x, new_y, new_theta], sigma)
+    # if new_theta <= -pi:
+    #     new_theta += 2*pi
+    # elif new_theta > pi:
+    #     new_theta -= 2*pi
+
+    # return new_x, new_y, new_theta
+
+    v_noise, omega_noise, yaw_noise = noise
+
+    v_sigma = v_noise[0]*command[0] + v_noise[1]*command[1]
+    omega_sigma = omega_noise[0]*command[0] + omega_noise[1]*command[1]
+    yaw_sigma = yaw_noise[0]*command[0] + yaw_noise[1]*command[1]
+    sigma = [[v_sigma, 0],
+             [0, omega_sigma]]
+
+    v, omega = multivariate_normal.rvs(command, sigma)
+
     new_x = pose[0] - command[0]/command[1] * \
         sin(pose[2]) + command[0]/command[1]*sin(pose[2] + command[1])
     new_y = pose[1] + command[0]/command[1] * \
         cos(pose[2]) - command[0]/command[1]*cos(pose[2] + command[1])
-    new_theta = pose[2] + command[1]
+    new_theta = multivariate_normal.rvs(pose[2] + command[1], yaw_sigma)
 
-    x_noise, y_noise, theta_noise = noise
-    x_sigma = x_noise[0]*command[0] + x_noise[1]*command[1]
-    y_sigma = y_noise[0]*command[0] + y_noise[1]*command[1]
-    theta_sigma = theta_noise[0]*command[0] + theta_noise[1]*command[1]
-    sigma = [[x_sigma, 0, 0],
-             [0, y_sigma, 0],
-             [0, 0, theta_sigma]]
-
-    new_x, new_y, new_theta = multivariate_normal.rvs(
-        [new_x, new_y, new_theta], sigma)
     if new_theta <= -pi:
         new_theta += 2*pi
     elif new_theta > pi:
         new_theta -= 2*pi
 
-    return new_x, new_y, new_theta
+    return [new_x, new_y, new_theta]
 
 
 # Observation model
@@ -202,10 +225,14 @@ omega = 0.1
 u = [v, omega]
 
 # Motion noise
-x_noise = [0.05, 0]
-y_noise = [0.05, 0]
-theta_noise = [0, 0.0005]
-motion_noise = [x_noise, y_noise, theta_noise]
+# x_noise = [0.05, 0]
+# y_noise = [0.05, 0]
+# theta_noise = [0, 0.0005]
+# motion_noise = [x_noise, y_noise, theta_noise]
+v_noise = [0.01, 0]
+omega_noise = [0, 0.01]
+yaw_noise = [0, 0.01]
+motion_noise = [v_noise, omega_noise, yaw_noise]
 
 # Observation noise
 d_noise = [0.05, 0]
@@ -280,7 +307,7 @@ for i in range(max_time-1):
     print("Observation: " + str(new_observation))
 
     for j, p in enumerate(particles):
-        print("\nParticle " + str(j) + ":")
+        # print("\nParticle " + str(j) + ":")
 
         # Prediction
         p[0], p[1], p[2] = predict(p, u, motion_noise)
@@ -289,24 +316,24 @@ for i in range(max_time-1):
         pose = np.array([[p[0]],
                          [p[1]],
                          [p[2]]])
-        print("Predicted pose: \n" + str(pose))
+        # print("Predicted pose: \n" + str(pose))
 
         for i in range(len(new_observation)):
             new_z = np.array([[new_observation[i][0]],
                               [new_observation[i][1]]])
-            print("Observation " + str(i) + ": \n" + str(new_z))
+            # print("Observation " + str(i) + ": \n" + str(new_z))
 
-            print("Number of features: " + str(len(p[4])))
+            # print("Number of features: " + str(len(p[4])))
             corresponding_feature, highest_likelihood = correspondence(
                 p[4], pose, new_observation[i], observation_noise, 0.001)
-            print("Highest likelihood: " + str(highest_likelihood))
-            if corresponding_feature != None:
-                print("Corresponding feature: " + str(corresponding_feature))
-            else:
-                print("Previously unseen feature")
+            # print("Highest likelihood: " + str(highest_likelihood))
+            # if corresponding_feature != None:
+            # print("Corresponding feature: " + str(corresponding_feature))
+            # else:
+            # print("Previously unseen feature")
             if corresponding_feature == None:
                 mu = h_inverse(pose, new_z)
-                print("Feature estimated position :\n" + str(mu))
+                # print("Feature estimated position :\n" + str(mu))
                 H1 = H(pose, mu)
                 H1_inverse = np.linalg.inv(H1)
                 Q1 = Q(new_z)
@@ -385,7 +412,7 @@ for i in range(max_time-1):
     stop = time.time()
     print("Time: " + str(stop-start))
 
-    plt.show()
+    # plt.show()
 
 
 print("\n")

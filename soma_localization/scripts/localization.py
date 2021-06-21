@@ -10,49 +10,34 @@ from scipy.stats import multivariate_normal
 def predict(pose, command, noise):
 
     #  Velocity-based (dead reckoning)
+    v_noise, omega_noise, yaw_noise = noise
 
-    # linear_velocity_noise = noise[0][0]*command[0] + noise[0][1]*command[1]
-    # noisy_linear_velocity = command[0] + \
-    #     normalvariate(0, linear_velocity_noise)
-    # angular_velocity_noise = noise[1][0]*command[0] + noise[1][1]*command[1]
-    # noisy_angular_velocity = command[1] + \
-    #     normalvariate(0, angular_velocity_noise)
-    # heading_noise = noise[2][0]*command[0] + noise[2][1]*command[1]
-    # noisy_heading = normalvariate(0, heading_noise)
+    v_sigma = v_noise[0]*command[0] + v_noise[1]*command[1]
+    omega_sigma = omega_noise[0]*command[0] + omega_noise[1]*command[1]
+    yaw_sigma = yaw_noise[0]*command[0] + yaw_noise[1]*command[1]
+    sigma = [[v_sigma, 0],
+             [0, omega_sigma]]
 
-    # new_x = pose[0] - noisy_linear_velocity/noisy_angular_velocity * \
-    #     sin(pose[2]) + noisy_linear_velocity/noisy_angular_velocity * \
-    #     sin(pose[2] + noisy_angular_velocity)
-    # new_y = pose[1] + noisy_linear_velocity/noisy_angular_velocity * \
-    #     cos(pose[2]) - noisy_linear_velocity/noisy_angular_velocity * \
-    #     cos(pose[2] + noisy_angular_velocity)
-    # new_h = pose[2] + noisy_angular_velocity + noisy_heading
+    v, omega = multivariate_normal.rvs(command, sigma)
 
     new_x = pose[0] - command[0]/command[1] * \
         sin(pose[2]) + command[0]/command[1]*sin(pose[2] + command[1])
     new_y = pose[1] + command[0]/command[1] * \
         cos(pose[2]) - command[0]/command[1]*cos(pose[2] + command[1])
-    new_theta = pose[2] + command[1]
+    new_theta = multivariate_normal.rvs(pose[2] + command[1], yaw_sigma)
 
-    x_sigma = x_noise[0]*command[0] + x_noise[1]*command[1]
-    y_sigma = y_noise[0]*command[0] + y_noise[1]*command[1]
-    theta_sigma = theta_noise[0]*command[0] + theta_noise[1]*command[1]
-    sigma = [[x_sigma, 0, 0],
-             [0, y_sigma, 0],
-             [0, 0, theta_sigma]]
+    if new_theta <= -pi:
+        new_theta += 2*pi
+    elif new_theta > pi:
+        new_theta -= 2*pi
 
-    new_pose = multivariate_normal.rvs([new_x, new_y, new_theta], sigma)
-    if new_pose[2] <= -pi:
-        new_pose[2] += 2*pi
-    elif new_pose[2] > pi:
-        new_pose[2] -= 2*pi
-
-    return new_pose
+    return [new_x, new_y, new_theta]
 
 
 # Observation model
 
 def observation(pose, visibility, noise):
+    d_noise, theta_noise = noise
     observation = []
     for i, f in enumerate(features):
         distance = sqrt((f[0] - pose[0])**2 + (f[1] - pose[1])**2)
@@ -60,9 +45,9 @@ def observation(pose, visibility, noise):
 
         if distance < visibility:
             d_sigma = d_noise[0]*distance + d_noise[1]*angle
-            a_sigma = a_noise[0]*distance + a_noise[1]*angle
+            theta_sigma = theta_noise[0]*distance + theta_noise[1]*angle
             sigma = [[d_sigma, 0],
-                     [0, a_sigma]]
+                     [0, theta_sigma]]
 
             noisy_observation = multivariate_normal.rvs(
                 [distance, angle], sigma)
@@ -75,6 +60,7 @@ def observation(pose, visibility, noise):
 
 
 def likelihood(features, pose, visibility, observation, noise):
+    d_noise, theta_noise = noise
     likelihood = 1
 
     visible_features = []
@@ -91,9 +77,9 @@ def likelihood(features, pose, visibility, observation, noise):
         highest_likelihood = 0
         for i, [d, a] in visible_features:
             d_sigma = d_noise[0]*d + d_noise[1]*a
-            a_sigma = a_noise[0]*d + a_noise[1]*a
+            theta_sigma = theta_noise[0]*d + theta_noise[1]*a
             sigma = [[d_sigma, 0],
-                     [0, a_sigma]]
+                     [0, theta_sigma]]
 
             if o[1] > 0 and a < 0:
                 a += 2*pi
@@ -154,15 +140,15 @@ angular_velocity = 0.1
 command = [linear_velocity, angular_velocity]
 
 # Motion noise
-x_noise = [0.2, 0.2]
-y_noise = [0.2, 0.2]
-h_noise = [0.2, 0.2]
-motion_noise = [x_noise, y_noise, h_noise]
+v_noise = [0.01, 0]
+omega_noise = [0, 0.01]
+yaw_noise = [0, 0.01]
+motion_noise = [v_noise, omega_noise, yaw_noise]
 
 # Observation noise
 d_noise = [0.05, 0]
-a_noise = [0.005, 0]
-observation_noise = [d_noise, a_noise]
+theta_noise = [0.0005, 0]
+observation_noise = [d_noise, theta_noise]
 
 # Map
 
@@ -443,7 +429,7 @@ display()
 
 for i in range(max_time-1):
     # Real world simulation
-    print("\nTemps: " + str(i+1))
+    print("\nStep: " + str(i+1))
     print("Command: " + str(command))
     robot_pose[0], robot_pose[1], robot_pose[2] = predict(
         robot_pose, command, motion_noise)
