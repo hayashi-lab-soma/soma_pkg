@@ -5,33 +5,40 @@ import numpy as np
 from scipy.stats import multivariate_normal
 
 
-# Motion model
+# Motion model (velocity-based or dead reckoning)
+# TODO: Odometry-based motion model
 
 def predict(pose, command, noise):
-
-    #  Velocity-based (dead reckoning)
+    x, y, theta = pose
+    v, omega = command
     v_noise, omega_noise, yaw_noise = noise
 
-    v_sigma = v_noise[0]*command[0] + v_noise[1]*command[1]
-    omega_sigma = omega_noise[0]*command[0] + omega_noise[1]*command[1]
-    yaw_sigma = yaw_noise[0]*command[0] + yaw_noise[1]*command[1]
+    # Covariance matrix
+    v_sigma = v_noise[0]*v + v_noise[1]*omega
+    omega_sigma = omega_noise[0]*v + omega_noise[1]*omega
+    yaw_sigma = yaw_noise[0]*v + yaw_noise[1]*omega
     sigma = [[v_sigma, 0],
              [0, omega_sigma]]
 
+    # Noisy commands
     v, omega = multivariate_normal.rvs(command, sigma)
 
-    new_x = pose[0] - command[0]/command[1] * \
-        sin(pose[2]) + command[0]/command[1]*sin(pose[2] + command[1])
-    new_y = pose[1] + command[0]/command[1] * \
-        cos(pose[2]) - command[0]/command[1]*cos(pose[2] + command[1])
-    new_theta = multivariate_normal.rvs(pose[2] + command[1], yaw_sigma)
+    # New pose
+    new_x = pose[0] - v/omega * \
+        sin(pose[2]) + v/omega*sin(pose[2] + omega)
+    new_y = pose[1] + v/omega * \
+        cos(pose[2]) - v/omega*cos(pose[2] + omega)
+    new_theta = multivariate_normal.rvs(pose[2] + omega, yaw_sigma)
 
+    # Ensure theta in ]-pi;pi]
     if new_theta <= -pi:
         new_theta += 2*pi
     elif new_theta > pi:
         new_theta -= 2*pi
 
-    return [new_x, new_y, new_theta]
+    new_pose = [new_x, new_y, new_theta]
+
+    return new_pose
 
 
 # Observation model
@@ -439,7 +446,7 @@ for i in range(max_time-1):
 
     for p in particles:
         # Prediction
-        p[0], p[1], p[2] = predict(p, command, motion_noise)
+        p[0], p[1], p[2] = predict(p[:3], command, motion_noise)
 
         # Correction
         weight_update = likelihood(features,
