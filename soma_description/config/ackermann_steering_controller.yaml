@@ -1,7 +1,7 @@
 ackermann_steering_controller:
   type: "ackermann_steering_controller/AckermannSteeringController"
 
-  rear_wheel: "ackermann_rear_wheel_rotate"
+  rear_wheel: "ackermann_virtual_rear_wheel_rotate"
   front_steer: "ackermann_front_steer_hinge"
 
   publish_rate: 50.0 # default: 50

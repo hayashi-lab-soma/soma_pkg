@@ -1,5 +1,5 @@
 steer_bot_hardware_gazebo:
-  rear_wheel: "ackermann_rear_wheel_rotate"
+  rear_wheel: "ackermann_virtual_rear_wheel_rotate"
   front_steer: "ackermann_front_steer_hinge"
 
   virtual_rear_wheels: ["right_rear_wheel_rotate", "left_rear_wheel_rotate"]

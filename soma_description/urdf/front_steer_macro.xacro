@@ -62,20 +62,10 @@
             <material>
 				Gazebo/Red
             </material>
-            <mu1 value="200" />
-            <mu2 value="200" />
-            <kp value="1000000" />
-            <kd value="10" />
-        </gazebo>
-
-        <gazebo reference="${prefix}_front_steer">
-            <material>
-				Gazebo/Red
-            </material>
-            <mu1 value="200" />
-            <mu2 value="200" />
-            <kp value="1000000" />
-            <kd value="10" />
+            <!-- <mu1 value="200" /> -->
+            <!-- <mu2 value="200" /> -->
+            <!-- <kp value="1000000" /> -->
+            <!-- <kd value="10" /> -->
         </gazebo>
 
     </macro>

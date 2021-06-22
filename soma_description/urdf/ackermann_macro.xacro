@@ -12,6 +12,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 	<include filename="$(find soma_description)/urdf/front_steer_macro.xacro" />
 	<include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
 	<include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
+	<include filename="$(find soma_description)/urdf/virtual_rear_wheel_macro.xacro" />
 
 
 	<!-- Ackermann macro -->
@@ -168,7 +169,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 
 		<!-- Build links and joints for ackermann_steering_controller -->
 		<front_steer_macro parent="body_bottom_link" prefix="ackermann" xyz="${width/2} 0 ${-0.5/2}" />
-		<rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2} 0 ${-0.5/2}" />
+		<virtual_rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2} 0 ${-0.5/2}" />
 
 		<!-- Build wheels -->
 		<front_wheel_macro parent="body_bottom_link" prefix="left" xyz="${width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
