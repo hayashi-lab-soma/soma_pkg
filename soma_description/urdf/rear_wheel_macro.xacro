@@ -2,21 +2,21 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
     <!-- Rear wheel macro -->
-	<macro name="rear_wheel_macro" params="parent prefix xyz">
-		
-		<!-- General properties used for inertia computation -->
-		<property name="mass" value="12" />
-		<property name="radius" value="0.2286" />
-		<property name="length" value="0.0889" />
+    <macro name="rear_wheel_macro" params="parent prefix xyz">
 
-		<!-- Joint -->
-        <joint name="${prefix}_rear_wheel_rotate" type="continuous"> 
-            <parent link="${parent}"/> 
-            <child link="${prefix}_rear_wheel"/> 
-            <origin xyz="${xyz}" rpy="0 0 0" />  
-            <axis xyz="0 1 0" rpy="0 0 0" /> 
-            <!--limit effort="0.4" velocity="12"/--> 
-            <dynamics damping="0.1"/> 
+        <!-- General properties used for inertia computation -->
+        <property name="mass" value="12" />
+        <property name="radius" value="0.2286" />
+        <property name="length" value="0.0889" />
+
+        <!-- Joint -->
+        <joint name="${prefix}_rear_wheel_rotate" type="continuous">
+            <parent link="${parent}"/>
+            <child link="${prefix}_rear_wheel"/>
+            <origin xyz="${xyz}" rpy="${-pi/2} 0 0" />
+            <axis xyz="0 0 1" rpy="0 0 0" />
+            <!--limit effort="0.4" velocity="12"/-->
+            <dynamics damping="0.1"/>
         </joint>
 
         <!-- Transmission -->
@@ -31,47 +31,47 @@
             </actuator>
         </transmission>
 
-		<!-- Link -->
-        <link name="${prefix}_rear_wheel"> 
-            
+        <!-- Link -->
+        <link name="${prefix}_rear_wheel">
+
             <!-- Collision part -->
-            <collision> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
-                <geometry> 
-                    <cylinder length="${length}" radius="${radius}"/> 
-                </geometry> 
-            </collision> 
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+            </collision>
 
             <!-- Visual part -->
-            <visual> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <geometry> 
-                    <cylinder length="${length}" radius="${radius}"/> 
-                </geometry> 
-                <material name="black"/> 
-            </visual> 		
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
 
             <!-- Inertial part -->
-            <inertial> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <mass value="${mass}"/> 
-                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" /> 
-            </inertial> 
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <mass value="${mass}"/>
+                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
+            </inertial>
 
         </link>
 
-		<!-- Gazebo additional parameters -->
-		<gazebo reference="${prefix}_rear_wheel">
-			<material>
+        <!-- Gazebo additional parameters -->
+        <gazebo reference="${prefix}_rear_wheel">
+            <material>
 				Gazebo/Red
-			</material>
-			<mu1 value="2.5" />
-			<mu2 value="2.5" />
-			<kp value="1000000" />
-			<kd value="10" />
-		</gazebo>
+            </material>
+            <mu1 value="2.5" />
+            <mu2 value="2.5" />
+            <kp value="1000000" />
+            <kd value="10" />
+        </gazebo>
 
-	</macro>
-	<!-- END rear wheel macro -->
+    </macro>
+    <!-- END rear wheel macro -->
 
 </robot> 

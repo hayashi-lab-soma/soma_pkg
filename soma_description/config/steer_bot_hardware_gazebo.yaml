@@ -1,0 +1,11 @@
+steer_bot_hardware_gazebo:
+  rear_wheel: "ackermann_rear_wheel_rotate"
+  front_steer: "ackermann_front_steer_hinge"
+
+  virtual_rear_wheels: ["right_rear_wheel_rotate", "left_rear_wheel_rotate"]
+  virtual_front_wheels: ["right_front_wheel_rotate", "left_front_wheel_rotate"]
+  virtual_front_steers: ["right_front_wheel_hinge", "left_front_wheel_hinge"]
+
+  enable_ackermann_link: true
+  wheel_separation_h: 1.05
+  wheel_separation_w: 0.9

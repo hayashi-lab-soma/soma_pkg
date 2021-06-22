@@ -1,8 +1,8 @@
 ackermann_steering_controller:
   type: "ackermann_steering_controller/AckermannSteeringController"
 
-  rear_wheel: "rear_wheel_rotate"
-  front_steer: "front_wheel_hinge"
+  rear_wheel: "ackermann_rear_wheel_rotate"
+  front_steer: "ackermann_front_steer_hinge"
 
   publish_rate: 50.0 # default: 50
   open_loop: false
@@ -14,8 +14,8 @@ ackermann_steering_controller:
   # These are both optional.
   # ackermann_steering_controller will attempt to read either one or both from the
   # URDF if not specified as a parameter.
-  wheel_separation_h: 0.4
-  wheel_radius: 0.1
+  wheel_separation_h: 1.05
+  wheel_radius: 0.2286
 
   # Wheel separation and radius multipliers for odometry calibration.
   wheel_separation_h_multiplier: 1.0 # default: 1.0

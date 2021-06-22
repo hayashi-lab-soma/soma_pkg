@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+
+    <!-- Front wheel macro -->
+    <macro name="front_steer_macro" params="parent prefix xyz">
+
+        <!-- General properties used for inertia computation -->
+
+        <!-- Joints -->
+        <joint name="${prefix}_front_steer_hinge" type="revolute">
+            <parent link="${parent}"/>
+            <child link="${prefix}_front_steer"/>
+            <origin xyz="${xyz}" rpy="0 0 0" />
+            <axis xyz="0 0 1" rpy="0 0 0" />
+            <limit effort="0.4" velocity="1" lower="-1" upper="1"/>
+            <dynamics damping="0.1"/>
+        </joint>
+        <!-- Initial values: effort=0.4 velocity=12 -->
+
+        <!-- Transmissions -->
+        <transmission name="${prefix}_front_steer_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_front_steer_hinge">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_front_steer_motor">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>10</mechanicalReduction>
+            </actuator>
+        </transmission>
+
+        <!-- Links -->
+        <link name="${prefix}_front_steer">
+
+            <!-- Collision part -->
+            <collision>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.05" radius="0.1"/>
+                </geometry>
+            </collision>
+
+            <!-- Visual part -->
+            <visual>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.05" radius="0.1"/>
+                </geometry>
+                <material name="white"/>
+            </visual>
+
+            <!-- Inertial part -->
+            <inertial>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <mass value="0.2"/>
+                <cylinder_inertia mass="0.2" radius="0.1" height="0.05"/>
+            </inertial>
+        </link>
+
+        <!-- Gazebo additional parameters -->
+        <gazebo reference="${prefix}_front_steer">
+            <material>
+				Gazebo/Red
+            </material>
+            <mu1 value="200" />
+            <mu2 value="200" />
+            <kp value="1000000" />
+            <kd value="10" />
+        </gazebo>
+
+        <gazebo reference="${prefix}_front_steer">
+            <material>
+				Gazebo/Red
+            </material>
+            <mu1 value="200" />
+            <mu2 value="200" />
+            <kp value="1000000" />
+            <kd value="10" />
+        </gazebo>
+
+    </macro>
+    <!-- END front wheel macro -->
+
+</robot> 

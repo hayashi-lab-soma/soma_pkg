@@ -2,33 +2,33 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
     <!-- Front wheel macro -->
-	<macro name="front_wheel_macro" params="parent prefix xyz">
-		
-		<!-- General properties used for inertia computation -->
-		<property name="mass" value="12" />
-		<property name="radius" value="0.2286" />
-		<property name="length" value="0.0889" />
+    <macro name="front_wheel_macro" params="parent prefix xyz">
 
-		<!-- Joints -->
-        <joint name="${prefix}_front_wheel_hinge" type="revolute"> 
-            <parent link="${parent}"/> 
-            <child link="${prefix}_front_wheel_assembly"/> 
-            <origin xyz="${xyz}" rpy="0 0 0" />  
+        <!-- General properties used for inertia computation -->
+        <property name="mass" value="12" />
+        <property name="radius" value="0.2286" />
+        <property name="length" value="0.0889" />
+
+        <!-- Joints -->
+        <joint name="${prefix}_front_wheel_hinge" type="revolute">
+            <parent link="${parent}"/>
+            <child link="${prefix}_front_wheel_assembly"/>
+            <origin xyz="${xyz}" rpy="0 0 0" />
             <axis xyz="0 0 1" rpy="0 0 0" />
             <limit effort="0.4" velocity="1" lower="-1" upper="1"/>
-            <dynamics damping="0.1"/> 
-        </joint> 
+            <dynamics damping="0.1"/>
+        </joint>
         <!-- Initial values: effort=0.4 velocity=12 -->
 
-        <joint name="${prefix}_front_wheel_rotate" type="continuous"> 
-            <parent link="${prefix}_front_wheel_assembly"/> 
-            <child link="${prefix}_front_wheel"/> 
-            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />  
-            <axis xyz="0 1 0" rpy="0 0 0" /> 
-            <dynamics damping="0.1"/> 
+        <joint name="${prefix}_front_wheel_rotate" type="continuous">
+            <parent link="${prefix}_front_wheel_assembly"/>
+            <child link="${prefix}_front_wheel"/>
+            <origin xyz="0.0 0.0 0.0" rpy="${-pi/2} 0 0" />
+            <axis xyz="0 0 1" rpy="0 0 0" />
+            <dynamics damping="0.1"/>
         </joint>
 
-		<!-- Transmissions -->
+        <!-- Transmissions -->
         <transmission name="${prefix}_front_wheel_hinge_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${prefix}_front_wheel_hinge">
@@ -51,84 +51,84 @@
             </actuator>
         </transmission>
 
-		<!-- Links -->
-        <link name="${prefix}_front_wheel"> 
-            
+        <!-- Links -->
+        <link name="${prefix}_front_wheel">
+
             <!-- Collision part -->
-            <collision> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
-                <geometry> 
-                    <cylinder length="${length}" radius="${radius}"/> 
-                </geometry> 
-            </collision> 
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+            </collision>
 
             <!-- Visual part -->
-            <visual> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <geometry> 
-                    <cylinder length="${length}" radius="${radius}"/> 
-                </geometry> 
-                <material name="black"/> 
-            </visual> 		
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
 
             <!-- Inertial part -->
-            <inertial> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <mass value="${mass}"/> 
-                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />  
-            </inertial> 
+            <inertial>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <mass value="${mass}"/>
+                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
+            </inertial>
 
         </link>
 
         <link name="${prefix}_front_wheel_assembly">
 
             <!-- Collision part -->
-            <collision> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" />
-                <geometry> 
-                    <cylinder length="0.001" radius="0.04"/> 
-                </geometry> 
-            </collision> 
+            <collision>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.05" radius="0.1"/>
+                </geometry>
+            </collision>
 
             <!-- Visual part -->
-            <visual> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <geometry> 
-                    <cylinder length="0.001" radius="0.04"/> 
-                </geometry> 
-                <material name="white"/> 
-            </visual> 		
+            <visual>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="0.05" radius="0.1"/>
+                </geometry>
+                <material name="white"/>
+            </visual>
 
             <!-- Inertial part -->
-            <inertial> 
-                <origin xyz="0 0 0" rpy="0 ${pi/2} ${pi/2}" /> 
-                <mass value="0.2"/> 
-                <cylinder_inertia mass="0.2" radius="0.3" height="0.1"/> 
+            <inertial>
+                <origin xyz="0 0 0.3" rpy="0 0 0" />
+                <mass value="0.2"/>
+                <cylinder_inertia mass="0.2" radius="0.1" height="0.05"/>
             </inertial>
-        </link>  
+        </link>
 
-		<!-- Gazebo additional parameters -->
-		<gazebo reference="${prefix}_front_wheel">
-			<material>
+        <!-- Gazebo additional parameters -->
+        <gazebo reference="${prefix}_front_wheel">
+            <material>
 				Gazebo/Red
-			</material>
-			<mu1 value="200" />
-			<mu2 value="200" />
-			<kp value="1000000" />
-			<kd value="10" />
-		</gazebo>
+            </material>
+            <mu1 value="200" />
+            <mu2 value="200" />
+            <kp value="1000000" />
+            <kd value="10" />
+        </gazebo>
 
         <gazebo reference="${prefix}_front_wheel_assembly">
-			<material>
+            <material>
 				Gazebo/Red
-			</material>
-			<mu1 value="200" />
-			<mu2 value="200" />
-			<kp value="1000000" />
-			<kd value="10" />
-		</gazebo>
+            </material>
+            <mu1 value="200" />
+            <mu2 value="200" />
+            <kp value="1000000" />
+            <kd value="10" />
+        </gazebo>
 
-	</macro>
-	<!-- END front wheel macro -->
+    </macro>
+    <!-- END front wheel macro -->
 
 </robot> 
