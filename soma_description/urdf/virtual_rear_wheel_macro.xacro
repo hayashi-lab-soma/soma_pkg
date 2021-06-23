@@ -52,11 +52,11 @@
             </visual> -->
 
             <!-- Inertial part -->
-            <!-- <inertial>
+            <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <mass value="${mass}"/>
                 <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
-            </inertial> -->
+            </inertial>
 
         </link>
 
