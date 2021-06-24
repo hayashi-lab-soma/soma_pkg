@@ -79,12 +79,137 @@ def observation(pose, visibility, noise):
     return z
 
 
-# Likelihood based on observation
+# Find correspondence between individual observation and feature (with distance and angle to features)
 
-def likelihood(features, pose, visibility, z, noise):
+def matching(visible_features, zi, noise):
+    d_noise, phi_noise = noise
+
+    # If no more visible features to match to individual observation, return None
+    if visible_features == []:
+        return None
+
+    highest_likelihood = 0
+
+    for i, [d, phi] in visible_features:
+        # Covariance matrix
+        d_sigma = d_noise[0]*d + d_noise[1]*phi
+        phi_sigma = phi_noise[0]*d + phi_noise[1]*phi
+        sigma = [[d_sigma, 0],
+                 [0, phi_sigma]]
+
+        # Ensure zi and phi are of the same sign (to be able to compare them)
+        if zi[1] > 0 and phi < 0:
+            phi += 2*pi
+        elif zi[1] < 0 and phi > 0:
+            phi -= 2*pi
+
+        # Corresponding feature is the one maximizing particle likelihood
+        feature_likelihood = multivariate_normal.pdf(zi, [d, phi], sigma)
+        if feature_likelihood > highest_likelihood:
+            highest_likelihood = feature_likelihood
+            corresponding_feature = list(visible_features[i])
+
+    visible_features.pop(i)
+
+    return corresponding_feature
+
+
+# Find correspondence between truncated observation and triangle of features (with triangle matching)
+
+def triangleMatching(features_triangles, z, noise):
+    assert len(
+        z) >= 3, "/!\ Triangle matching requires at least 3 individual observations !"
+
+    # Extract first 3 individual observations
+    d1, a1 = z[0]
+    d2, a2 = z[1]
+    d3, a3 = z[2]
+
+    # Compute distances and angles of triangle
+    first_side = sqrt(d1**2 + d2**2 - 2*d1*d2*cos(a2-a1))
+    second_side = sqrt(d2**2 + d3**2 - 2*d2*d3*cos(a3-a2))
+    third_side = sqrt(d3**2 + d1**2 - 2*d3*d1*cos(a1-a3))
+    first_angle = acos((first_side**2 - second_side**2 +
+                        third_side**2) / (2*first_side*third_side))
+    second_angle = acos((second_side**2 - third_side**2 +
+                        first_side**2) / (2*second_side*first_side))
+    third_angle = acos((third_side**2 - first_side**2 +
+                        second_side**2) / (2*third_side*second_side))
+
+    # Find most similar triangle in map
+    # near_triangles = []
+    smallest_distance = 1000000000
+    # distance_threshold = 50
+    for t in features_triangles:
+        triangle_values = features_triangles[t]
+
+        # Compute distance between distances and angles
+        # TODO: Normalize distances because angular distances much smaller than linear distances !
+        distance = (first_side - triangle_values[0])**2 + (
+            second_side - triangle_values[1])**2 + (third_side - triangle_values[2])**2
+
+        if first_angle > 0 and triangle_values[3] < 0:
+            first_angle -= 2*pi
+        elif first_angle < 0 and triangle_values[3] > 0:
+            first_angle += 2*pi
+        first_angle_delta = first_angle - triangle_values[3]
+
+        if second_angle > 0 and triangle_values[4] < 0:
+            second_angle -= 2*pi
+        elif second_angle < 0 and triangle_values[4] > 0:
+            second_angle += 2*pi
+        second_angle_delta = second_angle - triangle_values[4]
+
+        if third_angle > 0 and triangle_values[5] < 0:
+            third_angle -= 2*pi
+        elif third_angle < 0 and triangle_values[5] > 0:
+            third_angle += 2*pi
+        third_angle_delta = third_angle - triangle_values[5]
+
+        distance += first_angle_delta**2 + second_angle_delta**2 + third_angle_delta**2
+
+        # if distance < distance_threshold:
+        if distance < smallest_distance:
+            nearest_triangle = list(t)
+            smallest_distance = distance
+            # near_triangles.append(t)
+
+    # return near_triangles
+    return nearest_triangle
+
+
+# Likelihood for individual observation
+
+def individual_likelihood(corresponding_feature, pose, zi, noise):
     x, y, theta = pose
     d_noise, phi_noise = noise
 
+    if corresponding_feature == None:
+        return 0
+
+    i, [d, phi] = corresponding_feature
+
+    # Covariance matrix
+    d_sigma = d_noise[0]*d + d_noise[1]*phi
+    phi_sigma = phi_noise[0]*d + phi_noise[1]*phi
+    sigma = [[d_sigma, 0],
+             [0, phi_sigma]]
+
+    # Ensure zi and phi are of the same sign (to be able to compare them)
+    if zi[1] > 0 and phi < 0:
+        phi += 2*pi
+    elif zi[1] < 0 and phi > 0:
+        phi -= 2*pi
+
+    # Compute likelihood
+    likelihood = multivariate_normal.pdf(zi, [d, phi], sigma)
+
+    return likelihood
+
+
+# Overall likelihood
+
+def global_likelihood(features, pose, visibility, z, noise):
     likelihood = 1
 
     # Consider only features within sensor visibility circle (to be changed ?)
@@ -100,42 +225,18 @@ def likelihood(features, pose, visibility, z, noise):
 
     # For each individual observation (per feature)
     for zi in z:
-        # If no more visible features to match to individual observation, likelihood equals 0
-        if visible_features == []:
-            return 0
+        # Find correspondence between individual observation and feature
+        corresponding_feature = matching(
+            visible_features, pose, visibility, zi, noise)
 
-        highest_likelihood = 0
-
-        for i, [d, phi] in visible_features:
-            # Covariance matrix
-            d_sigma = d_noise[0]*d + d_noise[1]*a
-            phi_sigma = phi_noise[0]*d + phi_noise[1]*a
-            sigma = [[d_sigma, 0],
-                     [0, phi_sigma]]
-
-            # Ensure zi and phi are of the same sign (to be able to compare them)
-            if zi[1] > 0 and phi < 0:
-                phi += 2*pi
-            elif zi[1] < 0 and phi > 0:
-                phi -= 2*pi
-
-            # Corresponding feature is the one maximizing particle likelihood
-            feature_likelihood = multivariate_normal.pdf(zi, [d, phi], sigma)
-            if feature_likelihood > highest_likelihood:
-                highest_likelihood = feature_likelihood
-                corresponding_feature = i
-
-        # Individual likelihood are multiplied to compute global likelihood
-        likelihood *= highest_likelihood
-
-        # Visible features already matched are removed
-        for i, [j, [d, phi]] in enumerate(visible_features):
-            if j == corresponding_feature:
-                visible_features.pop(i)
+        # Compute individual likelihood
+        # Individual likelihood are multiplied to get global likelihood (independence assumption)
+        likelihood *= individual_likelihood(
+            corresponding_feature, pose, zi, noise)
 
     # If there are still unmatched visible features, likelihood equals 0
     if visible_features != []:
-        return 0
+        likelihood = 0
 
     return likelihood
 
@@ -239,56 +340,11 @@ for i in range(features_num):
                                    features_num**2] = [first_side, second_side, third_side, first_angle, second_angle, third_angle]
 
 # Initial observation
-initial_observation = observation(robot_pose, visibility, observation_noise)
-assert len(initial_observation) >= 3, "/!\ 3 features are necessary to initialize particles ! (only " + \
-    str(len(initial_observation)) + " were found)"
+z = observation(robot_pose, visibility, observation_noise)
 print("Initial observation: " + str(initial_observation))
+near_triangles = [triangleMatching(features_triangles, z, observation_noise)]
 
-# Extract individul observations and compute triangle's sides
-d1, a1 = initial_observation[0]
-d2, a2 = initial_observation[1]
-d3, a3 = initial_observation[2]
-first_side = sqrt(d1**2 + d2**2 - 2*d1*d2*cos(a2-a1))
-second_side = sqrt(d2**2 + d3**2 - 2*d2*d3*cos(a3-a2))
-third_side = sqrt(d3**2 + d1**2 - 2*d3*d1*cos(a1-a3))
-first_angle = acos((first_side**2 - second_side**2 +
-                   third_side**2) / (2*first_side*third_side))
-second_angle = acos((second_side**2 - third_side**2 +
-                    first_side**2) / (2*second_side*first_side))
-third_angle = acos((third_side**2 - first_side**2 +
-                   second_side**2) / (2*third_side*second_side))
-
-# Find most similar triangle in map
-near_triangles = []
-distance_threshold = 50
-for t in features_triangles:
-    triangle_values = features_triangles[t]
-    distance = (first_side - triangle_values[0])**2 + (
-        second_side - triangle_values[1])**2 + (third_side - triangle_values[2])**2
-
-    if first_angle > 0 and triangle_values[3] < 0:
-        first_angle -= 2*pi
-    elif first_angle < 0 and triangle_values[3] > 0:
-        first_angle += 2*pi
-    first_angle_delta = first_angle - triangle_values[3]
-
-    if second_angle > 0 and triangle_values[4] < 0:
-        second_angle -= 2*pi
-    elif second_angle < 0 and triangle_values[4] > 0:
-        second_angle += 2*pi
-    second_angle_delta = second_angle - triangle_values[4]
-
-    if third_angle > 0 and triangle_values[5] < 0:
-        third_angle -= 2*pi
-    elif third_angle < 0 and triangle_values[5] > 0:
-        third_angle += 2*pi
-    third_angle_delta = third_angle - triangle_values[5]
-
-    distance += first_angle_delta**2 + second_angle_delta**2 + third_angle_delta**2
-    if distance < distance_threshold:
-        near_triangles.append(t)
-
-# Compute estimated pose from triangle matching and observation
+# Compute estimated pose from triangle matching and initial observation
 estimated_poses = []
 for t in near_triangles:
     first_feature = t / features_num**2
@@ -356,7 +412,6 @@ plt.subplot(subplot)
 display()
 
 # Simulation
-
 for i in range(max_time-1):
     start = time.time()
 
@@ -376,8 +431,8 @@ for i in range(max_time-1):
         p[0], p[1], p[2] = motion(p[:3], command, motion_noise)
 
         # Correction
-        weight_update = likelihood(features,
-                                   p, visibility, new_observation, observation_noise)
+        weight_update = global_likelihood(features,
+                                          p, visibility, new_observation, observation_noise)
         p[3] *= weight_update
 
     # Normalization
