@@ -21,8 +21,7 @@ import time
 '''
 
 # Motion model (velocity-based or dead reckoning)
-# TODO: Odometry-based motion model
-
+# TODO: #3 Odometry-based motion model
 
 def motion(pose, command, noise):
     x, y, theta = pose
@@ -58,7 +57,7 @@ def motion(pose, command, noise):
 
 
 # Observation model (LIDAR)
-# TODO: observation model for other sensors
+# TODO: #4 Observation model for other sensors
 
 def observation(pose, visibility, noise):
     x, y, theta = pose
