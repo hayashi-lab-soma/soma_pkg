@@ -23,6 +23,7 @@ import time
 # Motion model (velocity-based or dead reckoning)
 # TODO: Odometry-based motion model
 
+
 def motion(pose, command, noise):
     x, y, theta = pose
     v, omega = command
@@ -75,7 +76,7 @@ def observation(pose, visibility, noise):
         if d < visibility:
             # Covariance matrix
             d_sigma = d_noise[0]*d + d_noise[1]*phi
-            phi_sigma = theta_noise[0]*d + theta_noise[1]*phi
+            phi_sigma = phi_noise[0]*d + phi_noise[1]*phi
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -103,8 +104,11 @@ def matching(visible_features, zi, noise):
         return None
 
     highest_likelihood = 0
+    corresponding_feature_index = 0
 
-    for i, [d, phi] in visible_features:
+    for i, e in enumerate(visible_features):
+        k, [d, phi] = e
+
         # Covariance matrix
         d_sigma = d_noise[0]*d + d_noise[1]*phi
         phi_sigma = phi_noise[0]*d + phi_noise[1]*phi
@@ -121,9 +125,10 @@ def matching(visible_features, zi, noise):
         feature_likelihood = multivariate_normal.pdf(zi, [d, phi], sigma)
         if feature_likelihood > highest_likelihood:
             highest_likelihood = feature_likelihood
-            corresponding_feature = list(visible_features[i])
+            corresponding_feature_index = i
 
-    visible_features.pop(i)
+    corresponding_feature = list(visible_features[corresponding_feature_index])
+    visible_features.pop(corresponding_feature_index)
 
     return corresponding_feature
 
@@ -184,7 +189,7 @@ def triangleMatching(features_triangles, z, noise):
 
         # if distance < distance_threshold:
         if distance < smallest_distance:
-            nearest_triangle = list(t)
+            nearest_triangle = t
             smallest_distance = distance
             # near_triangles.append(t)
 
@@ -224,6 +229,8 @@ def individual_likelihood(corresponding_feature, pose, zi, noise):
 # Overall likelihood
 
 def global_likelihood(features, pose, visibility, z, noise):
+    x, y, theta = pose
+
     likelihood = 1
 
     # Consider only features within sensor visibility circle (to be changed ?)
@@ -241,7 +248,7 @@ def global_likelihood(features, pose, visibility, z, noise):
     for zi in z:
         # Find correspondence between individual observation and feature
         corresponding_feature = matching(
-            visible_features, pose, visibility, zi, noise)
+            visible_features, zi, noise)
 
         # Compute individual likelihood
         # Individual likelihood are multiplied to get global likelihood (independence assumption)
@@ -355,7 +362,7 @@ for i in range(features_num):
 
 # Initial observation
 z = observation(robot_pose, visibility, observation_noise)
-print("Initial observation: " + str(initial_observation))
+print("Initial observation: " + str(z))
 near_triangles = [triangleMatching(features_triangles, z, observation_noise)]
 
 # Compute estimated pose from triangle matching and initial observation
@@ -368,6 +375,9 @@ for t in near_triangles:
         features_num**2 - second_feature*features_num
     print("Estimated features: " +
           str([first_feature, second_feature, third_feature]))
+    d1, a1 = z[0]
+    d2, a2 = z[1]
+    d3, a3 = z[2]
     x1, y1 = features[first_feature]
     x2, y2 = features[second_feature]
     x3, y3 = features[third_feature]
@@ -389,11 +399,11 @@ for t in near_triangles:
     print("Estimated pose: " + str(estimated_poses[-1]))
 
 # Sample particles with gaussian distribution around estimated pose
-particles_num = 100
+particles_num = 1000
 particles = []
-particles_sigma = [[10, 0, 0],
-                   [0, 10, 0],
-                   [0, 0, 0.1]]
+particles_sigma = [[500, 0, 0],
+                   [0, 500, 0],
+                   [0, 0, 5]]
 
 # for p in estimated_poses:
 #     for i in range(particles_num/len(estimated_poses)):
@@ -406,13 +416,13 @@ particles_sigma = [[10, 0, 0],
 
 for i in range(particles_num):
     # Normal distribution
-    new_particle_x, new_particle_y, new_particle_h = multivariate_normal.rvs(
-        robot_pose, particles_sigma)
+    # new_particle_x, new_particle_y, new_particle_h = multivariate_normal.rvs(
+        # robot_pose, particles_sigma)
 
     # Uniform distribution
-    # new_particle_x = uniform(0, map_width)
-    # new_particle_y = uniform(0, map_height)
-    # new_particle_h = uniform(-pi, pi)
+    new_particle_x = uniform(0, map_width)
+    new_particle_y = uniform(0, map_height)
+    new_particle_h = uniform(-pi, pi)
     # new_particle_h = robot_pose[2]
 
     new_particle_w = 1.0/particles_num
@@ -446,7 +456,7 @@ for i in range(max_time-1):
 
         # Correction
         weight_update = global_likelihood(features,
-                                          p, visibility, new_observation, observation_noise)
+                                          p[:3], visibility, new_observation, observation_noise)
         p[3] *= weight_update
 
     # Normalization
