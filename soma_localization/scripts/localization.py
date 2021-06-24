@@ -359,7 +359,7 @@ for t in near_triangles:
     x3, y3 = features[third_feature]
 
     assert (x2-x1) * (y3-y2) != (x3-x2) * \
-        (y2-y1), "/!\ Estimated pose can't be computed !"
+        (y2-y1), "/!\ Estimated pose can't be computed (division by 0) !"
     estimated_pose_x = ((y2-y1) * (d3**2 - x3**2 - y3**2) + (y3-y2) * (d1**2 - x1**2 - y1**2) +
                         (y1-y3) * (d2**2 - x2**2 - y2**2)) / (2 * ((x2-x1) * (y3-y2) - (x3-x2)*(y2-y1)))
     estimated_pose_y = ((x3-x2) * (d2**2 - d1**2 + x1**2 - x2**2 + y1**2 - y2**2) - (x1-x2) * (

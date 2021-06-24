@@ -3,8 +3,10 @@ from math import cos, sin, sqrt, atan2, pi
 import matplotlib.pyplot as plt
 
 
-def g(mu, u):
-    x, y, theta = mu.transpose()[0]
+# Theoretical motion
+
+def g(r, u):
+    x, y, theta = r.transpose()[0]
     v, omega = u.transpose()[0]
     return np.array([[x - float(v)/omega * sin(theta) + float(v)/omega * sin(theta + omega)],
                      [y + float(v)/omega * cos(theta) - float(v) /
@@ -12,8 +14,10 @@ def g(mu, u):
                      [theta + omega]])
 
 
-def G(mu, u):
-    x, y, theta = mu.transpose()[0]
+# Theoretical motion jacobian / pose
+
+def G(r, u):
+    x, y, theta = r.transpose()[0]
     v, omega = u.transpose()[0]
     return np.array([[1, 0, -float(v)/omega * cos(theta) + float(v)/omega * cos(theta + omega)],
                      [0, 1, -float(v)/omega * sin(theta) +
@@ -21,7 +25,9 @@ def G(mu, u):
                      [0, 0, 1]])
 
 
-def V(mu, u):
+# Theoretical motion jacobian / command
+
+def V(r, u):
     x, y, theta = mu.transpose()[0]
     v, omega = u.transpose()[0]
     return np.array([[-sin(theta)/omega + sin(theta + omega)/omega, v*sin(theta)/omega**2 - v*sin(theta + omega)/omega**2],
@@ -30,12 +36,16 @@ def V(mu, u):
                      [0, 1]])
 
 
+# Command-related motion noise
+
 def M(u):
     v, omega = u.transpose()[0]
     alphas = 6*[0.1]
     return np.array([[alphas[0]*abs(v) + alphas[1]*abs(omega), 0],
                      [0, alphas[2]*abs(v) + alphas[3]*abs(omega)]])
 
+
+# Yaw noise induced by motion
 
 def R(u):
     v, omega = u.transpose()[0]
@@ -45,20 +55,26 @@ def R(u):
                      [0, 0, alphas[0]*abs(v) + alphas[1]*abs(omega)]])
 
 
-def h(mu):
-    x, y, theta = mu.transpose()[0]
+# Theoretical observation
+
+def h(r):
+    x, y, theta = r.transpose()[0]
     xf, yf = 10, 0
     return np.array([[sqrt((xf-x)**2 + (yf-y)**2)],
                      [atan2(yf-y, xf-x) - theta]])
 
 
-def H(mu):
-    x, y, theta = mu.transpose()[0]
+# Theoretical observation jacobian / pose
+
+def H(r):
+    x, y, theta = r.transpose()[0]
     xf, yf = 10, 0
     q = (xf-x)**2 + (yf-y)**2
     return np.array([[(x-xf)/sqrt(q), (y-yf)/sqrt(q), 0],
                      [-(y-yf)/q, (x-xf)/q, -1]])
 
+
+# Observation noise
 
 def Q(z):
     d, phi = z.transpose()[0]
@@ -67,28 +83,40 @@ def Q(z):
                      [0, alphas[2]*abs(d) + alphas[3]*abs(phi)]])
 
 
+# TESTS
+
+max_time = 3
+
+# Prior
 mu = np.array([[0],
                [0],
                [0]])
 sigma = np.array([[5, 0, 0],
-                 [0, 5, 0],
-                 [0, 0, 0.5]])
-u = np.array([[2],
-              [0.1]])
+                  [0, 5, 0],
+                  [0, 0, 0.5]])
 
+# Init display
 fig, ax = plt.subplots()
 
-for k in range(3):
+for k in range(max_time):
+    # New command & observation
+    u = np.array([[2],
+                  [0.1]])
     z = np.array([[9-mu[0][0]],
                   [0]])
+
+    # Prediction
     predicted_mu = g(mu, u)
     predicted_sigma = (G(mu, u).dot(sigma)).dot(
         G(mu, u).transpose()) + (V(mu, u).dot(M(u))).dot(V(mu, u).transpose()) + R(u)
+
+    # Correction
     K = (predicted_sigma.dot(H(mu).transpose())).dot(np.linalg.inv(
         (H(mu).dot(predicted_sigma)).dot(H(mu).transpose()) + Q(z)))
     new_mu = predicted_mu + K.dot(z-h(predicted_mu))
     new_sigma = (np.identity(3) - K.dot(H(mu))).dot(predicted_sigma)
 
+    # Log
     print("")
     print("Initial:")
     print(mu)
@@ -102,6 +130,8 @@ for k in range(3):
     print(new_mu)
     print(new_sigma)
     print("")
+
+    # Display
 
     delta = 0.2
     x = np.arange(-10, 10, delta)
