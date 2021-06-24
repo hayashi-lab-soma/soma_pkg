@@ -3,6 +3,20 @@ from math import cos, sin, sqrt, atan2, pi
 import matplotlib.pyplot as plt
 
 
+'''
+---------------------- NOTATIONS ----------------------
+
+- Pose: r = (x, y, theta)
+- Command: u = (v, omega)
+- Observation: z = (z1, ..., zi, ..., zn)
+        where zi = (d, phi)
+- Belief: b = N(mu, sigma)
+- Kalman gain: K
+
+-------------------------------------------------------
+
+'''
+
 # Theoretical motion
 
 def g(r, u):

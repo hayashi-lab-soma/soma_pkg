@@ -6,6 +6,20 @@ from scipy.stats import multivariate_normal
 import time
 
 
+'''
+---------------------- NOTATIONS ----------------------
+
+- Pose: r = (x, y, theta)
+- Command: u = (v, omega)
+- Observation: z = (z1, ..., zi, ..., zn)
+        where zi = (d, phi)
+- Belief: b = N(mu, sigma)
+- Kalman gain: K
+
+-------------------------------------------------------
+
+'''
+
 # Motion model (velocity-based or dead reckoning)
 # TODO: Odometry-based motion model
 
