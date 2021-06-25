@@ -84,12 +84,12 @@
         <link name="${prefix}_front_wheel_assembly">
 
             <!-- Collision part -->
-            <!-- <collision>
+            <collision>
                 <origin xyz="0 0 0.3" rpy="0 0 0" />
                 <geometry>
                     <cylinder length="0.05" radius="0.1"/>
                 </geometry>
-            </collision> -->
+            </collision>
 
             <!-- Visual part -->
             <!-- <visual>

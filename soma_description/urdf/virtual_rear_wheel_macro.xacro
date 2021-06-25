@@ -35,12 +35,12 @@
         <link name="${prefix}_virtual_rear_wheel">
 
             <!-- Collision part -->
-            <!-- <collision>
+            <collision>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
                     <cylinder length="${length}" radius="${radius}"/>
                 </geometry>
-            </collision> -->
+            </collision>
 
             <!-- Visual part -->
             <!-- <visual>

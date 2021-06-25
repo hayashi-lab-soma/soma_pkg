@@ -43,6 +43,7 @@
         </node>
 
         <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)/gazebo -z 0" respawn="false" output="screen" />
+        <node name="rviz" pkg="rviz" type="rviz" />
 
     </group>
 
