@@ -5,7 +5,7 @@
     <macro name="front_wheel_macro" params="parent prefix xyz">
 
         <!-- General properties used for inertia computation -->
-        <property name="mass" value="12" />
+        <property name="mass" value="1" />
         <property name="radius" value="0.2286" />
         <property name="length" value="0.0889" />
 
@@ -17,7 +17,7 @@
             <axis xyz="0 0 1" rpy="0 0 0" />
             <!-- <limit effort="0.4" velocity="1" lower="-1" upper="1"/> -->
             <limit effort="10" velocity="5" lower="-0.2" upper="0.2"/>
-            <!-- <dynamics damping="0.1"/> -->
+            <dynamics damping="0.1"/>
         </joint>
         <!-- Initial values: effort=0.4 velocity=12 -->
 
@@ -26,7 +26,8 @@
             <child link="${prefix}_front_wheel"/>
             <origin xyz="0.0 0.0 0.0" rpy="${-pi/2} 0 0" />
             <axis xyz="0 0 1" rpy="0 0 0" />
-            <!-- <dynamics damping="0.1"/> -->
+            <limit effort="10" velocity="5"/>
+            <dynamics damping="0.1"/>
         </joint>
 
         <!-- Transmissions -->
@@ -115,18 +116,18 @@
             </material>
             <!-- <mu1 value="200" /> -->
             <!-- <mu2 value="200" /> -->
-            <!-- <kp value="1000000" /> -->
-            <!-- <kd value="10" /> -->
+            <kp value="1000000000" />
+            <kd value="1" />
         </gazebo>
 
         <gazebo reference="${prefix}_front_wheel_assembly">
             <material>
 				Gazebo/Red
             </material>
-            <!-- <mu1 value="200" /> -->
-            <!-- <mu2 value="200" /> -->
-            <!-- <kp value="1000000" /> -->
-            <!-- <kd value="10" /> -->
+            <mu1 value="0.5" />
+            <mu2 value="0.5" />
+            <kp value="1000000000" />
+            <kd value="10" />
         </gazebo>
 
     </macro>

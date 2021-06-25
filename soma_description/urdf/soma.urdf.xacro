@@ -13,24 +13,24 @@
 	<ackermann_macro parent="base_link" />
 
 	<!-- Build Velodyne -->
-	<!-- <VLP-16 parent="body_bottom_link" name="velodyne" topic="/velodyne_points">
+	<VLP-16 parent="body_bottom_link" name="velodyne" topic="/velodyne_points">
 		<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
-	</VLP-16> -->
+	</VLP-16>
 
 	<!-- Build IMU -->
-	<!-- <imu_macro parent="body_bottom_link">
+	<imu_macro parent="body_bottom_link">
 		<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
-	</imu_macro> -->
+	</imu_macro>
 
 	<!-- Build Realsense -->
 	<!-- Front -->
-	<!-- <realsense_macro parent="body_bottom_link" prefix="f">
+	<realsense_macro parent="body_bottom_link" prefix="f">
 		<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
-	</realsense_macro> -->
+	</realsense_macro>
 	<!-- Rear -->
-	<!-- <realsense_macro parent="body_bottom_link" prefix="r">
+	<realsense_macro parent="body_bottom_link" prefix="r">
 		<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
-	</realsense_macro> -->
+	</realsense_macro>
 
 	<!-- Gazebo plugins -->
 	<gazebo>

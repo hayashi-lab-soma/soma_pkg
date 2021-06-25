@@ -12,28 +12,26 @@
 		<property name="width" value="0.05" />
 		<property name="depth" value="0.05" />
 		<property name="height" value="0.025" />
-		
+
 		<!-- Joint -->
 		<joint name="imu_joint" type="fixed">
 			<insert_block name="origin" />
 			<parent link="${parent}" />
 			<child link="imu_link" />
 		</joint>
-		
+
 		<!-- Link -->
 		<link name="imu_link">
-			
+
 			<!-- Inertial part -->
 			<inertial>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<mass value="${mass}" />
-				
+
 				<!-- Inertia matrix of a parallelepiped -->
-				<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0"
-						 ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" 
-						 iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+				<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0" ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
 			</inertial>
-			
+
 			<!-- Visual part -->
 			<visual>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -42,7 +40,7 @@
 				</geometry>
 				<material name="red" />
 			</visual>
-			
+
 			<!-- Collision part -->
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
@@ -59,35 +57,35 @@
 			<material>
 				Gazebo/Red
 			</material>
-    		<gravity>true</gravity>
-    		<sensor name="imu_sensor" type="imu">
-      			<always_on>true</always_on>
-      			<update_rate>100</update_rate>
-      			<visualize>true</visualize>
-      			<topic>__default_topic__</topic>
-      			<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
-        			<topicName>imu</topicName>
-        			<bodyName>imu_link</bodyName>
-        			<updateRateHZ>10.0</updateRateHZ>
-        			<gaussianNoise>0.0</gaussianNoise>
-        			<xyzOffset>0 0 0</xyzOffset>
-        			<rpyOffset>0 0 0</rpyOffset>
-        			<frameName>imu_link</frameName>
-        			<initialOrientationAsReference>false</initialOrientationAsReference>
-      			</plugin>
-      			<pose>0 0 0 0 0 0</pose>
-    		</sensor>
-  		</gazebo>
-	
+			<gravity>true</gravity>
+			<sensor name="imu_sensor" type="imu">
+				<always_on>true</always_on>
+				<update_rate>100</update_rate>
+				<visualize>true</visualize>
+				<topic>__default_topic__</topic>
+				<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+					<topicName>imu</topicName>
+					<bodyName>imu_link</bodyName>
+					<updateRateHZ>10.0</updateRateHZ>
+					<gaussianNoise>0.0</gaussianNoise>
+					<xyzOffset>0 0 0</xyzOffset>
+					<rpyOffset>0 0 0</rpyOffset>
+					<frameName>imu_link</frameName>
+					<initialOrientationAsReference>false</initialOrientationAsReference>
+				</plugin>
+				<pose>0 0 0 0 0 0</pose>
+			</sensor>
+		</gazebo>
+
 	</macro>
 	<!-- END IMU macro -->
 
 
 	<!-- Realsense macro -->
 	<macro name="realsense_macro" params="parent prefix *origin">
-		
+
 		<link name="camera_${prefix}_mount_link" />
-	
+
 		<joint name="camera_${prefix}_mount_joint" type="fixed">
 			<insert_block name="origin" />
 			<parent link="${parent}" />
