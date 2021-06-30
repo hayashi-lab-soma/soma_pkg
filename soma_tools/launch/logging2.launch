@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- arguments -->
+	<arg name="prefix" default="/home/soma1/" />
+	<arg name="is_lidar_topics" default="true" doc="" />
+	<arg name="is_camera_topics" default="true" doc="" />
+	<arg name="add_topics" default="" /> 
+	<!--
+	topic settings
+	...
+	-->
+	<!-- lidar topics -->
+	<arg name="lidar_topics" default="/velodyne_points /filtered_points" if="$(arg is_lidar_topics)" />
+	<arg name="lidar_topics" default="" unless="$(arg is_lidar_topics)" />
+	<!-- rgbd camera topics -->
+	<arg name="rgb_image_topics" default="/camera_f/color/image_raw " />
+	<arg name="depth_image_topics" default="/camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw " />
+	<arg name="camera_info_topics" default="/camera_f/color/camera_info /camera_f/depth/camera_info " />
+	<arg name="points_topics" default="/camera_f/depth/color/points /camera_f/depth/filtered_points" />
+	<arg name="camera_topics" default="$(arg rgb_image_topics) $(arg depth_image_topics) $(arg camera_info_topics)" if="$(arg is_camera_topics)" />
+	<arg name="camera_topics" default="" unless="$(arg is_camera_topics)" />
+	<!-- Odometry topics -->
+	<arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" />
+	<!-- soma topics -->
+	<arg name="soma_topics" default="/soma /soma/status tf tf_static" />
+	<!-- marge topics -->
+	<arg name="topics" default="$(arg lidar_topics) $(arg camera_topics)  $(arg odom_topics) $(arg soma_topics)" />
+	<!--  -->
+	<!--
+	Run logging
+	...
+	-->
+	<node pkg="rosbag" type="record" name="soma_logging" output="screen" args="-o $(arg prefix) $(arg topics) $(arg add_topics)">
+	</node>
+</launch>
