@@ -162,7 +162,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 		<!-- Gazebo additional parameters -->
 		<gazebo reference="body_top_link">
 			<material>
-						Gazebo/Gray
+				Gazebo/Gray
 			</material>
 		</gazebo>
 

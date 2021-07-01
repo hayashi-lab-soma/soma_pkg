@@ -99,4 +99,13 @@
 	</macro>
 	<!-- END Realsense macro -->
 
+
+	<!-- Velodyne macro -->
+	<macro name="velodyne_macro" params="parent *origin">
+		<VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points">
+			<insert_block name="origin" />
+		</VLP-16>
+	</macro>
+	<!-- END Velodyne macro -->
+
 </robot>

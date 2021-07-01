@@ -12,11 +12,6 @@
 	<!-- Build Ackermann movebase -->
 	<ackermann_macro parent="base_link" />
 
-	<!-- Build Velodyne -->
-	<VLP-16 parent="body_bottom_link" name="velodyne" topic="/velodyne_points">
-		<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
-	</VLP-16>
-
 	<!-- Build IMU -->
 	<imu_macro parent="body_bottom_link">
 		<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
@@ -32,14 +27,20 @@
 		<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
 	</realsense_macro>
 
+	<!-- Build Velodyne -->
+	<velodyne_macro parent="body_bottom_link">
+		<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
+	</velodyne_macro>
+
 	<!-- Gazebo plugins -->
 	<gazebo>
 		<!-- Load ros_control plugin using the steer_bot_hardware_gazebo
    		implementation of the hardware_interface::RobotHW -->
 		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-			<robotNamespace>/soma</robotNamespace>
+			<robotNamespace>/</robotNamespace>
 			<robotSimType>steer_bot_hardware_gazebo/SteerBotHardwareGazebo</robotSimType>
-			<legacyModeNS>false</legacyModeNS>
+			<!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
+			<legacyModeNS>true</legacyModeNS>
 		</plugin>
 	</gazebo>
 
