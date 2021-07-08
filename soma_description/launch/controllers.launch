@@ -1,0 +1,11 @@
+<launch>
+    <arg name="namespace" default="/" />
+
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller" />
+
+    <node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+        <!-- <param name="default_topic" value="$(arg namespace)diff_drive_controller/cmd_vel" /> -->
+        <param name="default_topic" value="$(arg namespace)ackermann_steering_controller/cmd_vel" />
+    </node>
+
+</launch>

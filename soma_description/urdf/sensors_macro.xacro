@@ -3,6 +3,7 @@
 
 	<!-- Include files -->
 	<include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+	<include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
 
 	<!-- IMU macro -->
 	<macro name="imu_macro" params="parent *origin">
