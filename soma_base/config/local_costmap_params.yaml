@@ -19,3 +19,5 @@ local_costmap:
 
   plugins:
     - { name: point_cloud_sensor, type: "costmap_2d::ObstacleLayer" }
+    - { name: camera_f_laser, type: "costmap_2d::ObstacleLayer" }
+    - { name: camera_r_laser, type: "costmap_2d::ObstacleLayer" }
