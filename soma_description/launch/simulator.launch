@@ -25,16 +25,11 @@
 	</include>
 
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
-	<rosparam command="load" file="$(find soma_description)/config/joint_state_controller.yaml" ns="$(arg namespace)" />
-	<!-- <rosparam command="load" file="$(find soma_description)/config/diff_drive_controller.yaml" ns="$(arg namespace)" /> -->
-	<rosparam command="load" file="$(find soma_description)/config/ackermann_steering_controller.yaml" ns="$(arg namespace)" />
-	<rosparam command="load" file="$(find soma_description)/config/gains.yaml" ns="$(arg namespace)" />
-	<rosparam command="load" file="$(find soma_description)/config/steer_bot_hardware_gazebo.yaml" ns="$(arg namespace)" />
-
-	<!-- push robot_description to factory and spawn robot in gazebo -->
-	<!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller diff_drive_controller" /> -->
-	<!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller" /> -->
-	<!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller" /> -->
+	<rosparam command="load" file="$(find soma_description)/config/single_controllers/joint_state_controller.yaml" ns="$(arg namespace)" />
+	<!-- <rosparam command="load" file="$(find soma_description)/config/driving_controllers/differential/diff_drive_controller.yaml" ns="$(arg namespace)" /> -->
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/ackermann_steering_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/gains.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/steer_bot_hardware_gazebo.yaml" ns="$(arg namespace)" />
 
 	<!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
