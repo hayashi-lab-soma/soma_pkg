@@ -1,5 +1,7 @@
 # Package **soma_base**
 
+Navigation with **move_base**
+
 ## Navigation simulation
 
 - In first terminal :

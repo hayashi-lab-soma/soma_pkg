@@ -1,5 +1,7 @@
 # Package **soma_description**
 
+Robot model, visualization in Rviz, simulation in Gazebo, driving with rqt_robot_steering GUI
+
 ## Robot simulation
 
 - Only Rivz

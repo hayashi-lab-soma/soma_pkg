@@ -8,7 +8,7 @@
 
 VISUALIZATION
 
-- jsk_rviz_plugins : rviz に対応した便利な GUI プラグイン集
+- **jsk_rviz_plugins** : rviz に対応した便利な GUI プラグイン集
 
 ```
 sudo apt install ros-melodic-jsk-rviz-plugins
@@ -16,7 +16,7 @@ sudo apt install ros-melodic-jsk-rviz-plugins
 
 MOTORS
 
-- maxon_epos_ros :
+- _maxon_epos_ros_ :
 
 ```
 cd catkin_ws/src
@@ -29,13 +29,13 @@ SENSORS
 
 - GPS
 
-  - geodesy :
+  - **geodesy** :
 
     ```
     sudo apt-get install ros-melodic-geodesy
     ```
 
-  - nmea_msgs :
+  - **nmea_msgs** :
 
     ```
     sudo apt-get install ros-melodic-nmea-msgs
@@ -43,19 +43,19 @@ SENSORS
 
 - RGB-D camera
 
-  - realsense2_camera :
+  - **realsense2_camera** :
 
     ```
     sudo apt-get install ros-melodic-realsense2-camera
     ```
 
-  - realsense2_description :
+  - **realsense2_description** :
 
     ```
     sudo apt-get install ros-melodic-realsense2-description
     ```
 
-  - realsense :
+  - _realsense_ :
 
     ```
     cd catkin_ws/src
@@ -64,7 +64,7 @@ SENSORS
     catkin_make
     ```
 
-  - realsense_gazebo_plugin :
+  - _realsense_gazebo_plugin_ :
 
     ```
     cd catkin_ws/src
@@ -75,13 +75,13 @@ SENSORS
 
 - LIDAR
 
-  - velodyne :
+  - **velodyne** :
 
     ```
     sudo apt-get install ros-melodic-velodyne
     ```
 
-  - pointcloud_to_laserscan :
+  - **pointcloud_to_laserscan** :
 
     ```
     sudo apt-get install ros-melodic-pointcloud-to-laserscan
@@ -89,13 +89,13 @@ SENSORS
 
 DRIVING
 
-- ackermann_steering_controller :
+- **ackermann_steering_controller** :
 
 ```
 sudo apt-get install ros-melodic-ackermann-steering-controller
 ```
 
-- steer_drive_ros :
+- _steer_drive_ros_ :
 
 ```
 cd catkin_ws/src
@@ -106,13 +106,13 @@ catkin_make
 
 IMAGE PROCESSING
 
-- pcl_ros :
+- **pcl_ros** :
 
 ```
 sudo apt-get install ros-melodic-pcl-ros
 ```
 
-- ndt_omp :
+- _ndt_omp_ :
 
 ```
 cd catkin_ws/src
@@ -121,7 +121,7 @@ cd ~/catkin_ws
 catkin_make
 ```
 
-- fast_gicp :
+- _fast_gicp_ :
 
 ```
 cd catkin_ws/src
@@ -132,39 +132,39 @@ catkin_make
 
 LOCALIZATION & SLAM
 
-- move_base
+- **move_base**
 
-  - costmap_2d : 二次元コストマップを扱うパッケージ
+  - **costmap_2d** : 二次元コストマップを扱うパッケージ
 
     ```
     sudo apt install ros-melodic-costmap-2d
     ```
 
-  - navfn : ナビゲーション用の基礎パッケージ
+  - **navfn** : ナビゲーション用の基礎パッケージ
 
     ```
     sudo apt install ros-melodic-navfn
     ```
 
-  - dwa_local_planner : DWA による局所動作計画を行なうためのパッケージ
+  - **dwa_local_planner** : DWA による局所動作計画を行なうためのパッケージ
 
     ```
     sudo apt install ros-melodic-dwa-local-planner
     ```
 
-- libg2o :
+- **libg2o** :
 
 ```
 sudo apt-get install ros-melodic-libg2o
 ```
 
-- rtabmap_ros :
+- **rtabmap_ros** :
 
 ```
 sudo apt install ros-melodic-rtabmap-ros
 ```
 
-- hdl_graph_slam : LiDAR に対応した３次元 slam パッケージ
+- _hdl_graph_slam_ : LiDAR に対応した３次元 slam パッケージ
 
 ```
 cd catkin_ws/src
@@ -173,7 +173,7 @@ cd ~/catkin_ws
 catkin_make
 ```
 
-- hdl_global_localization :
+- _hdl_global_localization_ :
 
 ```
 cd catkin_ws/src
@@ -184,30 +184,32 @@ catkin_make
 
 ## Structure / パッケージ構成
 
-- soma_atv_driver
+- **minisoma** : ?
 
-- soma_base
+- **soma_atv_driver** : Motor control
 
-- soma_bring_up : センサ関係の launch,node を持つパッケージ
+- **soma_base** : Navigation with **move_base**
 
-- soma_description
+- **soma_bring_up** : Sensors control / センサ関係の launch,node を持つパッケージ
 
-- soma_experiments
+- **soma_description** : Robot model, visualization in Rviz, simulation in Gazebo, driving with rqt_robot_steering GUI
 
-- soma_global_planner : 大域的な動作計画のためのパッケージ
+- **soma_experiments** : ?
 
-- soma_localization
+- **soma_global_planner** : Why not in **soma_base** ? / 大域的な動作計画のためのパッケージ
 
-- soma_mapping
+- **soma_localization** : Localization in known map
 
-- soma_mse
+- **soma_mapping** : Mapping of environment
 
-- soma_msgs
+- **soma_mse** : ?
 
-- soma_perception : 点群処理，画像処理系を持つパッケージ
+- **soma_msgs** : Custom ROS messages
 
-- soma_samples : 動作チェック用，お試し用の置き場所
+- **soma_perception** : Slope detection / 点群処理，画像処理系を持つパッケージ
 
-- soma_tools
+- **soma_samples** : ? / 動作チェック用，お試し用の置き場所
 
-- soma_viz
+- **soma_tools** : ?
+
+- **soma_viz** : ?
