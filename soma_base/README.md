@@ -1,4 +1,6 @@
-# <p style="text-align: center;">Navigation simulation</p>
+# Package **soma_base**
+
+## Navigation simulation
 
 - In first terminal :
 

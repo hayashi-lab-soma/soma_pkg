@@ -1,4 +1,4 @@
-# <p style="text-align: center;">soma_pkg</p>
+# Metapackage **soma_pkg**
 
 林研究室 林業用ロボット"SOMA"の ROS ベースパッケージ
 

@@ -1,35 +1,37 @@
-# <p style="text-align: center;">Robot simulation</p>
+# Package **soma_description**
 
-## Only Rivz
+## Robot simulation
 
-```
-roslaunch soma_description rviz.launch
-```
+- Only Rivz
 
-## Only Gazebo
+  ```
+  roslaunch soma_description rviz.launch
+  ```
 
-- In first terminal :
+- Only Gazebo
 
-```
-roslaunch soma_description gazebo.launch
-```
+  - In first terminal :
 
-- In second terminal :
+    ```
+    roslaunch soma_description gazebo.launch
+    ```
 
-```
-roslaunch soma_description controllers.launch
-```
+  - In second terminal :
 
-## Both
+    ```
+    roslaunch soma_description controllers.launch
+    ```
 
-- In first terminal :
+- Both
 
-```
-roslaunch soma_description simulator.launch
-```
+  - In first terminal :
 
-- In second terminal :
+    ```
+    roslaunch soma_description simulator.launch
+    ```
 
-```
-roslaunch soma_description controllers.launch
-```
+  - In second terminal :
+
+    ```
+    roslaunch soma_description controllers.launch
+    ```
