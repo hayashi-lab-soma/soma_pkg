@@ -1,3 +1,5 @@
+# Differential driving controller
+
 diff_drive_controller:
   type: "diff_drive_controller/DiffDriveController"
   left_wheel: ["left_front_wheel_rotate", "left_rear_wheel_rotate"]

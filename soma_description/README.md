@@ -29,7 +29,7 @@ Robot model, visualization in Rviz, simulation in Gazebo, driving with rqt_robot
   - In first terminal :
 
     ```
-    roslaunch soma_description simulator.launch
+    roslaunch soma_description simulation.launch
     ```
 
   - In second terminal :

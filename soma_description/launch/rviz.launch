@@ -1,18 +1,19 @@
-<?xml version="1.0"?>
+<!-- Rviz launcher -->
+
 <launch>
-
-	<!-- Arguments -->
+	<!-- Robot model -->
 	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro" />
-	<arg name="rvizconfig" value="$(find soma_description)/rviz/simulator.rviz" />
-	<arg name="gui" default="true" />
-
-	<!-- Parameters -->
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
-	<!-- Nodes -->
+	<!-- Launch Rviz -->
+	<arg name="rvizconfig" value="$(find soma_description)/rviz/simulation.rviz" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+	<!-- Joint state control -->
+	<arg name="gui" default="true" />
 	<node if="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
 	<node unless="$(arg gui)" name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-	<node name="rviz" pkg="rviz" type="rviz" args="rvizconfig" />
-
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+		<param name="publish_frequency" value="50.0" />
+	</node>
 </launch>

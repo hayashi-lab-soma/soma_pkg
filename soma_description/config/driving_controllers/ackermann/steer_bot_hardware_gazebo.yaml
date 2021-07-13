@@ -1,3 +1,5 @@
+# Extension of ackermann_steering_controller for 4-wheeled robots
+
 steer_bot_hardware_gazebo:
   rear_wheel: "ackermann_virtual_rear_wheel_rotate"
   front_steer: "ackermann_front_steer_hinge"

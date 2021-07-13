@@ -42,5 +42,6 @@
     </node>
 
     <!-- Vizualization in Rviz (with adequate configuration) -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find soma_base)/rviz/navigation.rviz" />
+    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 </launch> 

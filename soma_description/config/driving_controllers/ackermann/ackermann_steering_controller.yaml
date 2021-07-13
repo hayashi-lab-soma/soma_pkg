@@ -1,3 +1,5 @@
+# Ackermann driving controller for 2-wheeled robots
+
 ackermann_steering_controller:
   type: "ackermann_steering_controller/AckermannSteeringController"
 

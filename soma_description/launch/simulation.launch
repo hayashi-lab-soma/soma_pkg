@@ -1,0 +1,47 @@
+<!-- Gazebo & Rviz launcher -->
+
+<launch>
+	<arg name="namespace" default="/" />
+
+	<!-- Robot model -->
+	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+	<!-- Launch Rviz -->
+	<arg name="rvizconfig" value="$(find soma_description)/rviz/simulation.rviz" />
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)"/>
+
+	<!-- Launch Gazebo -->
+	<arg name="world_name" default="simple3.world" />
+	<arg name="paused" default="true"/>
+	<arg name="use_sim_time" default="true"/>
+	<arg name="gui" default="true"/>
+	<arg name="headless" default="false"/>
+	<arg name="debug" default="false"/>
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(arg world_name)" />
+		<arg name="paused" value="$(arg paused)"/>
+		<arg name="use_sim_time" value="$(arg use_sim_time)"/>
+		<arg name="gui" value="$(arg gui)" />
+		<arg name="headless" value="$(arg headless)"/>
+		<arg name="debug" value="$(arg debug)" />
+	</include>
+
+	<!-- Load controllers (joint state & driving) -->
+	<rosparam command="load" file="$(find soma_description)/config/simple_controllers/joint_state_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/differential/diff_drive_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/ackermann_steering_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/ackermann_gains.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/steer_bot_hardware_gazebo.yaml" ns="$(arg namespace)" />
+
+	<!-- Joint state control -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+		<param name="publish_frequency" value="50.0" />
+	</node>
+
+	<!-- Spawn robot in Gazebo -->
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)gazebo -z 0" respawn="false" output="screen" />
+
+</launch>
