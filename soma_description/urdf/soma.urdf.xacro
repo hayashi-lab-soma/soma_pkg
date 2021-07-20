@@ -1,10 +1,13 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
+	<property name="sensors_enabled" value="false"/>
+
 	<!-- Include files -->
 	<include filename="$(find soma_description)/urdf/ackermann_macro.xacro" />
-	<include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
-	<include filename="$(find soma_description)/urdf/sensors_macro.xacro" />
+	<if value="${sensors_enabled}">
+		<include filename="$(find soma_description)/urdf/sensors_macro.xacro" />
+	</if>
 
 	<!-- Empty link to use Gazebo -->
 	<link name="base_link" />
@@ -12,25 +15,27 @@
 	<!-- Build Ackermann movebase -->
 	<ackermann_macro parent="base_link" />
 
-	<!-- Build IMU -->
-	<imu_macro parent="body_bottom_link">
-		<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
-	</imu_macro>
+	<if value="${sensors_enabled}">
+		<!-- Build IMU -->
+		<imu_macro parent="body_bottom_link">
+			<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
+		</imu_macro>
 
-	<!-- Build Realsense -->
-	<!-- Front -->
-	<realsense_macro parent="body_bottom_link" prefix="f">
-		<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
-	</realsense_macro>
-	<!-- Rear -->
-	<realsense_macro parent="body_bottom_link" prefix="r">
-		<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
-	</realsense_macro>
+		<!-- Build Realsense -->
+		<!-- Front -->
+		<realsense_macro parent="body_bottom_link" prefix="f">
+			<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
+		</realsense_macro>
+		<!-- Rear -->
+		<realsense_macro parent="body_bottom_link" prefix="r">
+			<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
+		</realsense_macro>
 
-	<!-- Build Velodyne -->
-	<velodyne_macro parent="body_bottom_link">
-		<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
-	</velodyne_macro>
+		<!-- Build Velodyne -->
+		<velodyne_macro parent="body_bottom_link">
+			<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
+		</velodyne_macro>
+	</if>
 
 	<!-- Gazebo plugins -->
 	<gazebo>
