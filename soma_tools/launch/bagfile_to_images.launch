@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="img_extract" pkg="image_view" type="extract_images">
+		<remap from="image" to="/camera_F/color/image_raw" />
+		<param name="filename_format" value="/home/hayashi/images/frame%04d.jpg" />
+	</node>
+</launch>

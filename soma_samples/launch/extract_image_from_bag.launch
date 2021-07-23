@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="extract" pkg="image_view" type="extract_images" output="screen" respawn="false" cwd="ROS_HOME">
+		<remap from="image" to="/color/image_raw" />
+		<param name="filename_format" value="%04d.jpg" />
+	</node>
+</launch>

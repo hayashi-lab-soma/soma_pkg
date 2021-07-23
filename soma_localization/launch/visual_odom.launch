@@ -2,14 +2,15 @@
 <launch>
 	<!-- arguments -->
 	<!-- subscribe topics -->
-	<arg name="camera_name" default="camera_F" doc="" />
+	<arg name="camera_name" default="camera_f" doc="" />
 	<arg name="rgb_image_topic" default="$(arg camera_name)/color/image_raw" doc="" />
-	<arg name="depth_image_topic" default="$(arg camera_name)/aligned_depth_to_color/image_raw" doc="" />
-	<arg name="camera_info_topic" default="$(arg camera_name)/color/camera_info" doc="" />
+	<arg name="depth_image_topic" default="$(arg camera_name)/depth/image_rect_raw" doc="" />
+	<arg name="rgb_camera_info_topic" default="$(arg camera_name)/color/camera_info" doc="" />
+	<arg name="depth_camera_info_topic" default="$(arg camera_name)/depth/camera_info" doc="" />
 	<!-- publish topic -->
 	<arg name="odom_topic" default="vodom" doc="" />
 	<!-- frame setting -->
-	<arg name="frame_id" default="soma_link" doc="base frame name" />
+	<arg name="frame_id" default="base_link" doc="base frame name" />
 	<arg name="vo_frame_id" default="vodom" doc="visual odometry frame name" />
 	<!-- other arguments -->
 	<arg name="publish_tf_odom" default="true" doc="tf vo_frame_id->frame_id publish flag" />
@@ -17,12 +18,18 @@
 	<arg name="odom_args" default="" doc="additional arguments for odometry" />
 	<arg name="output" default="screen" doc="" />
 	<!--  -->
+	<!-- depth registered -->
+	<node name="depth_registration" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/register">
+		<remap from="rgb/camera_info" to="$(arg rgb_camera_info_topic)" />
+		<remap from="depth/camera_info" to="$(arg depth_camera_info_topic)" />
+		<remap from="depth/image_rect" to="$(arg depth_image_topic)" />
+	</node>
 	<!-- RGB-D Odometry -->
-	<node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="$(arg output)" args="$(arg rtabmap_args) $(arg odom_args)">
+	<node if="false" pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="$(arg output)" args="$(arg rtabmap_args) $(arg odom_args)">
 		<!-- image subscribe topics -->
 		<remap from="rgb/image" to="$(arg rgb_image_topic)" />
 		<remap from="depth/image" to="$(arg depth_image_topic)" />
-		<remap from="rgb/camera_info" to="$(arg camera_info_topic)" />
+		<remap from="rgb/camera_info" to="$(arg rgb_camera_info_topic)" />
 		<!-- <remap from="rgbd_image" to="$(arg rgbd_topic_relay)" /> -->
 		<!-- publish topics -->
 		<remap from="odom" to="$(arg odom_topic)" />

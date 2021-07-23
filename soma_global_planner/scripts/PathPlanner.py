@@ -18,10 +18,12 @@ class PathPlanner:
     # print('landmarks ==>')
     # print(self.pos)
 
-    self.fig_G = plt.figure(num=1, figsize=(3, 3),)
-    self.ax_G = plt.subplot(1, 1, 1)
-    self.ax_G.set_xlim(0.0, 10.0)
-    self.ax_G.set_ylim(0.0, 10.0)
+    # self.fig_G = plt.figure(num=1, figsize=(3, 3),)
+    # self.ax_G = plt.subplot(1, 1, 1)
+    # self.ax_G.set_xlim(0.0, 10.0)
+    # self.ax_G.set_ylim(0.0, 10.0)
+
+    self.G = nx.Graph()
 
     # self.fig_Ge = plt.figure(num=2, figsize=(3, 3),)
     # self.ax_Ge = plt.subplot(1, 1, 1)
@@ -42,10 +44,9 @@ class PathPlanner:
 
     # print('--------------------------------------------------')
     # print('(i) Make initial graph')
-    self.G = nx.Graph()
     self.G = self.delaunay_network()
-    # print('|V|=', self.G.number_of_nodes())
-    # print('|E|=', self.G.number_of_edges())
+    print('|V|=', self.G.number_of_nodes())
+    print('|E|=', self.G.number_of_edges())
     # draw initial graph G
     # nx.draw_networkx(self.G, pos=self.pos, ax=self.ax_G)
     """
@@ -54,14 +55,14 @@ class PathPlanner:
     # print('(ii) Modify to be Eulerian')
     self.Ge = nx.MultiGraph()
     self.Ge, odd_nodes, M = self.chinese_postmap_problem(self.G)
-    # print('|Ve|=', self.Ge.number_of_nodes())
-    # print('|Ee|=', self.Ge.number_of_edges())
+    print('|Ve|=', self.Ge.number_of_nodes())
+    print('|Ee|=', self.Ge.number_of_edges())
     # draw odd nodes on G
-    nx.draw_networkx_nodes(self.G,
-                           pos=self.pos,
-                           nodelist=odd_nodes,
-                           node_color='r',
-                           ax=self.ax_G,)
+    # nx.draw_networkx_nodes(self.G,
+    #                        pos=self.pos,
+    #                        nodelist=odd_nodes,
+    #                        node_color='r',
+    #                        ax=self.ax_G,)
     # draw Eulerian graph Ge
     # nx.draw_networkx_edges(self.G,
     #                        pos=self.pos,

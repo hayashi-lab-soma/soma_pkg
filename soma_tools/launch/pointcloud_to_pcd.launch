@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <launch>
-	<arg name="input" default="/height_clip/output" doc="" />
-	<arg name="prefix" default="/home/hayashi/filtered_map" doc="" />
-	<arg name="frame_id" default="map" doc="" />
-	<arg name="duration" default="1" doc="" />
+	<arg name="input" default="merged_points" doc="" />
+	<arg name="prefix" default="/home/hayashi/points/" doc="" />
+	<arg name="frame_id" default="base_link" doc="" />
+	<arg name="duration" default="0.1" doc="" />
 	<node name="pointcloud2pcd" pkg="nodelet" type="nodelet" output="screen" args="standalone jsk_pcl_utils/PointCloudToPCD nodelet_manager">
 		<remap from="~input" to="$(arg input)" />
 		<param name="prefix" value="$(arg prefix)" />

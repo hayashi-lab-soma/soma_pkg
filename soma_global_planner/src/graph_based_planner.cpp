@@ -22,10 +22,10 @@ namespace graph_based_planner
   {
     if (!initialized)
     {
-      ROS_INFO("Initialize the planner");
+      ROS_INFO("Initialize the global planner");
       _costmap_ros = costmap_ros;
       _costmap = _costmap_ros->getCostmap();
-
+      nh = ros::NodeHandle();
       ros::NodeHandle pnh("~" + name);
       world_model = new base_local_planner::CostmapModel(*_costmap);
 
@@ -50,6 +50,25 @@ namespace graph_based_planner
     plan.clear();
     _costmap = _costmap_ros->getCostmap();
 
+    // call service of python script?
+    // check start pose
+    ROS_INFO("%.f, %.f, %.f",
+             start.pose.position.x,
+             start.pose.position.y,
+             start.pose.position.z);
+
+    ros::ServiceClient client = nh.serviceClient<nav_msgs::GetPlan>("get_graph_based_plan");
+    nav_msgs::GetPlan srv;
+    srv.request.start = start;
+    srv.request.goal = goal;
+    srv.request.tolerance = 1.0;
+    if (client.call(srv))
+    {
+      ROS_INFO("%d", (int)srv.response.plan.poses.size());
+      plan = srv.response.plan.poses;
+    }
+    else{
+    }
     return true;
   }
 };

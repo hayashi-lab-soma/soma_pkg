@@ -1,0 +1,21 @@
+CloudIn1: 
+  topic_name: /front/filtered_points
+  # topic_name: /front/obstacles
+  pose_yaw: 0
+  pose_pitch: 0
+  pose_roll: 0
+  pose_x: 0
+  pose_y: 0
+  pose_z: 0
+CloudIn2: 
+  topic_name: /rear/filtered_points
+  # topic_name: /rear/obstacles
+  pose_yaw: 0
+  pose_pitch: 0
+  pose_roll: 0
+  pose_x: 0
+  pose_y: 0
+  pose_z: 0
+CloudOut: 
+  topic_name: /merged_points
+  frame_id: soma_link # virtual link (not same base link name like "soma_link")

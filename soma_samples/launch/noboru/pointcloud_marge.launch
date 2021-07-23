@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- <param name="/use_sim_time" value="True" /> -->
+	<group ns="front">
+		<arg name="manager" default="manager" />
+		<node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+		<node name="transform" pkg="nodelet" type="nodelet" output="log" args="load jsk_pcl_utils/TfTransformCloud $(arg manager)">
+			<remap from="~input" to="/camera_F/depth_registered/points" />
+			<remap from="~output" to="transformed_points" />
+			<param name="target_frame_id" value="soma_link" />
+		</node>
+		<node name="depth_lim" pkg="nodelet" type="nodelet" output="log" args="load pcl/PassThrough $(arg manager)">
+			<remap from="~input" to="transformed_points" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="filter_field_name" value="x" />
+			<param name="filter_limit_min" value="0.5" />
+			<param name="filter_limit_max" value="8.0" />
+		</node>
+		<node name="downsampling" pkg="nodelet" type="nodelet" output="screen" args="load pcl/VoxelGrid $(arg manager)">
+			<!-- <remap from="~input" to="transformed_points" /> -->
+			<remap from="~input" to="depth_lim/output" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-100" />
+			<param name="filter_limit_max" value="100" />
+			<param name="leaf_size" value="0.1" />
+		</node>
+		<node name="radiusremoval" pkg="nodelet" type="nodelet" output="screen" args="load pcl/RadiusOutlierRemoval $(arg manager)">
+			<remap from="~input" to="downsampling/output" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="radius_search" value="0.5" />
+			<param name="min_neighbors" value="10" />
+		</node>
+		<node name="outlierremoval" pkg="nodelet" type="nodelet" output="screen" args="load pcl/StatisticalOutlierRemoval $(arg manager)">
+			<remap from="~input" to="radiusremoval/output" />
+			<remap from="~output" to="filtered_points" />
+			<param name="mean_k" value="20" />
+			<param name="stddev" value="0.1" />
+		</node>
+		<!-- normal filtering -->
+		<!--
+		<node name="obstacle_detection" pkg="nodelet" type="nodelet" output="screen" args="load rtabmap_ros/obstacles_detection $(arg manager)">
+		<remap from="cloud" to="filtered_points" />
+		<param name="frame_id" value="soma_link" />
+		</node>
+		-->
+	</group>
+	<!--  -->
+	<!--  -->
+	<!--  -->
+	<group ns="rear">
+		<arg name="manager" default="manager" />
+		<node name="$(arg manager)" pkg="nodelet" type="nodelet" args="manager" />
+		<node name="transform" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl_utils/TfTransformCloud $(arg manager)">
+			<remap from="~input" to="/camera_B/depth_registered/points" />
+			<remap from="~output" to="transformed_points" />
+			<param name="target_frame_id" value="soma_link" />
+		</node>
+		<node name="depth_lim" pkg="nodelet" type="nodelet" output="log" args="load pcl/PassThrough $(arg manager)">
+			<remap from="~input" to="transformed_points" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="filter_field_name" value="x" />
+			<param name="filter_limit_min" value="-10.0" />
+			<param name="filter_limit_max" value="-0.5" />
+		</node>
+		<node name="downsampling" pkg="nodelet" type="nodelet" output="screen" args="load pcl/VoxelGrid $(arg manager)">
+			<!-- <remap from="~input" to="transformed_points" /> -->
+			<remap from="~input" to="depth_lim/output" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-100" />
+			<param name="filter_limit_max" value="100" />
+			<param name="leaf_size" value="0.1" />
+		</node>
+		<node name="radiusremoval" pkg="nodelet" type="nodelet" output="screen" args="load pcl/RadiusOutlierRemoval $(arg manager)">
+			<remap from="~input" to="downsampling/output" />
+			<!-- <remap from="~output" to="filtered_points" /> -->
+			<param name="radius_search" value="0.5" />
+			<param name="min_neighbors" value="10" />
+		</node>
+		<node name="outlierremoval" pkg="nodelet" type="nodelet" output="screen" args="load pcl/StatisticalOutlierRemoval $(arg manager)">
+			<remap from="~input" to="radiusremoval/output" />
+			<remap from="~output" to="filtered_points" />
+			<param name="mean_k" value="20" />
+			<param name="stddev" value="0.1" />
+		</node>
+		<!-- normal filtering -->
+		<!--
+		<node name="obstacle_detection" pkg="nodelet" type="nodelet" output="screen" args="load rtabmap_ros/obstacles_detection $(arg manager)">
+		<remap from="cloud" to="filtered_points" />
+		<param name="frame_id" value="soma_link" />
+		</node>
+		-->
+	</group>
+	<!--  -->
+	<!--  -->
+	<!-- marge points -->
+	<rosparam command="load" file="$(find soma_samples)/config/merger.yaml" />
+	<node if="true" name="merger" pkg="cloud_merger" type="cloud_merger" output="screen" />
+	<!-- <node if="false" name="merger" pkg="pointcloud_merger" type="pointcloud_merger_node" output="screen"> -->
+	<!-- <remap from="cloud_out" to="/merged_points" /> -->
+	<!-- <remap from="cloud1" to="front/filtered_points" /> -->
+	<!-- <remap from="cloud2" to="rear/filtered_points" /> -->
+	<!-- <param name="target_frame" value="soma_link" /> -->
+	<!-- </node> -->
+	<!--  -->
+	<include if="true" file="$(find soma_tools)/launch/pointcloud_to_pcd.launch">
+		<arg name="input" value="merged_points" doc="" />
+		<arg name="prefix" value="/home/hayashi/points/" doc="" />
+		<arg name="frame_id" value="soma_link" doc="" />
+		<arg name="duration" value="0.1" doc="" />
+	</include>
+</launch>

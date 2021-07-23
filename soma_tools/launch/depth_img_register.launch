@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+	<arg name="manager" default="camera_nodelet_manager" />
+	<node name="$(arg manager)" pkg="nodelet" type="nodelet" output="screen" args="manager" />
+	<!--  -->
+	<node name="dpeth_register" pkg="nodelet" type="nodelet" args="standalone depth_image_proc/register $(arg manager)" output="screen">
+		<remap from="rgb/camera_info" to="/camera_F/color/camra_info" />
+		<remap from="depth/camera_info" to="/camera_F/depth/camera_info" />
+		<remap from="depth/image_rect" to="/camera_F/depth/image_rect_raw" />
+	</node>
+</launch>

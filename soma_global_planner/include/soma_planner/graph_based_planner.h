@@ -7,6 +7,7 @@
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
 #include <pluginlib/class_list_macros.h>
+#include <nav_msgs/GetPlan.h>
 
 namespace graph_based_planner
 {
@@ -27,6 +28,8 @@ namespace graph_based_planner
     costmap_2d::Costmap2D* _costmap;
     base_local_planner::WorldModel* world_model;
     bool initialized;
+
+    ros::NodeHandle nh;
   };
 };
 

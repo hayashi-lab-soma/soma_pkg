@@ -2,19 +2,56 @@
 <launch>
 	<arg name="frame_id" default="camera_f_link" />
 	<arg name="cloud_input" default="/depth/color/points" />
-	<!-- <node pkg="nodelet" type="nodelet" name="vg_filter" args="standalone pcl/VoxelGrid ob_detector_manager" output="screen">
-		<remap from="~input" to="/depth/color/points" />
-		<param name="input_frame" value="$(arg frame_id)" />
-		<param name="filter_field_name" value="z" />
-		<param name="filter_limit_min" value="-10.0" />
-		<param name="filter_limit_max" value="10.0" />
-		<param name="leaf_size" value="0.1" />
-		<param name="filter_limit_negative" value="false" />
-	</node> -->
-	<node pkg="nodelet" type="nodelet" name="obstacles_detection" args="standalone rtabmap_ros/obstacles_detection">
-		<remap from="cloud" to="$(arg cloud_input)" />
-		<param name="frame_id" type="string" value="$(arg frame_id)" />
-		<!-- <param name="map_frame_id" type="string" value="camera_f_depth_optical_frame"/> -->
-		<param name="wait_for_transform" type="bool" value="true" />
-	</node>
+	<arg name="namespace" default="camera1" />
+	<arg name="depth_min" default="-1.0" />
+	<arg name="depth_max" default="1.0" />
+	<!--  -->
+	<!--  -->
+	<group ns="$(arg namespace)">
+		<node name="ob_detector_manager" pkg="nodelet" type="nodelet" args="manager" />
+		<!--  -->
+		<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid ob_detector_manager" output="screen">
+			<remap from="~input" to="$(arg cloud_input)" />
+			<param name="input_frame" value="$(arg frame_id)" />
+			<param name="filter_field_name" value="x" />
+			<param name="filter_limit_min" value="$(arg depth_min)" />
+			<param name="filter_limit_max" value="$(arg depth_max)" />
+			<param name="leaf_size" value="0.1" />
+			<param name="filter_limit_negative" value="false" />
+		</node>
+		<node pkg="nodelet" type="nodelet" name="sor_filter" args="load pcl/StatisticalOutlierRemoval ob_detector_manager" output="screen">
+			<remap from="~input" to="vg_filter/output" />
+			<param name="input_frame" value="$(arg frame_id)" />
+			<param name="mean_k" value="50" />
+			<param name="stddev" value="0.01" />
+			<!-- <param name="filter_limit_negative" value="false" /> -->
+		</node>
+		<node pkg="nodelet" type="nodelet" name="obstacles_detection" args="load rtabmap_ros/obstacles_detection ob_detector_manager">
+			<!-- <remap from="cloud" to="$(arg cloud_input)" /> -->
+			<remap from="cloud" to="sor_filter/output" />
+			<!-- <remap from="cloud" to="birateral/output" /> -->
+			<param name="frame_id" value="$(arg frame_id)" />
+			<param name="wait_for_transform" type="bool" value="true" />
+		</node>
+		<!-- transform -->
+		<node name="trans" pkg="nodelet" type="nodelet" args="load jsk_pcl_utils/TfTransformCloud ob_detector_manager">
+			<remap from="~input" to="obstacles" />
+			<remap from="~output" to="filtered" />
+			<param name="target_frame_id" value="$(arg frame_id)" />
+		</node>
+		<!--
+		clustering
+		:
+		-->
+		<node name="clustering" pkg="nodelet" type="nodelet" args="load jsk_pcl/EuclideanClustering ob_detector_manager">
+			<remap from="~input" to="filtered" />
+			<param name="tolerance" value="0.1" />
+			<param name="min_size" value="100" />
+		</node>
+		<node name="decomposer" pkg="nodelet" type="nodelet" args="load jsk_pcl/ClusterPointIndicesDecomposer ob_detector_manager">
+			<remap from="~input" to="filtered" />
+			<remap from="~boxes" to="boxes" />
+			<remap from="~target" to="clustering/output" />
+		</node>
+	</group>
 </launch>

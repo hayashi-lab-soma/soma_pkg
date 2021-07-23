@@ -31,7 +31,7 @@ def cb(data):
 
   np.savetxt(SAVE_FILE_NAME, trees,
              fmt=['%d',
-                  '%.3f','%.3f','%.3f',])
+                  '%.3f', '%.3f', '%.3f', ])
   print('save tree locations')
 
 

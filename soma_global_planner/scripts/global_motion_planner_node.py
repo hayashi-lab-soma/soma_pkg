@@ -342,7 +342,6 @@ def call_back(data):
   make_marker_array_msg(way_points)
   pub_path.publish(path_msg)
 
-
 if __name__ == '__main__':
   rospy.init_node('global_motion_planner', anonymous=True)
   rospy.loginfo('start')
@@ -350,4 +349,7 @@ if __name__ == '__main__':
       '/soma/waypoints', MarkerArray, queue_size=3)
   pub_path = rospy.Publisher('/soma/global_trajectory', Path, queue_size=3)
   rospy.Subscriber('tree_poses', PoseArray, call_back)
+
+  rospy.
+
   rospy.spin()

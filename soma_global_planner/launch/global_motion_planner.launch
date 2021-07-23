@@ -2,22 +2,30 @@
 <launch>
 	<!-- arguments -->
 	<!-- <arg name="pcd_file" default="$(find soma_mapping)/data/tree_extracted_map.pcd" doc="" /> -->
-	<arg name="pcd_file" default="$(find soma_localization)/data/Mirais-3DMap-imu-non-ground-adjusted.pcd" doc="" />
+	<arg name="pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-non-ground-adjusted.pcd" doc="" />
 	<arg name="nodelet_manager" default="map_manager" doc="" />
 	<!--
 	publish 3-D tree map from PCD file
 	launch pcd_publish.launch in soma_tools
 	-->
-	<include file="$(find soma_tools)/launch/pcd_publish.launch">
+	<!-- <include file="$(find soma_tools)/launch/pcd_publish.launch">
 		<arg name="file" value="$(arg pcd_file)" doc="" />
-		<arg name="interval" value="5.0" doc="" />
+		<arg name="interval" value="0" doc="" />
 		<arg name="frame_id" value="map" doc="" />
-		<arg name="output" value="map_points" doc="" />
-	</include>
+		<arg name="latch" value="true"/>
+		<arg name="output" value="/planner/map_points" doc="" />
+	</include> -->
+		<node if="true" name="planning_map_points_publisher" pkg="pcl_ros" type="pcd_to_pointcloud">
+		<remap from="/cloud_pcd" to="/planner/map_points" />
+		<param name="file_name" value="$(arg pcd_file)" />
+		<param name="interval" value="0" />
+		<param name="frame_id" value="map" />
+		<param name="latch" value="true" />
+	</node>
 	<!-- run nodelet manager -->
 	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" />
 	<node name="map_ds" pkg="nodelet" type="nodelet" args="load pcl/VoxelGrid $(arg nodelet_manager)">
-		<remap from="~input" to="/map_points" />
+		<remap from="~input" to="/planner/map_points" />
 		<!-- <remap from="~output" to="/map_points_filtered" /> -->
 		<param name="filter_field_name" value="z" />
 		<param name="leaf_size" value="0.1" />
@@ -62,7 +70,7 @@
 	run graph based global planner
 	created by Tominaga
 	-->
-	<node if="true" name="planner" pkg="soma_planner" type="global_motion_planner_node.py" output="screen">
+	<node if="true" name="graph_based_python_planner" pkg="soma_global_planner" type="global_motion_planner_server.py" output="screen">
 		<remap from="tree_poses" to="/cluster_decomposer/centroid_pose_array" />
 	</node>
 </launch>

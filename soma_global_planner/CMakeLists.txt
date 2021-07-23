@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_core
   pluginlib
   base_local_planner
+  soma_msgs
 )
 
 ## System dependencies are found with CMake's conventions

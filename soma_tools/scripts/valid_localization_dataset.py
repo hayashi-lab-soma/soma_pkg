@@ -1,6 +1,7 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import os
+# import pathlib
 import sys
 import numpy as np
 import datetime
@@ -14,8 +15,10 @@ from tensorflow.keras import models
 from tensorflow.keras import layers
 
 
-#current file directry
-DIR=os.path.dirname(__file__)
-MODEL_NAME = DIR+'/../'+'models/model-x_train-1-n12-e1.h5'
+if __name__=='__main__':
+  #current file directry
+  # DIR = os.path.abspath(__file__)
+  MODEL_NAME='/home/hayashi/catkin_ws/src/soma_pkg/soma_tools/models/model-x_train-2-n6-e2000.h5'
+  # print(os.path.dirname(__file__))
+  model = tf.keras.models.load_model(MODEL_NAME,compile=False)
 
-print(MODEL_NAME)

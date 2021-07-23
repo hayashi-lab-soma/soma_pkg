@@ -20,7 +20,7 @@
 	<arg name="camera_info_topics" default="/camera_f/color/camera_info /camera_f/depth/camera_info /camera_r/color/camera_info /camera_r/depth/camera_info" />
 	<arg name="points_topics" default="/camera_f/depth/color/points /camera_r/dpeth/color/points /camera_f/depth/filtered_points /camera_r/depth/filtered_points" />
 	<arg name="camera_topics" default="$(arg rgb_image_topics) $(arg depth_image_topics) $(arg camera_info_topics)" if="$(arg is_camera_topics)" />
-	<arg name="camera_topics" default="" unless="$(arg is_camera_topics)" />
+	<arg name="camera_topics" default="" unless="$(arg is_camera_topics) /camera_f/scan /camera_r/scan" />
 	<!-- IMU topics -->
 	<arg name="imu_topics" default="/imu/data" if="$(arg is_imu_topics)" />
 	<arg name="imu_topics" default="" unless="$(arg is_imu_topics)" />
