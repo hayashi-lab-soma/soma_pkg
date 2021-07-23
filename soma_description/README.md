@@ -16,10 +16,10 @@ robot_state_publisherのlaunchを持っているパッケージ．
 [SOMA URDF FILE](./urdf/soma.urdf.xacro)  
 base_footprint  
 └ base_link : 後輪軸中心  
- ├ imu : MTi-30原点  
- ├ camera_f : 前方D435原点  
- ├ camera_r : 後方D435原点  
- ├ lidar : velodyne原点
+　├ imu : MTi-30原点  
+　├ camera_f : 前方D435原点  
+　├ camera_r : 後方D435原点  
+　├ lidar : velodyne原点
 
 ## Launch  
 [launch FILE](./launch/description.launch)    
