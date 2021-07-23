@@ -5,8 +5,8 @@
 
 
 ## パッケージ構成 (Structure)
-soma_ros_pkg  
-- 
+__soma_ros_pkg__  
+- __soma_description__ : SOMA's description files (URDF and so on).
 - 
 
 
