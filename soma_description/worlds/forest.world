@@ -82,8 +82,8 @@
           <surface>
             <friction>
               <ode>
-                <mu>1</mu>
-                <mu2>1</mu2>
+                <mu>Inf</mu>
+                <mu2>Inf</mu2>
                 <fdir1>0 0 0</fdir1>
                 <slip1>0</slip1>
                 <slip2>0</slip2>
@@ -100,7 +100,7 @@
             </friction>
             <bounce>
               <restitution_coefficient>0</restitution_coefficient>
-              <threshold>1e+06</threshold>
+              <threshold>1e+100</threshold>
             </bounce>
             <contact>
               <collide_without_contact>0</collide_without_contact>
@@ -109,8 +109,8 @@
               <ode>
                 <soft_cfm>0</soft_cfm>
                 <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
-                <kd>1</kd>
+                <kp>1e+7</kp>
+                <kd>Inf</kd>
                 <max_vel>0.01</max_vel>
                 <min_depth>0</min_depth>
               </ode>

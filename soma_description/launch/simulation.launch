@@ -6,6 +6,7 @@
 	<!-- Robot model -->
 	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+	<arg name="z_offset" default="0.2" />
 
 	<!-- Launch Rviz -->
 	<arg name="rvizconfig" value="$(find soma_description)/rviz/simulation.rviz" />
@@ -42,6 +43,6 @@
 	</node>
 
 	<!-- Spawn robot in Gazebo -->
-	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)gazebo -z 0" respawn="false" output="screen" />
+	<node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)gazebo -z $(arg z_offset)" respawn="false" output="screen" />
 
 </launch>

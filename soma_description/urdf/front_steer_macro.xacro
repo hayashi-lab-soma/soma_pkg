@@ -26,7 +26,7 @@
             </joint>
             <actuator name="${prefix}_front_steer_motor">
                 <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-                <mechanicalReduction>10</mechanicalReduction>
+                <mechanicalReduction>1</mechanicalReduction>
             </actuator>
         </transmission>
 

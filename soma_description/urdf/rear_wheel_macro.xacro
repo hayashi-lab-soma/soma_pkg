@@ -16,7 +16,7 @@
             <origin xyz="${xyz}" rpy="${-pi/2} 0 0" />
             <axis xyz="0 0 1" rpy="0 0 0" />
             <limit effort="10" velocity="5"/>
-            <dynamics damping="0.1"/>
+            <!-- <dynamics damping="0.1"/> -->
         </joint>
 
         <!-- Transmission -->
@@ -65,10 +65,10 @@
             <material>
 				Gazebo/Red
             </material>
-            <mu1 value="0.5" />
-            <mu2 value="0.5" />
-            <kp value="1000000000" />
-            <kd value="10" />
+            <mu1 value="Inf" />
+            <mu2 value="Inf" />
+            <!-- <kp value="1000000000" />
+            <kd value="10" /> -->
         </gazebo>
 
     </macro>
