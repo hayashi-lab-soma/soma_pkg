@@ -52,33 +52,33 @@
 		<group unless="$(arg use_center_frame)">
 			<node pkg="tf2_ros" type="static_transform_publisher" name="Camera2Base" args="$(arg tx) $(arg ty) $(arg tz) $(arg pan) $(arg tilt) $(arg role) $(arg base_link) $(arg camera_name)_link" />
 		</group>
-		<!--
+
 		<node pkg="nodelet" type="nodelet" name="pt_x_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
-		<remap from="~input" to="/$(arg camera_name)/depth_registered/points" />
-		<param name="input_frame" value="$(arg base_link)" />
-		<param name="filter_field_name" value="x" />
-		<param name="filter_limit_min" value="-6.0" />
-		<param name="filter_limit_max" value="6.0" />
-		<param name="filter_limit_negative" value="false" />
+			<remap from="~input" to="/$(arg camera_name)/depth_registered/points" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="x" />
+			<param name="filter_limit_min" value="-6.0" />
+			<param name="filter_limit_max" value="6.0" />
+			<param name="filter_limit_negative" value="false" />
 		</node>
 		<node pkg="nodelet" type="nodelet" name="pt_z_filter" args="load pcl/PassThrough realsense2_manager_$(arg camera_name)">
-		<remap from="~input" to="/$(arg camera_name)/pt_x_filter/output" />
-		<param name="input_frame" value="$(arg base_link)" />
-		<param name="filter_field_name" value="z" />
-		<param name="filter_limit_min" value="-0.5" />
-		<param name="filter_limit_max" value="1.5" />
-		<param name="filter_limit_negative" value="false" />
+			<remap from="~input" to="/$(arg camera_name)/pt_x_filter/output" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-0.5" />
+			<param name="filter_limit_max" value="1.5" />
+			<param name="filter_limit_negative" value="false" />
 		</node>
 		<node pkg="nodelet" type="nodelet" name="vg_filter" args="load pcl/VoxelGrid realsense2_manager_$(arg camera_name)">
-		<remap from="~input" to="/$(arg camera_name)/pt_z_filter/output" />
-		<remap from="~output" to="/$(arg camera_name)/prefiltered" />
-		<param name="input_frame" value="$(arg base_link)" />
-		<param name="filter_field_name" value="z" />
-		<param name="filter_limit_min" value="-10.0" />
-		<param name="filter_limit_max" value="10.0" />
-		<param name="leaf_size" value="0.03" />
-		<param name="filter_limit_negative" value="false" />
+			<remap from="~input" to="/$(arg camera_name)/pt_z_filter/output" />
+			<remap from="~output" to="/$(arg camera_name)/prefiltered" />
+			<param name="input_frame" value="$(arg base_link)" />
+			<param name="filter_field_name" value="z" />
+			<param name="filter_limit_min" value="-10.0" />
+			<param name="filter_limit_max" value="10.0" />
+			<param name="leaf_size" value="0.03" />
+			<param name="filter_limit_negative" value="false" />
 		</node>
-		-->
+
 	</group>
 </launch>

@@ -4,7 +4,7 @@
 	<arg name="prefix" default="/home/soma1/" />
 	<arg name="is_lidar_topics" default="true" doc="" />
 	<arg name="is_camera_topics" default="true" doc="" />
-	<arg name="add_topics" default="" /> 
+	<arg name="add_topics" default="" />
 	<!--
 	topic settings
 	...
@@ -16,8 +16,8 @@
 	<arg name="rgb_image_topics" default="/camera_f/color/image_raw " />
 	<arg name="depth_image_topics" default="/camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw " />
 	<arg name="camera_info_topics" default="/camera_f/color/camera_info /camera_f/depth/camera_info " />
-	<arg name="points_topics" default="/camera_f/depth/color/points /camera_f/depth/filtered_points" />
-	<arg name="camera_topics" default="$(arg rgb_image_topics) $(arg depth_image_topics) $(arg camera_info_topics)" if="$(arg is_camera_topics)" />
+	<arg name="points_topics" default=" /camera_f//prefiltered" />
+	<arg name="camera_topics" default="$(arg rgb_image_topics) $(arg depth_image_topics) $(arg camera_info_topics) $(arg points_topics)" if="$(arg is_camera_topics)" />
 	<arg name="camera_topics" default="" unless="$(arg is_camera_topics)" />
 	<!-- Odometry topics -->
 	<arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" />
