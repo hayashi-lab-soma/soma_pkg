@@ -1,16 +1,15 @@
 <!-- Controllers launcher -->
 
 <launch>
+    <!-- Arguments -->
     <arg name="namespace" value="/"/>
-
-    <!-- Ackermann (ackermann_steering_controller) or differential (diff_drive_controller) -->
-    <arg name="driving_controller" default="ackermann_steering_controller"/>
+    <arg name="driving_gui" value="true"/>
 
     <!-- Launch controllers (joint state & driving) -->
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller $(arg driving_controller)"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller"/>
 
     <!-- Launch driving GUI -->
-    <node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
-        <param name="default_topic" value="$(arg namespace)$(arg driving_controller)/cmd_vel" />
+    <node if="$(arg driving_gui)" name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+        <param name="default_topic" value="$(arg namespace)ackermann_steering_controller/cmd_vel" />
     </node>
 </launch>
