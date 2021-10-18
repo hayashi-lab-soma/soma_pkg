@@ -19,12 +19,13 @@ import matplotlib.pyplot as plt
 
 # Theoretical motion
 
+
 def g(r, u):
     x, y, theta = r.transpose()[0]
     v, omega = u.transpose()[0]
     return np.array([[x - float(v)/omega * sin(theta) + float(v)/omega * sin(theta + omega)],
                      [y + float(v)/omega * cos(theta) - float(v) /
-                     omega * cos(theta + omega)],
+                      omega * cos(theta + omega)],
                      [theta + omega]])
 
 
@@ -99,7 +100,7 @@ def Q(z):
 
 # TESTS
 
-max_time = 3
+max_time = 5
 
 # Prior
 mu = np.array([[0],
@@ -114,9 +115,9 @@ fig, ax = plt.subplots()
 
 for k in range(max_time):
     # New command & observation
-    u = np.array([[2],
+    u = np.array([[1],
                   [0.1]])
-    z = np.array([[9-mu[0][0]],
+    z = np.array([[10 - (mu[0][0]+u[0][0])],
                   [0]])
 
     # Prediction
@@ -148,8 +149,8 @@ for k in range(max_time):
     # Display
 
     delta = 0.2
-    x = np.arange(-10, 10, delta)
-    y = np.arange(-10, 10, delta)
+    x = np.arange(-4, 12, delta)
+    y = np.arange(-4, 4, delta)
     X, Y = np.meshgrid(x, y)
 
     Z1 = np.zeros([len(X), len(X[0])])
@@ -196,6 +197,7 @@ for k in range(max_time):
     plt.plot(new_mu[0][0], new_mu[1][0], "bo")
     CS3 = ax.contour(X, Y, Z3, levels=[0.02], colors=['b'])
     # ax.clabel(CS3, inline=1, fontsize=10)
+    plt.plot(10, 0, "y*", markersize="20")
 
     mu = new_mu
     sigma = new_sigma

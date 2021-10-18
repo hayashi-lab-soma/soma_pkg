@@ -1,4 +1,4 @@
-from random import uniform, normalvariate, random
+from random import uniform, normalvariate, random, seed
 import matplotlib.pyplot as plt
 from math import pi, cos, sin, sqrt, erf, atan2, acos, exp, tan
 import numpy as np
@@ -30,9 +30,9 @@ def motion(pose, command, noise):
     v_noise, omega_noise, yaw_noise = noise
 
     # Covariance matrix
-    v_sigma = v_noise[0]*v + v_noise[1]*omega
-    omega_sigma = omega_noise[0]*v + omega_noise[1]*omega
-    yaw_sigma = yaw_noise[0]*v + yaw_noise[1]*omega
+    v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
+    omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
+    yaw_sigma = yaw_noise[0]*abs(v) + yaw_noise[1]*abs(omega)
     sigma = [[v_sigma, 0],
              [0, omega_sigma]]
 
@@ -67,8 +67,8 @@ def observation(pose, visibility, noise):
 
         d_noise, phi_noise = noise
         if distance < visibility:
-            d_sigma = d_noise[0]*distance + d_noise[1]*angle
-            phi_sigma = phi_noise[0]*distance + phi_noise[1]*angle
+            d_sigma = d_noise[0]*distance + d_noise[1]*abs(angle)
+            phi_sigma = phi_noise[0]*distance + phi_noise[1]*abs(angle)
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -82,36 +82,120 @@ def observation(pose, visibility, noise):
     return observation
 
 
-def correspondence(features, pose, observation, noise, threshold):
-    corresponding_feature = None
-    highest_likelihood = 0
+def correspondence(features, pose, observation, visibility, noise, threshold):
+    if len(features) == 0:
+        return [], []
+
+    corresponding_features = len(features)*[0]
+    x, y, theta = pose.transpose()[0]
+    for i, f in enumerate(features):
+        mu = f[0].transpose()[0]
+        xf, yf = mu
+        d = sqrt((xf - x)**2 + (yf - y)**2)
+        phi = atan2(yf - y, xf - x) - theta
+
+        if d < visibility:
+            d_noise, phi_noise = noise
+            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
+            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+            sigma = [[d_sigma, 0],
+                     [0, phi_sigma]]
+
+            if abs(observation[1] - phi) > abs(observation[1] - phi + 2*pi):
+                phi -= 2*pi
+            elif abs(observation[1] - phi) > abs(observation[1] - phi - 2*pi):
+                phi += 2*pi
+
+            d_interval, phi_interval = d_sigma/10, phi_sigma/10
+            max_d_max_phi = multivariate_normal.cdf(
+                [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0], [d, phi], sigma)
+            max_d_min_phi = multivariate_normal.cdf(
+                [observation[0]+d_interval/2.0, observation[1]-phi_interval/2.0], [d, phi], sigma)
+            min_d_max_phi = multivariate_normal.cdf(
+                [observation[0]-d_interval/2.0, observation[1]+phi_interval/2.0], [d, phi], sigma)
+            min_d_min_phi = multivariate_normal.cdf(
+                [observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0], [d, phi], sigma)
+            feature_likelihood = max_d_max_phi - max_d_min_phi - min_d_max_phi + min_d_min_phi
+
+            assert feature_likelihood <= 1
+            if max_d_max_phi != 0:
+                if max_d_max_phi == max_d_min_phi or min_d_max_phi == min_d_min_phi:
+                    assert multivariate_normal.pdf(
+                        observation, [d, phi], sigma) < 10**(-10), "phi, " + str(phi_sigma)
+                elif max_d_max_phi == min_d_max_phi or max_d_min_phi == min_d_min_phi:
+                    assert multivariate_normal.pdf(
+                        observation, [d, phi], sigma) < 10**(-10), "d, " + str(d_sigma)
+
+            if feature_likelihood > threshold:
+                corresponding_features[i] = feature_likelihood
+
+    corresponding_likelihoods = list(
+        np.sort(np.array(corresponding_features)))
+    corresponding_features = list(np.argsort(
+        np.array(corresponding_features)))
+    corresponding_likelihoods.reverse()
+    corresponding_features.reverse()
+    for i, e in enumerate(corresponding_likelihoods):
+        if e == 0:
+            corresponding_features[i] = None
+
+    return corresponding_features, corresponding_likelihoods
+
+
+def delete_features(features, pose, observations, noise, visibility, threshold):
+    new_features = []
     for i, f in enumerate(features):
         mu = f[0].transpose()[0]
         xf, yf = mu
         d = sqrt((xf - pose[0])**2 + (yf - pose[1])**2)
-        phi = atan2(yf - pose[1], xf - pose[0]) - pose[2]
 
-        d_noise, phi_noise = noise
-        d_sigma = d_noise[0]*d + d_noise[1]*phi
-        phi_sigma = phi_noise[0]*d + phi_noise[1]*phi
-        sigma = [[d_sigma, 0],
-                 [0, phi_sigma]]
+        if d < visibility:
+            highest_likelihood = 0
+            for o in observations:
+                phi = atan2(yf - pose[1], xf - pose[0]) - pose[2]
 
-        if observation[1] > 0 and phi < 0:
-            phi += 2*pi
-        elif observation[1] < 0 and phi > 0:
-            phi -= 2*pi
+                d_noise, phi_noise = noise
+                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
+                phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+                sigma = [[d_sigma, 0],
+                         [0, phi_sigma]]
 
-        feature_likelihood = multivariate_normal.pdf(
-            observation, [d, phi], sigma)
-        if feature_likelihood > highest_likelihood:
-            highest_likelihood = feature_likelihood
-            corresponding_feature = i
+                if abs(o[1] - phi) > abs(o[1] - phi + 2*pi):
+                    phi -= 2*pi
+                elif abs(o[1] - phi) > abs(o[1] - phi - 2*pi):
+                    phi += 2*pi
 
-    if highest_likelihood < threshold:
-        corresponding_feature = None
+                d_interval, phi_interval = d_sigma/10, phi_sigma/10
+                max_d_max_phi = multivariate_normal.cdf(
+                    [o[0]+d_interval/2.0, o[1]+phi_interval/2.0], [d, phi], sigma)
+                max_d_min_phi = multivariate_normal.cdf(
+                    [o[0]+d_interval/2.0, o[1]-phi_interval/2.0], [d, phi], sigma)
+                min_d_max_phi = multivariate_normal.cdf(
+                    [o[0]-d_interval/2.0, o[1]+phi_interval/2.0], [d, phi], sigma)
+                min_d_min_phi = multivariate_normal.cdf(
+                    [o[0]-d_interval/2.0, o[1]-phi_interval/2.0], [d, phi], sigma)
+                feature_likelihood = max_d_max_phi - \
+                    max_d_min_phi - min_d_max_phi + min_d_min_phi
 
-    return corresponding_feature, highest_likelihood
+                assert feature_likelihood <= 1
+                if max_d_max_phi != 0:
+                    if max_d_max_phi == max_d_min_phi or min_d_max_phi == min_d_min_phi:
+                        assert multivariate_normal.pdf(
+                            o, [d, phi], sigma) < 10**(-10), "phi, " + str(phi_sigma)
+                    elif max_d_max_phi == min_d_max_phi or max_d_min_phi == min_d_min_phi:
+                        assert multivariate_normal.pdf(
+                            o, [d, phi], sigma) < 10**(-10), "d, " + str(d_sigma)
+
+                if feature_likelihood > highest_likelihood:
+                    highest_likelihood = feature_likelihood
+
+            if highest_likelihood > threshold:
+                new_features.append(f)
+
+        else:
+            new_features.append(f)
+
+    return new_features
 
 
 # EKF
@@ -215,6 +299,10 @@ def display():
 
 # TESTS
 
+# Init random seed
+
+seed(0)
+
 # Parameters
 
 max_time = 8
@@ -263,9 +351,6 @@ print("\nInitial pose: " + str(robot_pose))
 
 particles_num = 100
 particles = []
-particles_sigma = [[100, 0, 0],
-                   [0, 100, 0],
-                   [0, 0, 1]]
 
 for i in range(particles_num):
     # Right initial pose
@@ -286,11 +371,11 @@ display()
 
 # Simulation
 
-for i in range(max_time-1):
+for t in range(max_time-1):
     start = time.time()
 
     # Real world simulation
-    print("\nStep: " + str(i+1))
+    print("\nStep: " + str(t+1))
     print("Command: " + str(u))
     robot_pose[0], robot_pose[1], robot_pose[2] = motion(
         robot_pose, u, motion_noise)
@@ -299,7 +384,6 @@ for i in range(max_time-1):
     print("Observation: " + str(new_observation))
 
     # Particles update
-
     for j, p in enumerate(particles):
         # print("\nParticle " + str(j) + ":")
 
@@ -312,22 +396,74 @@ for i in range(max_time-1):
                          [p[2]]])
         # print("Predicted pose: \n" + str(pose))
 
+        features_correspondences = len(new_observation)*[None]
+
+        if len(p[4]) > 0:
+            correspondences_orders = len(new_observation)*[0]
+            features_preferences = []
+            features_likelihoods = []
+
+            for i in range(len(new_observation)):
+                corresponding_features, corresponding_likelihoods = correspondence(
+                    p[4], pose, new_observation[i], visibility, observation_noise, 10**(-5))
+
+                features_preferences.append(corresponding_features)
+                features_likelihoods.append(corresponding_likelihoods)
+
+            conflicts = dict()
+            for i in range(len(features_preferences)):
+                features_correspondences[i] = features_preferences[i][0]
+            for i, c in enumerate(features_correspondences):
+                if c != None and features_correspondences.count(c) > 1:
+                    if c not in conflicts:
+                        conflicts[c] = [i]
+                    else:
+                        conflicts[c].append(i)
+
+            while conflicts != {}:
+                conflicts_to_pop = []
+                for c in conflicts:
+                    likelihoods = [
+                        [features_likelihoods[e][correspondences_orders[e]], e] for e in conflicts[c]]
+                    tmp = list(np.sort(likelihoods))
+                    tmp.reverse()
+                    right_feature = tmp[0][1]
+
+                    for i, e in enumerate(conflicts[c]):
+                        if e == right_feature:
+                            conflicts[c].pop(i)
+                        else:
+                            new_order = correspondences_orders[e] + 1
+                            if new_order < len(features_preferences[e]):
+                                features_correspondences[e] = features_preferences[e][new_order]
+                                correspondences_orders[e] += 1
+                            else:
+                                features_correspondences[e] = None
+
+                    if len(conflicts[c]) < 2:
+                        conflicts_to_pop.append(c)
+
+                for c in conflicts_to_pop:
+                    conflicts.pop(c)
+
+                for i, c in enumerate(features_correspondences):
+                    if c != None and features_correspondences.count(c) > 1:
+                        if c not in conflicts:
+                            conflicts[c] = [i]
+                        else:
+                            conflicts[c].append(i)
+
+            for i, c in enumerate(features_correspondences):
+                assert c == None or features_correspondences.count(
+                    c) == 1, "Draw"
+
         for i in range(len(new_observation)):
             new_z = np.array([[new_observation[i][0]],
                               [new_observation[i][1]]])
             # print("Observation " + str(i) + ": \n" + str(new_z))
 
-            # print("Number of features: " + str(len(p[4])))
-            corresponding_feature, highest_likelihood = correspondence(
-                p[4], pose, new_observation[i], observation_noise, 0.001)
-            # print("Highest likelihood: " + str(highest_likelihood))
-            # if corresponding_feature != None:
-            # print("Corresponding feature: " + str(corresponding_feature))
-            # else:
-            # print("Previously unseen feature")
-
             # Previously unseen feature
-            if corresponding_feature == None:
+            if features_correspondences[i] == None:
                 mu = h_inverse(pose, new_z)
                 # print("Feature estimated position :\n" + str(mu))
                 H1 = H(pose, mu)
@@ -338,7 +474,7 @@ for i in range(max_time-1):
 
             # Already seen feature
             else:
-                mu, sigma = p[4][corresponding_feature]
+                mu, sigma = p[4][features_correspondences[i]]
                 f = mu.transpose()[0]
                 predicted_z = h(pose, f)
                 H1 = H(pose, mu)
@@ -348,13 +484,18 @@ for i in range(max_time-1):
                 K = (sigma.dot(H1.transpose())).dot(Q1_inverse)
                 new_mu = mu + K.dot(new_z - predicted_z)
                 new_sigma = (np.identity(2) - K.dot(H1)).dot(sigma)
-                p[4][corresponding_feature] = [new_mu, new_sigma]
+                p[4][features_correspondences[i]] = [new_mu, new_sigma]
                 tmp = (
                     (new_z - predicted_z).transpose().dot(Q1_inverse)).dot(new_z - predicted_z)[0][0]
                 tmp = max(tmp, -709)
                 weight_update = 1 / \
                     sqrt(2*pi*abs(np.linalg.det(Q1))) * exp(-1/2 * tmp)
-                p[3] *= weight_update
+
+                # Bias to ensure non-zero weight
+                p[3] = max(p[3]*weight_update, 10**(-323))
+
+        p[4] = delete_features(p[4], p[:3], new_observation,
+                               observation_noise, visibility, 10**(-5))[:]
 
     # Normalization
     weights_sum = 0
@@ -364,13 +505,18 @@ for i in range(max_time-1):
     for p in particles:
         p[3] /= weights_sum
 
-    # Find most probable pose
+    # Find most probable pose and features
     max_weight = 0
-    for p in particles:
+    for i, p in enumerate(particles):
         if p[3] > max_weight:
             max_weight = p[3]
-            most_probable_pose = p[:3]
-    print("Most probable pose: " + str(most_probable_pose))
+            most_probable_particle_index = i
+    # print("Most probable particle: " + str(most_probable_particle_index))
+    print("Most probable pose: " +
+          str(particles[most_probable_particle_index][:3]))
+    print("Most probable features: ")
+    for i, f in enumerate(particles[most_probable_particle_index][4]):
+        print(str(i) + ": " + str(f[0].transpose()[0]))
 
     # Resampling criteria (effective particles number)
     effective_particles_num = 0
@@ -380,6 +526,7 @@ for i in range(max_time-1):
 
     # Resampling
     if effective_particles_num < particles_num/2:
+        # if False:
         print("Resampling: Yes")
         cumulated_weights = [0]
         for p in particles:
@@ -389,30 +536,37 @@ for i in range(max_time-1):
         for p in particles:
             old_particles.append(p[:])
         particles = []
+        resampling_sigma = [[0.01, 0, 0],
+                            [0, 0.01, 0],
+                            [0, 0, 0.0001]]
+        survivors = []
         for i in range(particles_num):
             r = random()
             for j in range(len(cumulated_weights)-1):
                 if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
-                    resampling_sigma = [[0.01, 0, 0],
-                                        [0, 0.01, 0],
-                                        [0, 0, 0.0001]]
                     new_particle = list(multivariate_normal.rvs(
                         old_particles[j][:3], resampling_sigma))
                     new_particle.append(1.0/particles_num)
-                    new_particle.append(old_particles[j][4])
+                    new_particle.append(old_particles[j][4][:])
+                    if j not in survivors:
+                        survivors.append(j)
                     particles.append(new_particle)
+        survivors.sort()
+        # print("Survivors: " + str(survivors))
+        print("Survivors: " + str(len(survivors)))
+
     else:
         print("Resampling: No")
+
+    stop = time.time()
 
     subplot += 1
     ax = plt.subplot(subplot)
     display()
 
-    stop = time.time()
     print("Time: " + str(stop-start))
 
     # plt.show()
-
 
 print("\n")
 plt.show()
