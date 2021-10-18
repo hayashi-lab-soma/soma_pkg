@@ -3,27 +3,31 @@
 	<!-- arguments -->
 	<arg name="input_map" default="/map_points" doc="" />
 	<arg name="nodelet_manager" default="map_manager" doc="" />
+	<arg name="centroids_poses_topic" default="~centroid_pose_array" />
 	<!--  -->
 	<!--  -->
 	<node name="$(arg nodelet_manager)" pkg="nodelet" type="nodelet" args="manager" output="screen" />
 	<!-- filter -->
-	<node name="map_downsampling" pkg="nodelet" type="nodelet" output="screen" args="load pcl/VoxelGrid $(arg nodelet_manager)">
-		<remap from="~input" to="$(arg input_map)" />
-		<remap from="~output" to="$(arg input_map)_filtered" />
-		<param name="filter_field_name" value="z" />
-		<param name="leaf_size" value="0.1" />
-		<param name="filter_limit_min" value="-100" />
-		<param name="filter_limit_max" value="100" />
-	</node>
+	<!-- <node name="map_downsampling" pkg="nodelet" type="nodelet" output="screen" args="load pcl/VoxelGrid $(arg nodelet_manager)"> -->
+	<!-- <remap from="~input" to="$(arg input_map)" /> -->
+	<!-- <remap from="~output" to="$(arg input_map)_filtered" /> -->
+	<!-- <param name="filter_field_name" value="z" /> -->
+	<!-- <param name="leaf_size" value="0.1" /> -->
+	<!-- <param name="filter_limit_min" value="-100" /> -->
+	<!-- <param name="filter_limit_max" value="100" /> -->
+	<!-- </node> -->
 	<!-- Euclidean clustering -->
 	<node name="clustering" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/EuclideanClustering $(arg nodelet_manager)">
-		<remap from="~input" to="$(arg input_map)_filtered" />
+		<!-- <remap from="~input" to="$(arg input_map)_filtered" /> -->
+		<remap from="~input" to="$(arg input_map)" />
 		<param name="tolerance" value="0.6" />
 		<param name="min_size" value="80" />
 	</node>
 	<!-- decompose -->
 	<node name="cluster_decomposer" pkg="nodelet" type="nodelet" output="screen" args="load jsk_pcl/ClusterPointIndicesDecomposerZAxis $(arg nodelet_manager)">
-		<remap from="~input" to="$(arg input_map)_filtered" />
+		<!-- <remap from="~input" to="$(arg input_map)_filtered" /> -->
+		<remap from="~input" to="$(arg input_map)" />
 		<remap from="~target" to="/clustering/output" />
+		<remap from="~centroid_pose_array" to="$(arg centroids_poses_topic)"/>
 	</node>
 </launch>
