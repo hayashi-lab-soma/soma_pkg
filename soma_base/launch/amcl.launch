@@ -1,8 +1,9 @@
-<!-- AMCL launch file (localization) -->
+<!-- AMCL launcher (localization) -->
 
 <launch>
     <!-- Topic where sensor data is published -->
     <arg name="scan_topic" default="/scan"/>
+    <arg name="lidar_topic" default="/velodyne_points"/>
 
     <!-- Robot's initial pose -->
     <arg name="initial_pose_x" default="0.0"/>
@@ -45,7 +46,7 @@
     </node> -->
 
     <node pkg="pointcloud_to_laserscan" type="pointcloud_to_laserscan_node" name="pointcloud_to_laserscan">
-        <remap from="cloud_in" to="/velodyne_points" />
+        <remap from="cloud_in" to="$(arg lidar_topic)" />
         <remap from="scan" to="$(arg scan_topic)" />
     </node>
 
