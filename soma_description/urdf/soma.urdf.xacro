@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
-	<property name="sensors_enabled" value="false"/>
+	<property name="sensors_enabled" value="true"/>
 
 	<!-- Include files -->
 	<include filename="$(find soma_description)/urdf/ackermann_macro.xacro" />
@@ -17,24 +17,32 @@
 
 	<if value="${sensors_enabled}">
 		<!-- Build IMU -->
-		<imu_macro parent="body_bottom_link">
-			<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
-		</imu_macro>
+		<if value="${imu_enabled}">
+			<imu_macro parent="body_bottom_link">
+				<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
+			</imu_macro>
+		</if>
 
 		<!-- Build Realsense -->
 		<!-- Front -->
-		<realsense_macro parent="body_bottom_link" prefix="f">
-			<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
-		</realsense_macro>
+		<if value="${camera_enabled}">
+			<realsense_macro parent="body_bottom_link" prefix="f">
+				<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
+			</realsense_macro>
+		</if>
 		<!-- Rear -->
-		<realsense_macro parent="body_bottom_link" prefix="r">
-			<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
-		</realsense_macro>
+		<if value="${camera_enabled}">
+			<realsense_macro parent="body_bottom_link" prefix="r">
+				<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
+			</realsense_macro>
+		</if>
 
 		<!-- Build Velodyne -->
-		<velodyne_macro parent="body_bottom_link">
-			<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
-		</velodyne_macro>
+		<if value="${lidar_enabled}">
+			<velodyne_macro parent="body_bottom_link">
+				<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
+			</velodyne_macro>
+		</if>
 	</if>
 
 	<!-- Gazebo plugins -->
