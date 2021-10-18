@@ -1,0 +1,31 @@
+<!-- Tree poses extractor from lidar pointcloud -->
+
+<launch>
+    <!-- Arguments -->
+    <arg name="lidar_topic" default="/velodyne_points"/>
+    <arg name="clipped_lidar_topic" default="/filtered_map_points"/>
+    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
+
+    <!-- Clip pointcloud between min and max altitude -->
+    <include file="$(find soma_mapping)/launch/map_range_clip.launch">
+        <arg name="map_points_topic" default="$(arg lidar_topic)" />
+        <arg name="x_min" default="-100" />
+        <arg name="x_max" default="100" />
+        <arg name="y_min" default="-100" />
+        <arg name="y_max" default="100" />
+        <arg name="height_min" default="-1" />
+        <arg name="height_max" default="5" />
+    </include>
+
+    <!-- Make clusters -->
+    <include file="$(find soma_mapping)/launch/make_tree_map.launch">
+        <arg name="input_map" default="$(arg clipped_lidar_topic)" />
+        <arg name="centroids_poses_topic" default="/tree_pose_array" />
+    </include>
+
+    <!-- Extract centers of mass of clusters -->
+    <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/>
+
+    <!-- Vizualization in Rviz (with adequate configuration) -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+</launch>
