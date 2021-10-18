@@ -30,7 +30,7 @@
 	</node>
 	<node name="height_clip" pkg="nodelet" type="nodelet" args="load pcl/PassThrough $(arg nodelet_manager)">
 		<remap from="~input" to="/y_axis_clip/output" />
-		<!-- <remap from="~output" to="/filtered_map_points" /> -->
+		<remap from="~output" to="/filtered_map_points" />
 		<param name="filter_field_name" value="z" />
 		<param name="filter_limit_min" value="$(arg height_min)" />
 		<param name="filter_limit_max" value="$(arg height_max)" />
