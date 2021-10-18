@@ -1,21 +1,19 @@
-<!-- Navigation launch file -->
+<!-- Navigation launcher -->
 
 <launch>
+    <!-- Arguments -->
     <arg name="namespace" default="/" />
+    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
 
-    <!-- Run robot configuration (model, controllers, state publishers, spawn in Gazebo) -->
-    <!-- <include file="$(find my_package)/launch/robot_configuration.launch" /> -->
-
-    <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller diff_drive_controller" /> -->
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller" />
+    <!-- Run driving controllers -->
+    <include file="(find soma_description)/launch/controllers.launch">
+        <arg name="driving_gui" value="false"/>
+    </include>
 
     <!-- Run the map server which publish the global (static) map -->
     <node name="map_server" pkg="map_server" type="map_server" args="$(find soma_base)/maps/mirais_map.yaml">
         <param name="frame_id" value="map"/>
     </node>
-
-    <!-- Why is it necessary ? To set initial pose ? No more necessary... -->
-    <!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0 0 0 0 0 0 /map /odom 100"/> -->
 
     <!--- Run AMCL for localization (necessary for tf from map to odom) -->
     <include file="$(find soma_base)/launch/amcl.launch" />
@@ -23,7 +21,6 @@
     <!-- Core of the navigation stack: path planning -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
         <!-- To publish commands on the right topic -->
-        <!-- <remap from="/cmd_vel" to="/diff_drive_controller/cmd_vel" /> -->
         <remap from="/cmd_vel" to="/ackermann_steering_controller/cmd_vel" />
 
         <!-- Parameters common to global and local costmaps -->
@@ -39,9 +36,8 @@
 
         <!-- Other parameters (controller and planner frequencies) -->
         <rosparam file="$(find soma_base)/config/move_base_params.yaml" command="load" />
-    </node>
+        <!-- </node> -->
 
-    <!-- Vizualization in Rviz (with adequate configuration) -->
-    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
-</launch> 
+        <!-- Vizualization in Rviz (with adequate configuration) -->
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+    </launch>
