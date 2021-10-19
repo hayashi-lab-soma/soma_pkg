@@ -24,7 +24,8 @@
     </include>
 
     <!-- Extract centers of mass of clusters -->
-    <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/>
+    <!-- <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/> -->
+    <node name="get_observation" pkg="soma_online_slam" type="online_slam_node.py"/>
 
     <!-- Vizualization in Rviz (with adequate configuration) -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
