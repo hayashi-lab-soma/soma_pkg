@@ -206,6 +206,8 @@ catkin_make
 
 - **soma_msgs** : Custom ROS messages
 
+- **soma_online_slam** : Online Simultaneous Localization And Mapping (SLAM)
+
 - **soma_perception** : Slope detection / 点群処理，画像処理系を持つパッケージ
 
 - **soma_samples** : ? / 動作チェック用，お試し用の置き場所
