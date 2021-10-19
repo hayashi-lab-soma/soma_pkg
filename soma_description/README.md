@@ -2,6 +2,8 @@
 
 Robot model, visualization in Rviz, simulation in Gazebo, driving with rqt_robot_steering GUI
 
+![robot model in Gazebo](../images/robot_model.png)
+
 ## Robot simulation
 
 - Only Rivz

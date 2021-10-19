@@ -2,6 +2,8 @@
 
 Navigation with **move_base**
 
+![move_base in Rviz](../images/move_base.png)
+
 ## Navigation simulation
 
 - In first terminal :

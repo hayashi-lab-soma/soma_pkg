@@ -2,6 +2,8 @@
 
 Online Simultaneous Localization And Mapping (SLAM)
 
+![trees poses estimation in Rviz](../images/tree_poses.png)
+
 ## Tree poses extraction
 
 - In first terminal :
