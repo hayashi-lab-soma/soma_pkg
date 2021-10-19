@@ -4,7 +4,7 @@
     <!-- Arguments -->
     <arg name="lidar_topic" default="/velodyne_points"/>
     <arg name="clipped_lidar_topic" default="/filtered_map_points"/>
-    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
+    <arg name="rvizconfig" value="$(find soma_online_slam)/rviz/trees.rviz" />
 
     <!-- Clip pointcloud between min and max altitude -->
     <include file="$(find soma_mapping)/launch/map_range_clip.launch">

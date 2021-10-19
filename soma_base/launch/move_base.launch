@@ -3,10 +3,10 @@
 <launch>
     <!-- Arguments -->
     <arg name="namespace" default="/" />
-    <arg name="rvizconfig" value="$(find soma_base)/rviz/navigation.rviz" />
+    <arg name="rvizconfig" default="$(find soma_base)/rviz/navigation.rviz" />
 
     <!-- Run driving controllers -->
-    <include file="(find soma_description)/launch/controllers.launch">
+    <include file="$(find soma_description)/launch/controllers.launch">
         <arg name="driving_gui" value="false"/>
     </include>
 
@@ -36,8 +36,8 @@
 
         <!-- Other parameters (controller and planner frequencies) -->
         <rosparam file="$(find soma_base)/config/move_base_params.yaml" command="load" />
-        <!-- </node> -->
+    </node>
 
-        <!-- Vizualization in Rviz (with adequate configuration) -->
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
-    </launch>
+    <!-- Vizualization in Rviz (with adequate configuration) -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+</launch>
