@@ -7,6 +7,7 @@ from std_msgs.msg import Float64MultiArray
 from math import sqrt, atan2
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from onlineSLAMSolver import OnlineSLAMSolver, Particle
 
 
 class Visualiser:
@@ -59,6 +60,8 @@ if __name__ == '__main__':
                      callback=vis.observation_update)
     observation_pub = rospy.Publisher(
         '/observation', Float64MultiArray, queue_size=1)
+
+    solver = OnlineSLAMSolver(particles_num=100)
 
     ani = FuncAnimation(vis.fig, vis.update_plot, init_func=vis.plot_init)
     plt.show(block=True)
