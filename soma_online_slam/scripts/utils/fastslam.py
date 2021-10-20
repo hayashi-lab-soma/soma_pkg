@@ -1,6 +1,6 @@
-from random import uniform, normalvariate, random, seed
+from random import uniform, random, seed
 import matplotlib.pyplot as plt
-from math import pi, cos, sin, sqrt, erf, atan2, acos, exp, tan
+from math import pi, cos, sin, sqrt, atan2, exp, tan
 import numpy as np
 from scipy.stats import multivariate_normal
 import time
@@ -299,153 +299,122 @@ def display():
 
 # TESTS
 
-# Init random seed
+if __name__ == '__main__':
+    # Init random seed
 
-seed(0)
+    seed(0)
 
-# Parameters
+    # Parameters
 
-max_time = 8
+    max_time = 8
 
-# Command
-v = 5
-omega = 0.1
-u = [v, omega]
+    # Command
+    v = 5
+    omega = 0.1
+    u = [v, omega]
 
-# Motion noise
-v_noise = [0.01, 0]
-omega_noise = [0, 0.01]
-yaw_noise = [0, 0.01]
-motion_noise = [v_noise, omega_noise, yaw_noise]
+    # Motion noise
+    v_noise = [0.01, 0]
+    omega_noise = [0, 0.01]
+    yaw_noise = [0, 0.01]
+    motion_noise = [v_noise, omega_noise, yaw_noise]
 
-# Observation noise
-d_noise = [0.05, 0]
-phi_noise = [0.0005, 0]
-observation_noise = [d_noise, phi_noise]
+    # Observation noise
+    d_noise = [0.05, 0]
+    phi_noise = [0.0005, 0]
+    observation_noise = [d_noise, phi_noise]
 
-# Map
-map_width = 100
-map_height = 100
+    # Map
+    map_width = 100
+    map_height = 100
 
-# Features
-features_num = 10
-# Only for display (features are collapsed to their center of mass)
-feature_radius = 3
-features = []
-for i in range(features_num):
-    new_feature_x = uniform(0, map_width)
-    new_feature_y = uniform(0, map_height)
-    new_feature = [new_feature_x, new_feature_y]
-    features.append(new_feature)
+    # Features
+    features_num = 10
+    # Only for display (features are collapsed to their center of mass)
+    feature_radius = 3
+    features = []
+    for i in range(features_num):
+        new_feature_x = uniform(0, map_width)
+        new_feature_y = uniform(0, map_height)
+        new_feature = [new_feature_x, new_feature_y]
+        features.append(new_feature)
 
-# Initial robot pose
-initial_x = map_width/2
-initial_y = map_height/2
-initial_theta = 0
-robot_pose = [initial_x, initial_y, initial_theta]
-robot_radius = 10
-visibility = 30
-print("\nInitial pose: " + str(robot_pose))
+    # Initial robot pose
+    initial_x = map_width/2
+    initial_y = map_height/2
+    initial_theta = 0
+    robot_pose = [initial_x, initial_y, initial_theta]
+    robot_radius = 10
+    visibility = 30
+    print("\nInitial pose: " + str(robot_pose))
 
-# Particles
+    # Particles
 
-particles_num = 100
-particles = []
+    particles_num = 100
+    particles = []
 
-for i in range(particles_num):
-    # Right initial pose
-    new_particle_x = robot_pose[0]
-    new_particle_y = robot_pose[1]
-    new_particle_theta = robot_pose[2]
+    for i in range(particles_num):
+        # Right initial pose
+        new_particle_x = robot_pose[0]
+        new_particle_y = robot_pose[1]
+        new_particle_theta = robot_pose[2]
 
-    new_particle_w = 1.0/particles_num
-    new_particle_f = []
-    new_particle = [new_particle_x, new_particle_y,
-                    new_particle_theta, new_particle_w, new_particle_f]
-    particles.append(new_particle)
+        new_particle_w = 1.0/particles_num
+        new_particle_f = []
+        new_particle = [new_particle_x, new_particle_y,
+                        new_particle_theta, new_particle_w, new_particle_f]
+        particles.append(new_particle)
 
-# Init display
-subplot = 200 + max_time/2*10 + 1
-ax = plt.subplot(subplot)
-display()
+    # Init display
+    subplot = 200 + max_time/2*10 + 1
+    ax = plt.subplot(subplot)
+    display()
 
-# Simulation
+    # Simulation
 
-for t in range(max_time-1):
-    start = time.time()
+    for t in range(max_time-1):
+        start = time.time()
 
-    # Real world simulation
-    print("\nStep: " + str(t+1))
-    print("Command: " + str(u))
-    robot_pose[0], robot_pose[1], robot_pose[2] = motion(
-        robot_pose, u, motion_noise)
-    print("New pose: " + str(robot_pose))
-    new_observation = observation(robot_pose, visibility, observation_noise)
-    print("Observation: " + str(new_observation))
+        # Real world simulation
+        print("\nStep: " + str(t+1))
+        print("Command: " + str(u))
+        robot_pose[0], robot_pose[1], robot_pose[2] = motion(
+            robot_pose, u, motion_noise)
+        print("New pose: " + str(robot_pose))
+        new_observation = observation(
+            robot_pose, visibility, observation_noise)
+        print("Observation: " + str(new_observation))
 
-    # Particles update
-    for j, p in enumerate(particles):
-        # print("\nParticle " + str(j) + ":")
+        # Particles update
+        for j, p in enumerate(particles):
+            # print("\nParticle " + str(j) + ":")
 
-        # Prediction
-        p[0], p[1], p[2] = motion(p[:3], u, motion_noise)
+            # Prediction
+            p[0], p[1], p[2] = motion(p[:3], u, motion_noise)
 
-        # Correction & mapping
-        pose = np.array([[p[0]],
-                         [p[1]],
-                         [p[2]]])
-        # print("Predicted pose: \n" + str(pose))
+            # Correction & mapping
+            pose = np.array([[p[0]],
+                            [p[1]],
+                            [p[2]]])
+            # print("Predicted pose: \n" + str(pose))
 
-        features_correspondences = len(new_observation)*[None]
+            features_correspondences = len(new_observation)*[None]
 
-        if len(p[4]) > 0:
-            correspondences_orders = len(new_observation)*[0]
-            features_preferences = []
-            features_likelihoods = []
+            if len(p[4]) > 0:
+                correspondences_orders = len(new_observation)*[0]
+                features_preferences = []
+                features_likelihoods = []
 
-            for i in range(len(new_observation)):
-                corresponding_features, corresponding_likelihoods = correspondence(
-                    p[4], pose, new_observation[i], visibility, observation_noise, 10**(-5))
+                for i in range(len(new_observation)):
+                    corresponding_features, corresponding_likelihoods = correspondence(
+                        p[4], pose, new_observation[i], visibility, observation_noise, 10**(-5))
 
-                features_preferences.append(corresponding_features)
-                features_likelihoods.append(corresponding_likelihoods)
+                    features_preferences.append(corresponding_features)
+                    features_likelihoods.append(corresponding_likelihoods)
 
-            conflicts = dict()
-            for i in range(len(features_preferences)):
-                features_correspondences[i] = features_preferences[i][0]
-            for i, c in enumerate(features_correspondences):
-                if c != None and features_correspondences.count(c) > 1:
-                    if c not in conflicts:
-                        conflicts[c] = [i]
-                    else:
-                        conflicts[c].append(i)
-
-            while conflicts != {}:
-                conflicts_to_pop = []
-                for c in conflicts:
-                    likelihoods = [
-                        [features_likelihoods[e][correspondences_orders[e]], e] for e in conflicts[c]]
-                    tmp = list(np.sort(likelihoods))
-                    tmp.reverse()
-                    right_feature = tmp[0][1]
-
-                    for i, e in enumerate(conflicts[c]):
-                        if e == right_feature:
-                            conflicts[c].pop(i)
-                        else:
-                            new_order = correspondences_orders[e] + 1
-                            if new_order < len(features_preferences[e]):
-                                features_correspondences[e] = features_preferences[e][new_order]
-                                correspondences_orders[e] += 1
-                            else:
-                                features_correspondences[e] = None
-
-                    if len(conflicts[c]) < 2:
-                        conflicts_to_pop.append(c)
-
-                for c in conflicts_to_pop:
-                    conflicts.pop(c)
-
+                conflicts = dict()
+                for i in range(len(features_preferences)):
+                    features_correspondences[i] = features_preferences[i][0]
                 for i, c in enumerate(features_correspondences):
                     if c != None and features_correspondences.count(c) > 1:
                         if c not in conflicts:
@@ -453,120 +422,153 @@ for t in range(max_time-1):
                         else:
                             conflicts[c].append(i)
 
-            for i, c in enumerate(features_correspondences):
-                assert c == None or features_correspondences.count(
-                    c) == 1, "Draw"
+                while conflicts != {}:
+                    conflicts_to_pop = []
+                    for c in conflicts:
+                        likelihoods = [
+                            [features_likelihoods[e][correspondences_orders[e]], e] for e in conflicts[c]]
+                        tmp = list(np.sort(likelihoods))
+                        tmp.reverse()
+                        right_feature = tmp[0][1]
 
-        for i in range(len(new_observation)):
-            new_z = np.array([[new_observation[i][0]],
-                              [new_observation[i][1]]])
-            # print("Observation " + str(i) + ": \n" + str(new_z))
+                        for i, e in enumerate(conflicts[c]):
+                            if e == right_feature:
+                                conflicts[c].pop(i)
+                            else:
+                                new_order = correspondences_orders[e] + 1
+                                if new_order < len(features_preferences[e]):
+                                    features_correspondences[e] = features_preferences[e][new_order]
+                                    correspondences_orders[e] += 1
+                                else:
+                                    features_correspondences[e] = None
 
-            # Previously unseen feature
-            if features_correspondences[i] == None:
-                mu = h_inverse(pose, new_z)
-                # print("Feature estimated position :\n" + str(mu))
-                H1 = H(pose, mu)
-                H1_inverse = np.linalg.inv(H1)
-                Q1 = Q(new_z)
-                sigma = (H1_inverse.dot(Q1)).dot(H1_inverse.transpose())
-                p[4].append([mu, sigma])
+                        if len(conflicts[c]) < 2:
+                            conflicts_to_pop.append(c)
 
-            # Already seen feature
-            else:
-                mu, sigma = p[4][features_correspondences[i]]
-                f = mu.transpose()[0]
-                predicted_z = h(pose, f)
-                H1 = H(pose, mu)
-                Q1 = (H1.dot(sigma)).dot(
-                    H1.transpose()) + Q(new_z)
-                Q1_inverse = np.linalg.inv(Q1)
-                K = (sigma.dot(H1.transpose())).dot(Q1_inverse)
-                new_mu = mu + K.dot(new_z - predicted_z)
-                new_sigma = (np.identity(2) - K.dot(H1)).dot(sigma)
-                p[4][features_correspondences[i]] = [new_mu, new_sigma]
-                tmp = (
-                    (new_z - predicted_z).transpose().dot(Q1_inverse)).dot(new_z - predicted_z)[0][0]
-                tmp = max(tmp, -709)
-                weight_update = 1 / \
-                    sqrt(2*pi*abs(np.linalg.det(Q1))) * exp(-1/2 * tmp)
+                    for c in conflicts_to_pop:
+                        conflicts.pop(c)
 
-                # Bias to ensure non-zero weight
-                p[3] = max(p[3]*weight_update, 10**(-323))
+                    for i, c in enumerate(features_correspondences):
+                        if c != None and features_correspondences.count(c) > 1:
+                            if c not in conflicts:
+                                conflicts[c] = [i]
+                            else:
+                                conflicts[c].append(i)
 
-        p[4] = delete_features(p[4], p[:3], new_observation,
-                               observation_noise, visibility, 10**(-5))[:]
+                for i, c in enumerate(features_correspondences):
+                    assert c == None or features_correspondences.count(
+                        c) == 1, "Draw"
 
-    # Normalization
-    weights_sum = 0
-    for p in particles:
-        weights_sum += p[3]
-    assert weights_sum > 0, "/!\ Sum of weights equals 0 !"
-    for p in particles:
-        p[3] /= weights_sum
+            for i in range(len(new_observation)):
+                new_z = np.array([[new_observation[i][0]],
+                                  [new_observation[i][1]]])
+                # print("Observation " + str(i) + ": \n" + str(new_z))
 
-    # Find most probable pose and features
-    max_weight = 0
-    for i, p in enumerate(particles):
-        if p[3] > max_weight:
-            max_weight = p[3]
-            most_probable_particle_index = i
-    # print("Most probable particle: " + str(most_probable_particle_index))
-    print("Most probable pose: " +
-          str(particles[most_probable_particle_index][:3]))
-    print("Most probable features: ")
-    for i, f in enumerate(particles[most_probable_particle_index][4]):
-        print(str(i) + ": " + str(f[0].transpose()[0]))
+                # Previously unseen feature
+                if features_correspondences[i] == None:
+                    mu = h_inverse(pose, new_z)
+                    # print("Feature estimated position :\n" + str(mu))
+                    H1 = H(pose, mu)
+                    H1_inverse = np.linalg.inv(H1)
+                    Q1 = Q(new_z)
+                    sigma = (H1_inverse.dot(Q1)).dot(H1_inverse.transpose())
+                    p[4].append([mu, sigma])
 
-    # Resampling criteria (effective particles number)
-    effective_particles_num = 0
-    for p in particles:
-        effective_particles_num += p[3]**2
-    effective_particles_num = 1/effective_particles_num
+                # Already seen feature
+                else:
+                    mu, sigma = p[4][features_correspondences[i]]
+                    f = mu.transpose()[0]
+                    predicted_z = h(pose, f)
+                    H1 = H(pose, mu)
+                    Q1 = (H1.dot(sigma)).dot(
+                        H1.transpose()) + Q(new_z)
+                    Q1_inverse = np.linalg.inv(Q1)
+                    K = (sigma.dot(H1.transpose())).dot(Q1_inverse)
+                    new_mu = mu + K.dot(new_z - predicted_z)
+                    new_sigma = (np.identity(2) - K.dot(H1)).dot(sigma)
+                    p[4][features_correspondences[i]] = [new_mu, new_sigma]
+                    tmp = (
+                        (new_z - predicted_z).transpose().dot(Q1_inverse)).dot(new_z - predicted_z)[0][0]
+                    tmp = max(tmp, -709)
+                    weight_update = 1 / \
+                        sqrt(2*pi*abs(np.linalg.det(Q1))) * exp(-1/2 * tmp)
 
-    # Resampling
-    if effective_particles_num < particles_num/2:
-        # if False:
-        print("Resampling: Yes")
-        cumulated_weights = [0]
+                    # Bias to ensure non-zero weight
+                    p[3] = max(p[3]*weight_update, 10**(-323))
+
+            p[4] = delete_features(p[4], p[:3], new_observation,
+                                   observation_noise, visibility, 10**(-5))[:]
+
+        # Normalization
+        weights_sum = 0
         for p in particles:
-            cumulated_weights.append(cumulated_weights[-1] + p[3])
-
-        old_particles = []
+            weights_sum += p[3]
+        assert weights_sum > 0, "/!\ Sum of weights equals 0 !"
         for p in particles:
-            old_particles.append(p[:])
-        particles = []
-        resampling_sigma = [[0.01, 0, 0],
-                            [0, 0.01, 0],
-                            [0, 0, 0.0001]]
-        survivors = []
-        for i in range(particles_num):
-            r = random()
-            for j in range(len(cumulated_weights)-1):
-                if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
-                    new_particle = list(multivariate_normal.rvs(
-                        old_particles[j][:3], resampling_sigma))
-                    new_particle.append(1.0/particles_num)
-                    new_particle.append(old_particles[j][4][:])
-                    if j not in survivors:
-                        survivors.append(j)
-                    particles.append(new_particle)
-        survivors.sort()
-        # print("Survivors: " + str(survivors))
-        print("Survivors: " + str(len(survivors)))
+            p[3] /= weights_sum
 
-    else:
-        print("Resampling: No")
+        # Find most probable pose and features
+        max_weight = 0
+        for i, p in enumerate(particles):
+            if p[3] > max_weight:
+                max_weight = p[3]
+                most_probable_particle_index = i
+        # print("Most probable particle: " + str(most_probable_particle_index))
+        print("Most probable pose: " +
+              str(particles[most_probable_particle_index][:3]))
+        print("Most probable features: ")
+        for i, f in enumerate(particles[most_probable_particle_index][4]):
+            print(str(i) + ": " + str(f[0].transpose()[0]))
 
-    stop = time.time()
+        # Resampling criteria (effective particles number)
+        effective_particles_num = 0
+        for p in particles:
+            effective_particles_num += p[3]**2
+        effective_particles_num = 1/effective_particles_num
 
-    subplot += 1
-    ax = plt.subplot(subplot)
-    display()
+        # Resampling
+        if effective_particles_num < particles_num/2:
+            # if False:
+            print("Resampling: Yes")
+            cumulated_weights = [0]
+            for p in particles:
+                cumulated_weights.append(cumulated_weights[-1] + p[3])
 
-    print("Time: " + str(stop-start))
+            old_particles = []
+            for p in particles:
+                old_particles.append(p[:])
+            particles = []
+            resampling_sigma = [[0.01, 0, 0],
+                                [0, 0.01, 0],
+                                [0, 0, 0.0001]]
+            survivors = []
+            for i in range(particles_num):
+                r = random()
+                for j in range(len(cumulated_weights)-1):
+                    if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
+                        new_particle = list(multivariate_normal.rvs(
+                            old_particles[j][:3], resampling_sigma))
+                        new_particle.append(1.0/particles_num)
+                        new_particle.append(old_particles[j][4][:])
+                        if j not in survivors:
+                            survivors.append(j)
+                        particles.append(new_particle)
+            survivors.sort()
+            # print("Survivors: " + str(survivors))
+            print("Survivors: " + str(len(survivors)))
 
-    # plt.show()
+        else:
+            print("Resampling: No")
 
-print("\n")
-plt.show()
+        stop = time.time()
+
+        subplot += 1
+        ax = plt.subplot(subplot)
+        display()
+
+        print("Time: " + str(stop-start))
+
+        # plt.show()
+
+    print("\n")
+    plt.show()
