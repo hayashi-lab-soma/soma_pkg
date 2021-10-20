@@ -17,8 +17,8 @@ class Visualiser:
         self.x_data, self.y_data = [], []
 
     def plot_init(self):
-        self.ax.set_xlim(-10, 10)
-        self.ax.set_ylim(-10, 10)
+        self.ax.set_xlim(-20, 20)
+        self.ax.set_ylim(-20, 20)
         return self.ln1
 
     def observation_update(self, data):
