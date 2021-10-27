@@ -2,7 +2,7 @@ from random import uniform, random, seed
 import matplotlib.pyplot as plt
 from math import pi, cos, sin, sqrt, atan2, exp, tan
 import numpy as np
-from scipy.stats import multivariate_normal
+from scipy.stats.mvn import mvnun
 import time
 
 
@@ -88,6 +88,7 @@ def correspondence(features, pose, observation, visibility, noise, threshold):
 
     corresponding_features = len(features)*[0]
     x, y, theta = pose.transpose()[0]
+
     for i, f in enumerate(features):
         mu = f[0].transpose()[0]
         xf, yf = mu
@@ -107,24 +108,10 @@ def correspondence(features, pose, observation, visibility, noise, threshold):
                 phi += 2*pi
 
             d_interval, phi_interval = d_sigma/10, phi_sigma/10
-            max_d_max_phi = multivariate_normal.cdf(
-                [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0], [d, phi], sigma)
-            max_d_min_phi = multivariate_normal.cdf(
-                [observation[0]+d_interval/2.0, observation[1]-phi_interval/2.0], [d, phi], sigma)
-            min_d_max_phi = multivariate_normal.cdf(
-                [observation[0]-d_interval/2.0, observation[1]+phi_interval/2.0], [d, phi], sigma)
-            min_d_min_phi = multivariate_normal.cdf(
-                [observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0], [d, phi], sigma)
-            feature_likelihood = max_d_max_phi - max_d_min_phi - min_d_max_phi + min_d_min_phi
+            feature_likelihood = mvnun(np.array([observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0]), np.array(
+                [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
-            assert feature_likelihood <= 1
-            if max_d_max_phi != 0:
-                if max_d_max_phi == max_d_min_phi or min_d_max_phi == min_d_min_phi:
-                    assert multivariate_normal.pdf(
-                        observation, [d, phi], sigma) < 10**(-10), "phi, " + str(phi_sigma)
-                elif max_d_max_phi == min_d_max_phi or max_d_min_phi == min_d_min_phi:
-                    assert multivariate_normal.pdf(
-                        observation, [d, phi], sigma) < 10**(-10), "d, " + str(d_sigma)
+            assert feature_likelihood <= 1, feature_likelihood
 
             if feature_likelihood > threshold:
                 corresponding_features[i] = feature_likelihood
@@ -166,25 +153,10 @@ def delete_features(features, pose, observations, noise, visibility, threshold):
                     phi += 2*pi
 
                 d_interval, phi_interval = d_sigma/10, phi_sigma/10
-                max_d_max_phi = multivariate_normal.cdf(
-                    [o[0]+d_interval/2.0, o[1]+phi_interval/2.0], [d, phi], sigma)
-                max_d_min_phi = multivariate_normal.cdf(
-                    [o[0]+d_interval/2.0, o[1]-phi_interval/2.0], [d, phi], sigma)
-                min_d_max_phi = multivariate_normal.cdf(
-                    [o[0]-d_interval/2.0, o[1]+phi_interval/2.0], [d, phi], sigma)
-                min_d_min_phi = multivariate_normal.cdf(
-                    [o[0]-d_interval/2.0, o[1]-phi_interval/2.0], [d, phi], sigma)
-                feature_likelihood = max_d_max_phi - \
-                    max_d_min_phi - min_d_max_phi + min_d_min_phi
+                feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
+                    [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
-                assert feature_likelihood <= 1
-                if max_d_max_phi != 0:
-                    if max_d_max_phi == max_d_min_phi or min_d_max_phi == min_d_min_phi:
-                        assert multivariate_normal.pdf(
-                            o, [d, phi], sigma) < 10**(-10), "phi, " + str(phi_sigma)
-                    elif max_d_max_phi == min_d_max_phi or max_d_min_phi == min_d_min_phi:
-                        assert multivariate_normal.pdf(
-                            o, [d, phi], sigma) < 10**(-10), "d, " + str(d_sigma)
+                assert feature_likelihood <= 1, feature_likelihood
 
                 if feature_likelihood > highest_likelihood:
                     highest_likelihood = feature_likelihood
