@@ -2,9 +2,12 @@
 
 <launch>
     <!-- Arguments -->
+    <!-- <arg name="lidar_topic" default="/lidar_pointcloud"/> -->
     <arg name="lidar_topic" default="/velodyne_points"/>
     <arg name="clipped_lidar_topic" default="/filtered_map_points"/>
     <arg name="rvizconfig" value="$(find soma_online_slam)/rviz/trees.rviz" />
+
+    <!-- <node name="fix_update_rate" pkg="soma_online_slam" type="update_rate_node.py" output="screen"/> -->
 
     <!-- Clip pointcloud between min and max altitude -->
     <include file="$(find soma_mapping)/launch/map_range_clip.launch">
@@ -25,8 +28,7 @@
 
     <!-- Extract centers of mass of clusters -->
     <!-- <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/> -->
-    <node name="get_observation" pkg="soma_online_slam" type="online_slam_node.py"/>
 
     <!-- Vizualization in Rviz (with adequate configuration) -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" /> -->
 </launch>
