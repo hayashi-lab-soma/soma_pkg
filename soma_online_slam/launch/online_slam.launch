@@ -1,0 +1,5 @@
+<!-- Online SLAM with lidar -->
+
+<launch>
+    <node name="online_slam" pkg="soma_online_slam" type="online_slam_node.py" output="screen"/>
+</launch>
