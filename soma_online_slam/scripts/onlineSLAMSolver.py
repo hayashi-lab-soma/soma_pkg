@@ -7,7 +7,7 @@ from utils.fastslam import delete_features, motion, correspondence, h_inverse, h
 
 class Feature:
     def __init__(self, pose, sigma):
-        self.pose = np.array(pose[:])
+        self.pose = np.array([pose[:]]).transpose()
         self.sigma = np.array(sigma)
 
         return
@@ -16,7 +16,7 @@ class Feature:
         tmp = ""
         if not nested:
             tmp += "\nMap feature\n"
-        tmp += "\nPose: " + str(self.pose)
+        tmp += "\nPose:\n" + str(self.pose)
         tmp += "\nCovariance matrix:\n" + str(self.sigma)
         if not nested:
             tmp += "\n"
@@ -24,12 +24,12 @@ class Feature:
         return tmp
 
     def clone(self):
-        return Feature(self.pose, self.sigma)
+        return Feature(self.pose.transpose()[0], self.sigma)
 
 
 class Particle:
     def __init__(self, pose, weight, features=[]):
-        self.pose = np.array(pose[:])
+        self.pose = np.array([pose[:]]).transpose()
         self.weight = weight
         self.features = features[:]
 
@@ -37,7 +37,7 @@ class Particle:
 
     def __str__(self):
         tmp = "\nParticle for online SLAM\n"
-        tmp += "\nPose: " + str(self.pose)
+        tmp += "\nPose:\n" + str(self.pose)
         tmp += "\nWeight: " + str(self.weight)
         tmp += "\nFeatures: "
         for i, f in enumerate(self.features):
@@ -47,14 +47,14 @@ class Particle:
         return tmp
 
     def clone(self):
-        return Particle(self.pose, self.weight, self.features)
+        return Particle(self.pose.transpose()[0], self.weight, self.features)
 
 
 class OnlineSLAMSolver:
-    def __init__(self, initial_x=0.0, initial_y=0.0, initial_theta=0.0, v_noise=[0.01, 0.0], omega_noise=[0.0, 0.01], yaw_noise=[0.0, 0.01], visibility=30, d_noise=[0.05, 0.0], phi_noise=[0.0005, 0.0], particles_num=100):
+    def __init__(self, particles_num=100, initial_x=0.0, initial_y=0.0, initial_theta=0.0, v_noise=[0.01, 0.0], omega_noise=[0.0, 0.01], yaw_noise=[0.0, 0.01], visibility=30, d_noise=[0.05, 0.0], phi_noise=[0.0005, 0.0]):
         # Initial pose
         self.robot_initial_pose = np.array(
-            [initial_x, initial_y, initial_theta])
+            [[initial_x], [initial_y], [initial_theta]])
 
         # Motion
         self.motion_noise = np.array([v_noise, omega_noise, yaw_noise])
@@ -69,22 +69,19 @@ class OnlineSLAMSolver:
 
         for i in range(particles_num):
             # Pose
-            new_pose = np.array(self.robot_initial_pose[:])
+            new_pose = [initial_x, initial_y, initial_theta]
 
             # Weight
             new_weight = 1.0/particles_num
 
-            # Featured-map
-            new_features = np.array([])
-
-            new_particle = Particle(new_pose, new_weight, new_features)
+            new_particle = Particle(new_pose, new_weight)
             self.particles.append(new_particle.clone())
 
         return
 
     def __str__(self):
         tmp = "\nOnlineSLAMSolver from FASTSLAM\n"
-        tmp += "\nRobot initial pose: " + str(self.robot_initial_pose)
+        tmp += "\nRobot initial pose:\n" + str(self.robot_initial_pose)
         tmp += "\nMotion noise:\n" + str(self.motion_noise)
         tmp += "\nVisibility: " + str(self.visibility)
         tmp += "\nObservation noise:\n" + str(self.observation_noise)
@@ -93,12 +90,21 @@ class OnlineSLAMSolver:
         return tmp
 
     def motion_update(self, command):
+        print("Motion update")
+
         for p in self.particles:
-            p.pose = np.array(motion(p.pose, command, self.motion_noise)[:])
+            p.pose = np.array([
+                motion(p.pose.transpose()[0], command, self.motion_noise)[:]]).transpose()
 
     def observation_update(self, observation):
-        for j, p in enumerate(self.particles):
-            self.observation_update_particle_weight(observation, j)
+        print("Observation update")
+
+        print("- Weights update")
+
+        for i in range(self.particles_num):
+            self.observation_update_particle_weight(observation, i)
+
+        print("- Normalization")
 
         # Normalization
         weights_sum = 0
@@ -109,10 +115,12 @@ class OnlineSLAMSolver:
             p.weight /= weights_sum
 
         # Find most probable pose and features
-        max_weight = 0
-        for i, p in enumerate(self.particles):
-            if p.weight > max_weight:
-                max_weight = p.weight
+        # max_weight = 0
+        # for i, p in enumerate(self.particles):
+            # if p.weight > max_weight:
+            # max_weight = p.weight
+
+        print("- Resampling")
 
         # Resampling criteria (effective particles number)
         effective_particles_num = 0
@@ -122,6 +130,7 @@ class OnlineSLAMSolver:
 
         # Resampling
         if effective_particles_num < self.particles_num/2:
+            # if False:
             cumulated_weights = [0]
             for p in self.particles:
                 cumulated_weights.append(cumulated_weights[-1] + p.weight)
@@ -135,7 +144,7 @@ class OnlineSLAMSolver:
                 for j in range(len(cumulated_weights)-1):
                     if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
                         new_pose = multivariate_normal.rvs(
-                            self.particles[j].pose, resampling_sigma)[:]
+                            self.particles[j].pose.transpose()[0], resampling_sigma)[:]
                         new_weight = 1.0/self.particles_num
                         new_features = self.particles[j].features[:]
                         new_particle = Particle(
@@ -150,14 +159,15 @@ class OnlineSLAMSolver:
 
         features_correspondences = len(observation)*[None]
 
-        if len(p[4]) > 0:
+        if len(p.features) > 0:
             correspondences_orders = len(observation)*[0]
             features_preferences = []
             features_likelihoods = []
 
             for i in range(len(observation)):
+
                 corresponding_features, corresponding_likelihoods = correspondence(
-                    p.features, p.pose, observation[i], self.visibility, self.observation_noise, 10**(-5))
+                    [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation[i].transpose()[0], self.visibility, self.observation_noise, 10**(-5))
 
                 features_preferences.append(corresponding_features)
                 features_likelihoods.append(corresponding_likelihoods)
@@ -210,22 +220,22 @@ class OnlineSLAMSolver:
                     c) == 1, "Draw"
 
         for i in range(len(observation)):
-            new_z = np.array([[observation[i][0]],
-                              [observation[i][1]]])
+            new_z = np.array(observation[i][:])
 
             # Previously unseen feature
             if features_correspondences[i] == None:
+                # if len(p.features) < 10:
                 mu = h_inverse(p.pose, new_z)
-                # print("Feature estimated position :\n" + str(mu))
                 H1 = H(p.pose, mu)
                 H1_inverse = np.linalg.inv(H1)
                 Q1 = Q(new_z)
                 sigma = (H1_inverse.dot(Q1)).dot(H1_inverse.transpose())
-                p[4].append([mu, sigma])
+                p.features.append(Feature(mu.transpose()[0], sigma))
 
             # Already seen feature
             else:
-                mu, sigma = p[4][features_correspondences[i]]
+                feature = p.features[features_correspondences[i]]
+                mu, sigma = feature.pose[:], feature.sigma[:]
                 f = mu.transpose()[0]
                 predicted_z = h(p.pose, f)
                 H1 = H(p.pose, mu)
@@ -235,7 +245,8 @@ class OnlineSLAMSolver:
                 K = (sigma.dot(H1.transpose())).dot(Q1_inverse)
                 new_mu = mu + K.dot(new_z - predicted_z)
                 new_sigma = (np.identity(2) - K.dot(H1)).dot(sigma)
-                p.features[features_correspondences[i]] = [new_mu, new_sigma]
+                p.features[features_correspondences[i]] = Feature(
+                    new_mu.transpose()[0], new_sigma)
                 tmp = (
                     (new_z - predicted_z).transpose().dot(Q1_inverse)).dot(new_z - predicted_z)[0][0]
                 tmp = max(tmp, -709)
@@ -245,19 +256,23 @@ class OnlineSLAMSolver:
                 # Bias to ensure non-zero weight
                 p.weight = max(p.weight*weight_update, 10**(-323))
 
-        p.features = delete_features(p.features, p.pose, observation,
-                                     self.observation_noise, self.visibility, 10**(-5))[:]
+        new_features = delete_features(
+            [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation, self.observation_noise, self.visibility, 10**(-5))[:]
+        p.features = []
+        for feature in new_features:
+            p.features.append(Feature(feature[0].transpose()[0], feature[1]))
 
         return
 
 
 # Tests
 
-F = Feature([78.9, -14.26], [[0.52, 0.0], [0.0, 0.00187]])
-print(F)
+if __name__ == '__main__':
+    F = Feature([78.9, -14.26], [[0.52, 0.0], [0.0, 0.00187]])
+    print(F)
 
-P = Particle(np.array([2.4, -5.6, 0.1254]), 0.0015, [F, F])
-print(P)
+    P = Particle(np.array([2.4, -5.6, 0.1254]), 0.0015)
+    print(P)
 
-S = OnlineSLAMSolver()
-print(S)
+    S = OnlineSLAMSolver()
+    print(S)
