@@ -89,12 +89,14 @@ class OnlineSLAMSolver:
 
         return tmp
 
-    def motion_update(self, command):
+    def motion_update(self, command, dt):
         print("Motion update")
 
         for p in self.particles:
             p.pose = np.array([
-                motion(p.pose.transpose()[0], command, self.motion_noise)[:]]).transpose()
+                motion(p.pose.transpose()[0], command, self.motion_noise, dt)[:]]).transpose()
+
+        return
 
     def observation_update(self, observation):
         print("Observation update")

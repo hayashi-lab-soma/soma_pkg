@@ -2,6 +2,7 @@ from random import uniform, random, seed
 import matplotlib.pyplot as plt
 from math import pi, cos, sin, sqrt, atan2, exp, tan
 import numpy as np
+from scipy.stats import multivariate_normal
 from scipy.stats.mvn import mvnun
 import time
 
@@ -24,7 +25,7 @@ import time
 # TODO: Odometry-based motion model
 
 
-def motion(pose, command, noise):
+def motion(pose, command, noise, dt=1):
     x, y, theta = pose
     v, omega = command
     v_noise, omega_noise, yaw_noise = noise
@@ -40,11 +41,13 @@ def motion(pose, command, noise):
     v, omega = multivariate_normal.rvs(command, sigma)
 
     # New pose
-    new_x = pose[0] - v/omega * \
-        sin(pose[2]) + v/omega*sin(pose[2] + omega)
-    new_y = pose[1] + v/omega * \
-        cos(pose[2]) - v/omega*cos(pose[2] + omega)
-    new_theta = multivariate_normal.rvs(pose[2] + omega, yaw_sigma)
+    if omega == 0:
+        new_x = pose[0] + v*cos(pose[2])*dt
+        new_y = pose[1] + v*sin(pose[2])*dt
+    else:
+        new_x = pose[0] - v/omega*sin(pose[2])*dt + v/omega*sin(pose[2] + omega)*dt
+        new_y = pose[1] + v/omega*cos(pose[2])*dt - v/omega*cos(pose[2] + omega)*dt
+    new_theta = multivariate_normal.rvs(pose[2] + omega*dt, yaw_sigma)
 
     # Ensure theta in ]-pi;pi]
     if new_theta <= -pi:
