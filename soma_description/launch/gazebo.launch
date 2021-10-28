@@ -9,7 +9,8 @@
     <arg name="z_offset" default="0.2" />
 
     <!-- Launch Gazebo -->
-    <arg name="world_name" default="$(find soma_description)/worlds/forest.world" />
+    <!-- <arg name="world_name" default="$(find soma_description)/worlds/forest.world" /> -->
+    <arg name="world_name" default="$(find soma_description)/worlds/flat_forest.world" />
     <arg name="paused" default="true"/>
     <arg name="use_sim_time" default="true"/>
     <arg name="gui" default="true"/>
