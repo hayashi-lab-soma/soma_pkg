@@ -30,5 +30,5 @@
     <!-- <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/> -->
 
     <!-- Vizualization in Rviz (with adequate configuration) -->
-    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" /> -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 </launch>
