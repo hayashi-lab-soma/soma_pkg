@@ -1,6 +1,6 @@
 # **soma_pkg**  
-林研究室 林業用ロボット"SOMA"の ROS パッケージ  
-![SOMA 3D Model](./images/ATV_3D_Model.png "SOMA")
+林研究室林業用ロボット"SOMA"の ROS パッケージ  
+<img src=./images/ATV_3D_Model.png width=60%>
 
 ## **REQUIREMENTS** / 外部パッケージ要求  
 ### **VISUALIZATION**  
