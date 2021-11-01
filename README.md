@@ -1,63 +1,49 @@
-# Metapackage **soma_pkg**
-
-林研究室 林業用ロボット"SOMA"の ROS ベースパッケージ
-
+# **soma_pkg**  
+林研究室 林業用ロボット"SOMA"の ROS パッケージ  
 ![SOMA 3D Model](./images/ATV_3D_Model.png "SOMA")
 
-## Requirements / 外部パッケージ要求
-VISUALIZATION
-- **jsk_rviz_plugins** : rviz に対応した便利な GUI プラグイン集
+## **REQUIREMENTS** / 外部パッケージ要求  
+### **VISUALIZATION**  
+`jsk_rviz_plugins`  
 ```
-sudo apt install ros-melodic-jsk-rviz-plugins
-```
-MOTORS
-
-- _maxon_epos_ros_ :
-
-```
-cd catkin_ws/src
-git clone https://github.com/iwata-lab/maxon_epos_ros.git
-cd ~/catkin_ws
-catkin_make
+$ sudo apt install ros-melodic-jsk-rviz-plugins
 ```
 
-SENSORS
+### **MOTORS**  
+`maxon_epos_ros`  
+```
+$ cd catkin_ws/src
+$ git clone https://github.com/iwata-lab/maxon_epos_ros.git
+$ cd ~/catkin_ws
+$ catkin_make
+```
 
-- GPS
-
-  - **geodesy** :
-
+### **SENSORS**  
+- GPS  
+  - `geodesy`  
     ```
-    sudo apt-get install ros-melodic-geodesy
+    $ sudo apt install ros-melodic-geodesy
+    ```  
+  - `nmea_msgs`  
     ```
-
-  - **nmea_msgs** :
-
+    $ sudo apt install ros-melodic-nmea-msgs
     ```
-    sudo apt-get install ros-melodic-nmea-msgs
-    ```
-
 - RGB-D camera
-
-  - **realsense2_camera** :
+  - `realsense2_camera`  
+    ```
+    $ sudo apt-get install ros-melodic-realsense2-camera
+    ```
+  - `realsense2_description`  
+    ```
+    $ sudo apt install ros-melodic-realsense2-description
+    ```
+  - `realsense`  
 
     ```
-    sudo apt-get install ros-melodic-realsense2-camera
-    ```
-
-  - **realsense2_description** :
-
-    ```
-    sudo apt-get install ros-melodic-realsense2-description
-    ```
-
-  - _realsense_ :
-
-    ```
-    cd catkin_ws/src
-    git clone https://github.com/pal-robotics-forks/realsense.git
-    cd ~/catkin_ws
-    catkin_make
+    $ cd catkin_ws/src
+    $ git clone https://github.com/pal-robotics-forks/realsense.git
+    $ cd ~/catkin_ws
+    $ catkin_make
     ```
 
   - _realsense_gazebo_plugin_ :
