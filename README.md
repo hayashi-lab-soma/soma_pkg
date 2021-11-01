@@ -4,40 +4,12 @@
 
 ![SOMA 3D Model](./images/ATV_3D_Model.png "SOMA")
 
-<<<<<<< HEAD
-
-## パッケージ構成 (Structure)
-__soma_ros_pkg__  
-- __soma_description__ : SOMA's description files (URDF and so on).
-- 
-
-
-## 外部パッケージ要求(Requirement)  
-* costmap_2d : 二次元コストマップを扱うパッケージ
-* dwa_local_planner : DWAによる局所動作計画を行なうためのパッケージ
-* navfn : ナビゲーション用の基礎パッケージ
-* jsk_rviz_plugins : rvizに対応した便利なGUIプラグイン集
-=======
 ## Requirements / 外部パッケージ要求
->>>>>>> soma_simulation
-
 VISUALIZATION
-
 - **jsk_rviz_plugins** : rviz に対応した便利な GUI プラグイン集
-
-<<<<<<< HEAD
-* __costmap_2d__  
-2次元コストマップ用パッケージ
-=======
->>>>>>> soma_simulation
 ```
 sudo apt install ros-melodic-jsk-rviz-plugins
 ```
-
-<<<<<<< HEAD
-* __dwa_local_planner__  
-DWA 局所動作計画用パッケージ
-=======
 MOTORS
 
 - _maxon_epos_ros_ :
@@ -115,15 +87,10 @@ DRIVING
 
 - **ackermann_steering_controller** :
 
->>>>>>> soma_simulation
 ```
 sudo apt-get install ros-melodic-ackermann-steering-controller
 ```
 
-<<<<<<< HEAD
-* __navfn__  
-for melodic
-=======
 - _steer_drive_ros_ :
 
 ```
@@ -137,18 +104,12 @@ IMAGE PROCESSING
 
 - **pcl_ros** :
 
->>>>>>> soma_simulation
 ```
 sudo apt-get install ros-melodic-pcl-ros
 ```
 
-<<<<<<< HEAD
-* __jsk_rviz_plugins__  
-rviz用の便利なGUIプラグイン集
-=======
 - _ndt_omp_ :
 
->>>>>>> soma_simulation
 ```
 cd catkin_ws/src
 git clone https://github.com/koide3/ndt_omp.git
@@ -156,12 +117,8 @@ cd ~/catkin_ws
 catkin_make
 ```
 
-<<<<<<< HEAD
-* __rtabmap_ros__
-=======
 - _fast_gicp_ :
 
->>>>>>> soma_simulation
 ```
 cd catkin_ws/src
 git clone https://github.com/SMRT-AIST/fast_gicp.git
@@ -169,10 +126,6 @@ cd ~/catkin_ws
 catkin_make
 ```
 
-<<<<<<< HEAD
-* __hdl_graph_slam__  
-https://github.com/koide3/hdl_graph_slam  
-=======
 LOCALIZATION & SLAM
 
 - **move_base**
@@ -182,7 +135,6 @@ LOCALIZATION & SLAM
     ```
     sudo apt install ros-melodic-costmap-2d
     ```
->>>>>>> soma_simulation
 
   - **navfn** : ナビゲーション用の基礎パッケージ
 
@@ -198,15 +150,12 @@ LOCALIZATION & SLAM
 
 - **libg2o** :
 
-<<<<<<< HEAD
-=======
 ```
 sudo apt-get install ros-melodic-libg2o
 ```
 
 - **rtabmap_ros** :
 
->>>>>>> soma_simulation
 ```
 sudo apt install ros-melodic-rtabmap-ros
 ```
@@ -261,7 +210,4 @@ catkin_make
 
 - **soma_tools** : ?
 
-<<<<<<< HEAD
-=======
 - **soma_viz** : ?
->>>>>>> soma_simulation
