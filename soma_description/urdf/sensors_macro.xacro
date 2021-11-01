@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
-	<property name="camera_enabled" value="false"/>
+	<property name="camera_enabled" value="true"/>
 	<property name="lidar_enabled" value="true"/>
-	<property name="imu_enabled" value="false"/>
+	<property name="imu_enabled" value="true"/>
 
 	<!-- Include files -->
 	<if value="${camera_enabled}">
