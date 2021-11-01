@@ -3,12 +3,11 @@
 <img src=./images/ATV_3D_Model.png width=60%>
 
 ## **REQUIREMENTS** / 外部パッケージ要求  
-### **VISUALIZATION**  
+## **VISUALIZATION**  
 - `jsk_rviz_plugins`  
 ```
 $ sudo apt install ros-melodic-jsk-rviz-plugins
 ```
-
 ### **MOTORS**  
 - `maxon_epos_ros`  
 ```
