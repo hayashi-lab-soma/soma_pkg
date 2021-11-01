@@ -1,0 +1,35 @@
+# Costmap configuration file for both global and local
+
+obstacle_range: 2.5
+raytrace_range: 3.0
+robot_radius: 1
+inflation_radius: 0.55
+
+observation_sources: point_cloud_sensor camera_f_laser camera_r_laser
+
+point_cloud_sensor:
+  {
+    sensor_frame: velodyne,
+    data_type: LaserScan,
+    topic: scan,
+    expected_update_rate: 40,
+    marking: true,
+    clearing: true,
+  }
+
+camera_f_laser:
+  {
+    data_type: LaserScan,
+    topic: /camera_f/scan,
+    inf_is_valid: true,
+    marking: true,
+    clearing: true,
+  }
+camera_r_laser:
+  {
+    data_type: LaserScan,
+    topic: /camera_r/scan,
+    inf_is_valid: true,
+    marking: true,
+    clearing: true,
+  }

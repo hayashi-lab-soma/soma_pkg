@@ -25,5 +25,5 @@
 	<!--  -->
 	<!-- rviz -->
 	<node if="$(arg gui_rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
-	<!-- <node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/> -->
+	<node name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering"/>
 </launch>

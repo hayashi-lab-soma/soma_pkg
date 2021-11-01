@@ -2,7 +2,12 @@
 <launch>
 	<!-- arguments -->
 	<!-- <arg name="pcd_file" default="$(find soma_mapping)/data/tree_extracted_map.pcd" doc="" /> -->
+<<<<<<< HEAD
 	<arg name="pcd_file" default="$(find soma_base)/maps/Mirais-3DMap-imu-non-ground-adjusted.pcd" doc="" />
+=======
+	<!-- <arg name="pcd_file" default="$(find soma_localization)/data/Mirais-3DMap-imu-non-ground-adjusted.pcd" doc="" /> -->
+	<arg name="pcd_file" default="$(find soma_localization)/data/Mirais-3DMap-imu-non-ground.pcd" doc="" />
+>>>>>>> soma_simulation
 	<arg name="nodelet_manager" default="map_manager" doc="" />
 	<!--
 	publish 3-D tree map from PCD file
@@ -70,7 +75,11 @@
 	run graph based global planner
 	created by Tominaga
 	-->
+<<<<<<< HEAD
 	<node if="true" name="graph_based_python_planner" pkg="soma_global_planner" type="global_motion_planner_server.py" output="screen">
+=======
+	<node if="true" name="planner" pkg="soma_global_planner" type="global_motion_planner_node.py" output="screen">
+>>>>>>> soma_simulation
 		<remap from="tree_poses" to="/cluster_decomposer/centroid_pose_array" />
 	</node>
 </launch>

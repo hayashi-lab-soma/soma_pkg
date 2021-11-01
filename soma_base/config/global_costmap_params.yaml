@@ -1,0 +1,16 @@
+# Global costmap configuration file
+
+global_costmap:
+  global_frame: map
+  robot_base_frame: base_link
+
+  update_frequency: 1.0
+  publish_frequency: 0.5
+
+  transform_tolerance: 5
+
+  # No updates during simulation
+  static_map: true
+
+  plugins:
+    - { name: map, type: "costmap_2d::StaticLayer" }

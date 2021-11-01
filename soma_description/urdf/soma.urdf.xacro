@@ -1,60 +1,60 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
-	<!--  -->
-	<!--  -->
-	<include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
-	<include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
-	<!--  -->
-	<!--  -->
-	<!--  -->
-	<link name="base_link">
-		<visual>
-			<origin xyz="0.45 0.0 0.0" rpy="0.0 0.0 0.0" />
-			<geometry>
-				<box size="1.4 0.9 1.2" />
-			</geometry>
-		</visual>
-	</link>
-	<!-- Base footprint is on the ground under the robot -->
-	<link name="base_footprint" />
-	<joint name="base_footprint_joint" type="fixed">
-		<parent link="base_link" />
-		<child link="base_footprint" />
-		<origin xyz="0.0 0.0 -0.45" rpy="0.0 0.0 0.0" />
-	</joint>
-	<!--
-	sensor links
-	D435,VLP-16,IMU, ...
-	-->
-	<!-- IMU link -->
-	<link name="imu" />
-	<joint name="imu_joint" type="fixed">
-		<parent link="base_link" />
-		<child link="imu" />
-		<origin xyz="0 0 1.45" rpy="0.0 0.0 0.0" />
-	</joint>
-	<!-- VLP-16 -->
-	<VLP-16 parent="base_link" name="velodyne" topic="/velodyne_points">
-		<origin xyz="0.5 0 1.0" rpy="0.0 0.0 0.0" />
-	</VLP-16>
-	<!-- realsense link (front side) -->
-	<link name="camera_f_mount_link" />
-	<joint name="camera_f_mount_joint" type="fixed">
-		<parent link="base_link" />
-		<child link="camera_f_mount_link" />
-		<origin xyz="0.85 0.1 0.61" rpy="0.0 0.0 0.0" />
-	</joint>
-	<sensor_d435 parent="camera_f_mount_link" name="camera_f">
-		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
-	</sensor_d435>
-	<!-- realsense link (rear side) -->
-	<link name="camera_r_mount_link" />
-	<joint name="camera_r_mount_joint" type="fixed">
-		<parent link="base_link" />
-		<child link="camera_r_mount_link" />
-		<origin xyz="-0.2 0.0 0.35" rpy="0.0 0.0 -3.1415" />
-	</joint>
-	<sensor_d435 parent="camera_r_mount_link" name="camera_r">
-		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
-	</sensor_d435>
+
+	<property name="sensors_enabled" value="true"/>
+
+	<!-- Include files -->
+	<include filename="$(find soma_description)/urdf/ackermann_macro.xacro" />
+	<if value="${sensors_enabled}">
+		<include filename="$(find soma_description)/urdf/sensors_macro.xacro" />
+	</if>
+
+	<!-- Empty link to use Gazebo -->
+	<link name="base_link" />
+
+	<!-- Build Ackermann movebase -->
+	<ackermann_macro parent="base_link" />
+
+	<if value="${sensors_enabled}">
+		<!-- Build IMU -->
+		<if value="${imu_enabled}">
+			<imu_macro parent="body_bottom_link">
+				<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
+			</imu_macro>
+		</if>
+
+		<!-- Build Realsense -->
+		<!-- Front -->
+		<if value="${camera_enabled}">
+			<realsense_macro parent="body_bottom_link" prefix="f">
+				<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
+			</realsense_macro>
+		</if>
+		<!-- Rear -->
+		<if value="${camera_enabled}">
+			<realsense_macro parent="body_bottom_link" prefix="r">
+				<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
+			</realsense_macro>
+		</if>
+
+		<!-- Build Velodyne -->
+		<if value="${lidar_enabled}">
+			<velodyne_macro parent="body_bottom_link">
+				<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
+			</velodyne_macro>
+		</if>
+	</if>
+
+	<!-- Gazebo plugins -->
+	<gazebo>
+		<!-- Load ros_control plugin using the steer_bot_hardware_gazebo
+   		implementation of the hardware_interface::RobotHW -->
+		<plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+			<robotNamespace>/</robotNamespace>
+			<robotSimType>steer_bot_hardware_gazebo/SteerBotHardwareGazebo</robotSimType>
+			<!-- <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> -->
+			<legacyModeNS>true</legacyModeNS>
+		</plugin>
+	</gazebo>
+
 </robot>

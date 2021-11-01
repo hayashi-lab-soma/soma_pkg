@@ -1,0 +1,23 @@
+# Local costmap configuration file
+
+local_costmap:
+  global_frame: odom
+  robot_base_frame: base_link
+
+  update_frequency: 1.0
+  publish_frequency: 5.0
+
+  # Updates during simulation & rolling window (take only near obstacles into account)
+  static_map: false
+  rolling_window: true
+
+  width: 50
+  height: 50
+  origin_x: -25
+  origin_y: -25
+  resolution: 0.05
+
+  plugins:
+    - { name: point_cloud_sensor, type: "costmap_2d::ObstacleLayer" }
+    - { name: camera_f_laser, type: "costmap_2d::ObstacleLayer" }
+    - { name: camera_r_laser, type: "costmap_2d::ObstacleLayer" }

@@ -1,0 +1,181 @@
+<?xml version="1.0"?>
+
+
+<!-- Based on ackermann_1.urdf in simple_ackermann repository:
+https://github.com/benwarrick/simple_ackermann.git -->
+
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
+
+	<!-- Include files -->
+	<include filename="$(find soma_description)/urdf/utils.xacro" />
+	<include filename="$(find soma_description)/urdf/front_steer_macro.xacro" />
+	<include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
+	<include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
+	<include filename="$(find soma_description)/urdf/virtual_rear_wheel_macro.xacro" />
+
+
+	<!-- Ackermann macro -->
+	<macro name="ackermann_macro" params="parent">
+
+		<!-- General properties used for inertia computation -->
+		<property name="mass" value="250" />
+		<property name="width" value="1.05" />
+		<property name="depth" value="0.70" />
+		<property name="height" value="1.7" />
+
+		<!-- Bottom body joint -->
+		<joint name="body_bottom_joint" type="fixed">
+			<parent link="${parent}" />
+			<child link="body_bottom_link" />
+			<origin xyz="0 0 ${0.2286 + 0.5/2}" rpy="0.0 0.0 0.0" />
+		</joint>
+
+		<!-- Bottom body link -->
+		<link name="body_bottom_link">
+
+			<!-- Inertial part -->
+			<inertial>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<mass value="${0.8*mass}" />
+
+				<!-- Inertia matrix of a parallelepiped -->
+				<parallelepiped_inertia mass="${0.8*mass}" width="${width}" height="0.5" depth="${depth}" />
+				<!-- Old values: ixx = iyy = izz = 0.001 -->
+			</inertial>
+
+			<!-- Visual part -->
+			<visual>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="${width} ${depth} 0.5" />
+				</geometry>
+				<material name="gray" />
+			</visual>
+
+			<!-- Collision part -->
+			<collision>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="${width} ${depth} 0.5" />
+				</geometry>
+			</collision>
+
+		</link>
+		<!-- END bottom body link -->
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="body_bottom_link">
+			<material>
+				Gazebo/Gray
+			</material>
+		</gazebo>
+
+		<!-- Middle body joint -->
+		<joint name="body_middle_joint" type="fixed">
+			<parent link="${parent}" />
+			<child link="body_middle_link" />
+			<origin xyz="-0.1 0 ${0.2286 + 0.5 + 0.9/2}" rpy="0.0 0.0 0.0" />
+		</joint>
+
+		<!-- Middle body link -->
+		<link name="body_middle_link">
+
+			<!-- Inertial part -->
+			<inertial>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<mass value="${0.19*mass}" />
+
+				<!-- Inertia matrix of a parallelepiped -->
+				<parallelepiped_inertia mass="${0.19*mass}" width="0.85" height="0.9" depth="${depth}" />
+				<!-- Old values: ixx = iyy = izz = 0.001 -->
+			</inertial>
+
+			<!-- Visual part -->
+			<visual>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="0.85 ${depth} 0.9" />
+				</geometry>
+				<material name="gray" />
+			</visual>
+
+			<!-- Collision part -->
+			<collision>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="0.85 ${depth} 0.9" />
+				</geometry>
+			</collision>
+
+		</link>
+		<!-- END middle body link -->
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="body_middle_link">
+			<material>
+						Gazebo/Gray
+			</material>
+		</gazebo>
+
+
+		<!-- Top body joint -->
+		<joint name="body_top_joint" type="fixed">
+			<parent link="${parent}" />
+			<child link="body_top_link" />
+			<origin xyz="0.075 0 ${0.2286 + 0.5 + 0.9 + 0.3/2}" rpy="0.0 0.0 0.0" />
+		</joint>
+
+		<!-- Top body link -->
+		<link name="body_top_link">
+
+			<!-- Inertial part -->
+			<inertial>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<mass value="${0.01*mass}" />
+
+				<!-- Inertia matrix of a parallelepiped -->
+				<parallelepiped_inertia mass="${0.01*mass}" width="0.05" height="0.3" depth="0.05" />
+				<!-- Old values: ixx = iyy = izz = 0.001 -->
+			</inertial>
+
+			<!-- Visual part -->
+			<visual>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="0.05 0.05 0.3" />
+				</geometry>
+				<material name="gray" />
+			</visual>
+
+			<!-- Collision part -->
+			<collision>
+				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+				<geometry>
+					<box size="0.05 0.05 0.3" />
+				</geometry>
+			</collision>
+
+		</link>
+		<!-- END top body link -->
+
+		<!-- Gazebo additional parameters -->
+		<gazebo reference="body_top_link">
+			<material>
+				Gazebo/Gray
+			</material>
+		</gazebo>
+
+		<!-- Build links and joints for ackermann_steering_controller -->
+		<front_steer_macro parent="body_bottom_link" prefix="ackermann" xyz="${width/2} 0 ${-0.5/2}" />
+		<virtual_rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2} 0 ${-0.5/2}" />
+
+		<!-- Build wheels -->
+		<front_wheel_macro parent="body_bottom_link" prefix="left" xyz="${width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
+		<front_wheel_macro parent="body_bottom_link" prefix="right" xyz="${width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
+		<rear_wheel_macro parent="body_bottom_link" prefix="left" xyz="${-width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
+		<rear_wheel_macro parent="body_bottom_link" prefix="right" xyz="${-width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
+
+	</macro>
+
+</robot> 

@@ -1,0 +1,6 @@
+# Position-controlled joints
+
+wheel_hinge_position_controller:
+  type: "position_controllers/JointGroupPositionController"
+  joints: ["left_front_wheel_hinge", "right_front_wheel_hinge"]
+  pid: { p: 100.0, i: 0.01, d: 10.0 }

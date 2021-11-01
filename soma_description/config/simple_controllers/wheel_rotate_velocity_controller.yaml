@@ -1,0 +1,6 @@
+# Velocity-controlled joints
+
+wheel_rotate_velocity_controller:
+  type: "velocity_controllers/JointGroupVelocityController"
+  joints: ["ackermann_front_wheel_rotate", "ackermann_rear_wheel_rotate"]
+  pid: { p: 100.0, i: 0.01, d: 10.0 }

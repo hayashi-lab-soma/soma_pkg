@@ -1,0 +1,58 @@
+# Ackermann driving controller for 2-wheeled robots
+
+ackermann_steering_controller:
+  type: "ackermann_steering_controller/AckermannSteeringController"
+
+  rear_wheel: "ackermann_virtual_rear_wheel_rotate"
+  front_steer: "ackermann_front_steer_hinge"
+
+  publish_rate: 50.0 # default: 50
+  open_loop: false
+
+  pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
+  twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.03]
+
+  # Wheel separation between the rear and the front, and diameter of the rear.
+  # These are both optional.
+  # ackermann_steering_controller will attempt to read either one or both from the
+  # URDF if not specified as a parameter.
+  wheel_separation_h: 1.05
+  wheel_radius: 0.2286
+
+  # Wheel separation and radius multipliers for odometry calibration.
+  wheel_separation_h_multiplier: 1.0 # default: 1.0
+  wheel_radius_multiplier: 1.0 # default: 1.0
+
+  # Steer position angle multipliers for fine tuning.
+  steer_pos_multiplier: 1.0
+
+  # Velocity commands timeout [s], default 0.5
+  cmd_vel_timeout: 0.5
+
+  # Base frame_id
+  base_frame_id: base_link
+
+  # Odom frame_id
+  odom_frame_id: odom
+
+  # Velocity and acceleration limits
+  # Whenever a min_* is unspecified, default to -max_*
+  linear:
+    x:
+      has_velocity_limits: false
+      # max_velocity: 10 # 0.55 m/s
+      # min_velocity: -0.55 # m/s
+      # has_acceleration_limits: true
+      # max_acceleration: 2 # 1.0 m/s^2
+      # min_acceleration: -1.0 # m/s^2
+      # has_jerk_limits: true
+      # max_jerk: 5.0 # m/s^3
+
+  angular:
+    z:
+      has_velocity_limits: false
+      # max_velocity: 3 # 1.5 rad/s
+      # has_acceleration_limits: true
+      # max_acceleration: 3 # 1.0 rad/s^2
+      # has_jerk_limits: true
+      # max_jerk: 2.5 # rad/s^3
