@@ -4,13 +4,13 @@
 
 ## **REQUIREMENTS** / 外部パッケージ要求  
 ### **VISUALIZATION**  
-`jsk_rviz_plugins`  
+- `jsk_rviz_plugins`  
 ```
 $ sudo apt install ros-melodic-jsk-rviz-plugins
 ```
 
 ### **MOTORS**  
-`maxon_epos_ros`  
+- `maxon_epos_ros`  
 ```
 $ cd catkin_ws/src
 $ git clone https://github.com/iwata-lab/maxon_epos_ros.git
@@ -28,6 +28,7 @@ $ catkin_make
     ```
     $ sudo apt install ros-melodic-nmea-msgs
     ```
+
 - RGB-D camera
   - `realsense2_camera`  
     ```
@@ -38,133 +39,110 @@ $ catkin_make
     $ sudo apt install ros-melodic-realsense2-description
     ```
   - `realsense`  
-
     ```
     $ cd catkin_ws/src
     $ git clone https://github.com/pal-robotics-forks/realsense.git
     $ cd ~/catkin_ws
     $ catkin_make
     ```
-
-  - _realsense_gazebo_plugin_ :
-
+  - `realsense_gazebo_plugin`  
     ```
-    cd catkin_ws/src
-    git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git
-    cd ~/catkin_ws
-    catkin_make
+    $ cd catkin_ws/src
+    $ git clone https://github.com/pal-robotics/realsense_gazebo_plugin.git
+    $ cd ~/catkin_ws
+    $ catkin_make
     ```
 
-- LIDAR
-
-  - **velodyne** :
-
+- LIDAR  
+  - `velodyne`  
     ```
-    sudo apt-get install ros-melodic-velodyne
+    $ sudo apt-get install ros-melodic-velodyne
     ```
-
-  - **pointcloud_to_laserscan** :
-
+  - `pointcloud_to_laserscan`  
     ```
-    sudo apt-get install ros-melodic-pointcloud-to-laserscan
+    $ sudo apt-get install ros-melodic-pointcloud-to-laserscan
     ```
 
-DRIVING
-
-- **ackermann_steering_controller** :
-
+### **DRIVING**  
+- `ackermann_steering_controller`  
 ```
-sudo apt-get install ros-melodic-ackermann-steering-controller
+$ sudo apt-get install ros-melodic-ackermann-steering-controller
 ```
 
-- _steer_drive_ros_ :
-
+- `steer_drive_ros`
 ```
-cd catkin_ws/src
-git clone https://github.com/CIR-KIT/steer_drive_ros.git
-cd ~/catkin_ws
-catkin_make
-```
-
-IMAGE PROCESSING
-
-- **pcl_ros** :
-
-```
-sudo apt-get install ros-melodic-pcl-ros
+$ cd catkin_ws/src
+$ git clone https://github.com/CIR-KIT/steer_drive_ros.git
+$ cd ~/catkin_ws
+$ catkin_make
 ```
 
-- _ndt_omp_ :
-
+### **IMAGE PROCESSING**  
+- `pcl_ros`  
 ```
-cd catkin_ws/src
-git clone https://github.com/koide3/ndt_omp.git
-cd ~/catkin_ws
-catkin_make
+$ sudo apt-get install ros-melodic-pcl-ros
 ```
 
-- _fast_gicp_ :
-
+- `ndt_omp`  
 ```
-cd catkin_ws/src
-git clone https://github.com/SMRT-AIST/fast_gicp.git
-cd ~/catkin_ws
-catkin_make
-```
-
-LOCALIZATION & SLAM
-
-- **move_base**
-
-  - **costmap_2d** : 二次元コストマップを扱うパッケージ
-
-    ```
-    sudo apt install ros-melodic-costmap-2d
-    ```
-
-  - **navfn** : ナビゲーション用の基礎パッケージ
-
-    ```
-    sudo apt install ros-melodic-navfn
-    ```
-
-  - **dwa_local_planner** : DWA による局所動作計画を行なうためのパッケージ
-
-    ```
-    sudo apt install ros-melodic-dwa-local-planner
-    ```
-
-- **libg2o** :
-
-```
-sudo apt-get install ros-melodic-libg2o
+$ cd catkin_ws/src
+$ git clone https://github.com/koide3/ndt_omp.git
+$ cd ~/catkin_ws
+$ catkin_make
 ```
 
-- **rtabmap_ros** :
-
+- `fast_gic`  
 ```
-sudo apt install ros-melodic-rtabmap-ros
-```
-
-- _hdl_graph_slam_ : LiDAR に対応した３次元 slam パッケージ
-
-```
-cd catkin_ws/src
-git clone https://github.com/koide3/hdl_graph_slam.git
-cd ~/catkin_ws
-catkin_make
+$ cd catkin_ws/src
+$ git clone https://github.com/SMRT-AIST/fast_gicp.git
+$ cd ~/catkin_ws
+$ catkin_make
 ```
 
-- _hdl_global_localization_ :
+### **LOCALIZATION & SLAM**  
+- **move_base**  
+  - `costmap_2d`  
+  ```
+  $ sudo apt install ros-melodic-costmap-2d
+  ```
 
+  - `navfn`
+  ```
+  $ sudo apt install ros-melodic-navfn
+  ```
+
+  - `dwa_local_planner`
+  ```
+  $ sudo apt install ros-melodic-dwa-local-planner
+  ```
+
+- `libg2o` :
 ```
-cd catkin_ws/src
-git clone https://github.com/koide3/hdl_global_localization.git
-cd ~/catkin_ws
-catkin_make
+$ sudo apt-get install ros-melodic-libg2o
 ```
 
-## Structure / パッケージ構成
+- `rtabmap_ros`  
+```
+$ sudo apt install ros-melodic-rtabmap-ros
+```
+
+- `hdl_graph_slam`
+```
+$ cd catkin_ws/src
+$ git clone https://github.com/koide3/hdl_graph_slam.git
+$ cd ~/catkin_ws
+$ catkin_make
+```
+
+- `hdl_global_localization`  
+```
+$ cd catkin_ws/src
+$ git clone https://github.com/koide3/hdl_global_localization.git
+$ cd ~/catkin_ws
+$ catkin_make
+```
+
+## **Structure** / パッケージ構成
 
 - **minisoma** : ?
 
