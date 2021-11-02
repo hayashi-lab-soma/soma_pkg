@@ -23,10 +23,12 @@ class OnlineSLAMNode:
 
         self.fig, self.ax = plt.subplots()
         self.real_ln, = plt.plot([], [], 'go', markersize=5)
-        self.particles_ln, = plt.plot([], [], 'ro', markersize=5)
-        self.features_ln, = plt.plot([], [], 'bo', markersize=10)
         self.real_x_data, self.real_y_data, self.real_theta_data = 0, 0, 0
+        self.trees_ln, = plt.plot([], [], 'gx', markersize=10)
+        self.trees_x_data, self.trees_y_data = [], []
+        self.particles_ln, = plt.plot([], [], 'ro', markersize=5)
         self.particles_x_data, self.particles_y_data = [], []
+        self.features_ln, = plt.plot([], [], 'bx', markersize=10)
         self.features_x_data, self.features_y_data = [], []
 
         self.motion_mutex = False
@@ -38,7 +40,7 @@ class OnlineSLAMNode:
         self.ax.set_xlim(-20, 20)
         self.ax.set_ylim(-20, 20)
 
-        return self.real_ln, self.particles_ln, self.features_ln
+        return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
 
     def update_plot(self, frame):
         if self.motion_mutex or self.observation_mutex:
@@ -46,18 +48,32 @@ class OnlineSLAMNode:
 
         print("DISPLAY\n")
 
+        self.real_ln.set_data(self.real_x_data, self.real_y_data)
+        self.trees_ln.set_data(self.trees_x_data, self.trees_y_data)
         self.features_ln.set_data(self.features_x_data, self.features_y_data)
         self.particles_ln.set_data(
             self.particles_x_data, self.particles_y_data)
-        self.real_ln.set_data(self.real_x_data, self.real_y_data)
 
-        return self.real_ln, self.particles_ln, self.features_ln
+        return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
 
     def real_update(self, data):
         self.real_x_data = data.pose[1].position.x
         self.real_y_data = data.pose[1].position.y
         self.real_theta_data = euler_from_quaternion([
             data.pose[1].orientation.x, data.pose[1].orientation.y, data.pose[1].orientation.z, data.pose[1].orientation.w])[2]
+
+        if self.first:
+            for p in self.solver.particles:
+                p.pose[0][0] = self.real_x_data
+                p.pose[1][0] = self.real_y_data
+                p.pose[2][0] = self.real_theta_data
+
+                self.trees_x_data = [
+                    data.pose[i].position.x for i in range(2, 19)]
+                self.trees_y_data = [
+                    data.pose[i].position.y for i in range(2, 19)]
+
+            self.first = False
 
         return
 
@@ -99,14 +115,6 @@ class OnlineSLAMNode:
             phi = atan2(pose.position.y, pose.position.x)
 
             observation.append(np.array([[d], [phi]]))
-
-        if self.first:
-            for p in self.solver.particles:
-                p.pose[0][0] = self.real_x_data
-                p.pose[1][0] = self.real_y_data
-                p.pose[2][0] = self.real_theta_data
-
-            self.first = False
 
         self.solver.motion_update(self.command, stop-self.command_start)
         self.solver.observation_update(observation)
