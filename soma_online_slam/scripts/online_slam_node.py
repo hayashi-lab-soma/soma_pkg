@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import rospy
 import numpy as np
-from math import pi
 from geometry_msgs.msg import PoseArray, Twist
 from gazebo_msgs.msg import ModelStates
 from tf.transformations import euler_from_quaternion
