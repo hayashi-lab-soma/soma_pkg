@@ -25,29 +25,60 @@ import time
 # TODO: Odometry-based motion model
 
 
-def motion(pose, command, noise, dt=1):
+def motion(motion_model, pose, command, noise, dt=1):
     x, y, theta = pose
-    v, omega = command
-    v_noise, omega_noise, yaw_noise = noise
+
+    if motion_model == "velocity":
+        v, omega = command
+        v_noise, omega_noise, yaw_noise = noise
+
+    elif motion_model == "odometry":
+        rot1, trans, rot2 = command
+        rot1_noise, trans_noise, rot2_noise = noise
+
+    else:
+        assert False, "Invalid motion model: " + motion_model
 
     # Covariance matrix
-    v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
-    omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
-    yaw_sigma = yaw_noise[0]*abs(v) + yaw_noise[1]*abs(omega)
-    sigma = [[v_sigma, 0],
-             [0, omega_sigma]]
+    if motion_model == "velocity":
+        v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
+        omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
+        yaw_sigma = yaw_noise[0]*abs(v) + yaw_noise[1]*abs(omega)
+        sigma = [[v_sigma, 0],
+                 [0, omega_sigma]]
+
+    elif motion_model == "odometry":
+        rot1_sigma = rot1_noise[0]*abs(rot1) + rot1_noise[1] * \
+            abs(trans) + rot1_noise[2]*abs(rot2)
+        trans_sigma = trans_noise[0]*abs(rot1) + trans_noise[1] * \
+            abs(trans) + trans_noise[2]*abs(rot2)
+        rot2_sigma = rot2_noise[0]*abs(rot1) + rot2_noise[1] * \
+            abs(trans) + rot2_noise[2]*abs(rot2)
+        sigma = [[rot1_sigma, 0, 0],
+                 [0, trans_sigma, 0],
+                 [0, 0, rot2_sigma]]
 
     # Noisy commands
-    v, omega = multivariate_normal.rvs(command, sigma)
+    if motion_model == "velocity":
+        v, omega = multivariate_normal.rvs(command, sigma)
+
+    elif motion_model == "odometry":
+        rot1, trans, rot2 = multivariate_normal.rvs(command, sigma)
 
     # New pose
-    if omega == 0:
-        new_x = pose[0] + v*cos(pose[2])*dt
-        new_y = pose[1] + v*sin(pose[2])*dt
-    else:
-        new_x = pose[0] - v/omega*sin(pose[2])*dt + v/omega*sin(pose[2] + omega)*dt
-        new_y = pose[1] + v/omega*cos(pose[2])*dt - v/omega*cos(pose[2] + omega)*dt
-    new_theta = multivariate_normal.rvs(pose[2] + omega*dt, yaw_sigma)
+    if motion_model == "velocity":
+        if omega == 0:
+            new_x = x + v*cos(theta)*dt
+            new_y = y + v*sin(theta)*dt
+        else:
+            new_x = x - v/omega*sin(theta)*dt + v/omega*sin(theta + omega)*dt
+            new_y = y + v/omega*cos(theta)*dt - v/omega*cos(theta + omega)*dt
+            new_theta = multivariate_normal.rvs(theta + omega*dt, yaw_sigma)
+
+    elif motion_model == "odometry":
+        new_x = x + trans*cos(theta + rot1)
+        new_y = y + trans*sin(theta + rot1)
+        new_theta = theta + rot1 + rot2
 
     # Ensure theta in ]-pi;pi]
     if new_theta <= -pi:
@@ -354,7 +385,7 @@ if __name__ == '__main__':
         print("\nStep: " + str(t+1))
         print("Command: " + str(u))
         robot_pose[0], robot_pose[1], robot_pose[2] = motion(
-            robot_pose, u, motion_noise)
+            "velocity", robot_pose, u, motion_noise)
         print("New pose: " + str(robot_pose))
         new_observation = observation(
             robot_pose, visibility, observation_noise)
@@ -365,7 +396,7 @@ if __name__ == '__main__':
             # print("\nParticle " + str(j) + ":")
 
             # Prediction
-            p[0], p[1], p[2] = motion(p[:3], u, motion_noise)
+            p[0], p[1], p[2] = motion("velocity", p[:3], u, motion_noise)
 
             # Correction & mapping
             pose = np.array([[p[0]],

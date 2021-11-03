@@ -51,17 +51,19 @@ class Particle:
 
 
 class OnlineSLAMSolver:
-    def __init__(self, particles_num=100, initial_x=0.0, initial_y=0.0, initial_theta=0.0, v_noise=[0.01, 0.0], omega_noise=[0.0, 0.01], yaw_noise=[0.0, 0.01], visibility=30, d_noise=[0.05, 0.0], phi_noise=[0.0005, 0.0]):
+    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=30, observation_noise=[[0.05, 0.0], [0.0005, 0.0]]):
         # Initial pose
-        self.robot_initial_pose = np.array(
-            [[initial_x], [initial_y], [initial_theta]])
+        self.robot_initial_pose = np.array(initial_pose)
 
         # Motion
-        self.motion_noise = np.array([v_noise, omega_noise, yaw_noise])
+        self.motion_model = motion_model
+        # v, omega, yaw for velocity / rot1, trans, rot2 for odometry
+        self.motion_noise = np.array(motion_noise)
 
         # Observation
+        self.observation_model = observation_model
         self.visibility = visibility
-        self.observation_noise = np.array([d_noise, phi_noise])
+        self.observation_noise = np.array(observation_noise)
 
         # Particles
         self.particles_num = particles_num
@@ -69,7 +71,7 @@ class OnlineSLAMSolver:
 
         for i in range(particles_num):
             # Pose
-            new_pose = [initial_x, initial_y, initial_theta]
+            new_pose = initial_pose[:]
 
             # Weight
             new_weight = 1.0/particles_num
@@ -89,12 +91,12 @@ class OnlineSLAMSolver:
 
         return tmp
 
-    def motion_update(self, command, dt):
+    def motion_update(self, command, dt=1):
         print("Motion update")
 
         for p in self.particles:
             p.pose = np.array([
-                motion(p.pose.transpose()[0], command, self.motion_noise, dt)[:]]).transpose()
+                motion(self.motion_model, p.pose.transpose()[0], command, self.motion_noise, dt)[:]]).transpose()
 
         return
 
