@@ -143,8 +143,6 @@ $ catkin_make
 
 ## **Structure** / パッケージ構成
 
-- **minisoma** : ?
-
 - **soma_atv_driver** : Motor control
 
 - **soma_base** : Navigation with **move_base**
@@ -160,8 +158,6 @@ $ catkin_make
 - **soma_localization** : Localization in known map
 
 - **soma_mapping** : Mapping of environment
-
-- **soma_mse** : ?
 
 - **soma_msgs** : Custom ROS messages
 
