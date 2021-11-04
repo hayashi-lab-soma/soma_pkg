@@ -5,6 +5,7 @@ from scipy.stats import multivariate_normal
 from utils.fastslam import delete_features, motion, correspondence, h_inverse, h, H, Q, delete_features
 
 
+# Feature: distinctive object that we can clearly distinguish from others
 class Feature:
     def __init__(self, pose, sigma):
         self.pose = np.array([pose[:]]).transpose()
@@ -27,6 +28,7 @@ class Feature:
         return Feature(self.pose.transpose()[0], self.sigma)
 
 
+# Particle: robot pose and featured-map joint hypothesis
 class Particle:
     def __init__(self, pose, weight, features=[]):
         self.pose = np.array([pose[:]]).transpose()
@@ -50,6 +52,7 @@ class Particle:
         return Particle(self.pose.transpose()[0], self.weight, self.features)
 
 
+# Online SLAM solver based on FastSLAM (particles with robot pose and Kalman filters for each feature)
 class OnlineSLAMSolver:
     def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=30, observation_noise=[[0.05, 0.0], [0.0005, 0.0]]):
         # Initial pose
@@ -134,7 +137,7 @@ class OnlineSLAMSolver:
 
         # Resampling
         if effective_particles_num < self.particles_num/2:
-            # if False:
+            print("  Yes")
             cumulated_weights = [0]
             for p in self.particles:
                 cumulated_weights.append(cumulated_weights[-1] + p.weight)
@@ -154,6 +157,8 @@ class OnlineSLAMSolver:
                         new_particle = Particle(
                             new_pose, new_weight, new_features)
                         new_particles.append(new_particle.clone())
+        else:
+            print("  No")
 
         return
 
@@ -269,7 +274,7 @@ class OnlineSLAMSolver:
         return
 
 
-# Tests
+# TESTS
 
 if __name__ == '__main__':
     F = Feature([78.9, -14.26], [[0.52, 0.0], [0.0, 0.00187]])

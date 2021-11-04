@@ -12,8 +12,9 @@ from matplotlib.animation import FuncAnimation
 from onlineSLAMSolver import OnlineSLAMSolver
 
 
+# Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, motion_model="odometry", motion_noise=[[0.01, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.01]], observation_model="range_bearing"):
+    def __init__(self, motion_model="odometry", motion_noise=[[0.007, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.007]], observation_model="range_bearing"):
         self.solver = OnlineSLAMSolver(
             particles_num=10, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
 
@@ -45,8 +46,8 @@ class OnlineSLAMNode:
         return
 
     def plot_init(self):
-        self.ax.set_xlim(-20, 20)
-        self.ax.set_ylim(-20, 20)
+        self.ax.set_xlim(-15, 15)
+        self.ax.set_ylim(-15, 15)
 
         return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
 
