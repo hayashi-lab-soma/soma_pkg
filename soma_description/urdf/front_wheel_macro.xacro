@@ -116,8 +116,8 @@
             </material>
             <mu1 value="Inf" />
             <mu2 value="Inf" />
-            <!-- <kp value="1000000000" />
-            <kd value="1" /> -->
+            <!-- <kp value="1000000000" /> -->
+            <!-- <kd value="1" /> -->
         </gazebo>
 
         <gazebo reference="${prefix}_front_wheel_assembly">

@@ -67,8 +67,8 @@
             </material>
             <mu1 value="Inf" />
             <mu2 value="Inf" />
-            <!-- <kp value="1000000000" />
-            <kd value="10" /> -->
+            <!-- <kp value="1000000000" /> -->
+            <!-- <kd value="10" /> -->
         </gazebo>
 
     </macro>
