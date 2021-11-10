@@ -6,14 +6,15 @@ from geometry_msgs.msg import PoseArray, Twist
 from nav_msgs.msg import Odometry
 from gazebo_msgs.msg import ModelStates
 from tf.transformations import euler_from_quaternion
-from math import sqrt, atan2
+from math import sqrt, atan2, pi
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from onlineSLAMSolver import OnlineSLAMSolver
 
 
+# Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, motion_model="odometry", motion_noise=[[0.01, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.01]], observation_model="range_bearing"):
+    def __init__(self, motion_model="odometry", motion_noise=[[0.007, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.007]], observation_model="range_bearing"):
         self.solver = OnlineSLAMSolver(
             particles_num=10, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
 
@@ -30,13 +31,13 @@ class OnlineSLAMNode:
             assert False, "Invalid motion model: " + motion_model
 
         self.fig, self.ax = plt.subplots()
-        self.real_ln, = plt.plot([], [], 'go', markersize=5)
+        self.real_ln, = plt.plot([], [], 'ro', markersize=5)
         self.real_x_data, self.real_y_data, self.real_theta_data = 0, 0, 0
-        self.trees_ln, = plt.plot([], [], 'gx', markersize=10)
+        self.trees_ln, = plt.plot([], [], 'bx', markersize=10)
         self.trees_x_data, self.trees_y_data = [], []
-        self.particles_ln, = plt.plot([], [], 'ro', markersize=5)
+        self.particles_ln, = plt.plot([], [], 'go', markersize=5)
         self.particles_x_data, self.particles_y_data = [], []
-        self.features_ln, = plt.plot([], [], 'bx', markersize=10)
+        self.features_ln, = plt.plot([], [], 'gx', markersize=10)
         self.features_x_data, self.features_y_data = [], []
 
         self.motion_mutex = False
@@ -45,8 +46,8 @@ class OnlineSLAMNode:
         return
 
     def plot_init(self):
-        self.ax.set_xlim(-20, 20)
-        self.ax.set_ylim(-20, 20)
+        self.ax.set_xlim(-15, 15)
+        self.ax.set_ylim(-15, 15)
 
         return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
 
@@ -112,11 +113,17 @@ class OnlineSLAMNode:
 
             self.new_odom = [new_x, new_y, new_theta]
 
-            if self.old_odom[0] != 0.0 and self.old_odom[1] != 0.0 and self.old_odom != 0.0:
+            if self.old_odom[0] != 0.0 and self.old_odom[1] != 0.0 and self.old_odom[2] != 0.0:
                 trans = sqrt(
                     (new_x-self.old_odom[0])**2 + (new_y-self.old_odom[1])**2)
                 rot1 = atan2(
                     new_y-self.old_odom[1], new_x-self.old_odom[0]) - self.old_odom[2]
+                if rot1 <= -pi/2:
+                    trans *= -1
+                    rot1 += pi
+                elif rot1 > pi/2:
+                    trans *= -1
+                    rot1 -= pi
                 rot2 = new_theta - self.old_odom[2] - rot1
 
                 self.command = [rot1, trans, rot2]

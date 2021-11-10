@@ -21,10 +21,7 @@ import time
 
 '''
 
-# Motion model (velocity-based or dead reckoning)
-# TODO: Odometry-based motion model
-
-
+# Motion model (velocity-based/dead reckoning or odometry-based)
 def motion(motion_model, pose, command, noise, dt=1):
     x, y, theta = pose
 
@@ -91,8 +88,7 @@ def motion(motion_model, pose, command, noise, dt=1):
     return new_pose
 
 
-# Observation model
-
+# Observation model (lidar)
 def observation(pose, visibility, noise):
     observation = []
     for i, f in enumerate(features):
@@ -247,7 +243,6 @@ def Q(z):
 
 
 # Display
-
 def display():
     plt.plot([0, 0, map_width, map_width], [
              0, map_height, 0, map_height], "y*")
