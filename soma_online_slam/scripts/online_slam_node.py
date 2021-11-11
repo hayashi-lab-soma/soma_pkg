@@ -14,9 +14,9 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, motion_model="odometry", motion_noise=[[0.007, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.007]], observation_model="range_bearing"):
+    def __init__(self, particles_num=100, motion_model="odometry", motion_noise=[[0.007, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.007]], observation_model="range_bearing"):
         self.solver = OnlineSLAMSolver(
-            particles_num=10, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
+            particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
 
         self.first = True
 
@@ -66,10 +66,10 @@ class OnlineSLAMNode:
         return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
 
     def real_update(self, data):
-        self.real_x_data = data.pose[1].position.x
-        self.real_y_data = data.pose[1].position.y
+        self.real_x_data = data.pose[11].position.x
+        self.real_y_data = data.pose[11].position.y
         self.real_theta_data = euler_from_quaternion([
-            data.pose[1].orientation.x, data.pose[1].orientation.y, data.pose[1].orientation.z, data.pose[1].orientation.w])[2]
+            data.pose[11].orientation.x, data.pose[11].orientation.y, data.pose[11].orientation.z, data.pose[11].orientation.w])[2]
 
         if self.first:
             for p in self.solver.particles:
@@ -78,9 +78,9 @@ class OnlineSLAMNode:
                 p.pose[2][0] = self.real_theta_data
 
                 self.trees_x_data = [
-                    data.pose[i].position.x for i in range(2, 19)]
+                    data.pose[i].position.x for i in range(1, 11)]
                 self.trees_y_data = [
-                    data.pose[i].position.y for i in range(2, 19)]
+                    data.pose[i].position.y for i in range(1, 11)]
 
             self.first = False
 
