@@ -276,61 +276,61 @@
         </link>
       </model>
       <model name='soma'>
-        <pose frame=''>1.76716 1.16494 -0.00023 -3.9e-05 0.000246 1.79931</pose>
+        <pose frame=''>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='ackermann_front_steer'>
-          <pose frame=''>1.64821 1.67634 0.228241 -4.3e-05 0.000247 1.78582</pose>
-          <velocity>0.009311 0.012754 -0.009201 -0.002605 0.003698 -0.032559</velocity>
-          <acceleration>-0.622633 0.381872 1.7653 2.31489 0.331954 -0.016214</acceleration>
-          <wrench>-0.124527 0.076374 0.353061 0 -0 0</wrench>
+          <pose frame=''>0.525 0 0.4286 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='ackermann_virtual_rear_wheel'>
-          <pose frame=''>1.88607 0.653636 0.228499 -1.57086 0.932539 1.79926</pose>
-          <velocity>-0.024546 0.005119 -0.007684 -0.009261 0.002871 -0.032431</velocity>
-          <acceleration>-5.87617 3.6417 -11.2249 2.02902 -1.05085 0.123984</acceleration>
-          <wrench>-5.87617 3.6417 -11.2249 0 -0 0</wrench>
+          <pose frame=''>-0.525 0 0.4286 -1.5708 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='base_link'>
-          <pose frame=''>1.76716 1.16494 -0.00023 -3.9e-05 0.000246 1.79931</pose>
-          <velocity>-0.008946 0.008394 -0.008401 -0.002526 0.00439 -0.03243</velocity>
-          <acceleration>-0.172459 -0.074231 -4.91521 0.075415 -0.795013 -0.272608</acceleration>
-          <wrench>-43.1492 -18.5726 -1229.79 0 -0 0</wrench>
+          <pose frame=''>0 0 0.2 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='left_front_wheel'>
-          <pose frame=''>1.22343 1.57753 0.228668 -1.59293 1.50786 1.77736</pose>
-          <velocity>0.036823 0.035889 0.004268 -0.022058 0.194959 0.718307</velocity>
-          <acceleration>-193.294 -44.5988 99.2153 1.9538 1.07845 -2.91653</acceleration>
-          <wrench>-96.6472 -22.2994 49.6076 0 -0 0</wrench>
+          <pose frame=''>0.525 0.4389 0.4286 -1.5708 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='left_front_wheel_assembly'>
-          <pose frame=''>1.22145 1.57707 0.228629 0.000735 0.000318 1.79943</pose>
-          <velocity>-0.03313 0.018436 0.002937 -0.056566 0.258755 0.717698</velocity>
-          <acceleration>237.557 56.3495 98.2389 -0.919136 -1.41689 -0.87867</acceleration>
-          <wrench>47.5113 11.2699 19.6478 0 -0 0</wrench>
+          <pose frame=''>0.525 0.4389 0.4286 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='left_rear_wheel'>
-          <pose frame=''>1.45858 0.554212 0.228588 1.57099 -0.092048 -1.34228</pose>
-          <velocity>-0.027921 0.018875 -0.032163 -0.023522 0.040476 -0.038832</velocity>
-          <acceleration>-5.97003 3.40564 -32.4988 0.791999 0.358228 0.842388</acceleration>
-          <wrench>-2.98502 1.70282 -16.2494 0 -0 0</wrench>
+          <pose frame=''>-0.525 0.4389 0.4286 -1.5708 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='right_front_wheel'>
-          <pose frame=''>2.07347 1.77524 0.228594 1.5579 1.34856 -1.35479</pose>
-          <velocity>0.251876 0.053668 -0.095849 -0.193015 0.84357 0.015379</velocity>
-          <acceleration>210.589 47.1467 -101.123 -0.280009 -1.11597 2.04631</acceleration>
-          <wrench>105.294 23.5734 -50.5617 0 -0 0</wrench>
+          <pose frame=''>0.525 -0.4389 0.4286 -1.5708 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='right_front_wheel_assembly'>
-          <pose frame=''>2.07475 1.77553 0.228564 0.001297 0.000311 1.79937</pose>
-          <velocity>-0.177208 -0.042459 -0.087732 -0.271298 1.22941 0.018699</velocity>
-          <acceleration>209.55 47.1637 -93.485 -0.033094 0.538795 2.54878</acceleration>
-          <wrench>41.9099 9.43273 -18.697 0 -0 0</wrench>
+          <pose frame=''>0.525 -0.4389 0.4286 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
         <link name='right_rear_wheel'>
-          <pose frame=''>2.31357 0.753061 0.228579 -1.57109 0.930096 1.7991</pose>
-          <velocity>-0.022882 -0.008984 -0.025559 -0.02213 0.034492 -0.038811</velocity>
-          <acceleration>-7.42917 3.48286 -32.2349 2.18388 0.65672 0.883085</acceleration>
-          <wrench>-3.71459 1.74143 -16.1175 0 -0 0</wrench>
+          <pose frame=''>-0.525 -0.4389 0.4286 -1.5708 0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 0 0 -0 0</acceleration>
+          <wrench>0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <light name='sun'>
