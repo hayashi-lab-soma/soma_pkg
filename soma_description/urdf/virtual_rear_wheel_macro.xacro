@@ -5,7 +5,7 @@
     <macro name="virtual_rear_wheel_macro" params="parent prefix xyz">
 
         <!-- General properties used for inertia computation -->
-        <property name="mass" value="1" />
+        <property name="mass" value="12" />
         <property name="radius" value="0.03" />
         <property name="length" value="0.0889" />
 
