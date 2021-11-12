@@ -29,6 +29,7 @@
 	<arg name="motor_topics" default="" unless="$(arg is_motor_topics)" />
 	<!-- Odometry topics -->
 	<arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" />
+	<!-- <arg name="odom_topics" default="/soma /lidar_odom /vodom /odom /t265/odom/sample" doc="" /> -->
 	<!-- soma topics -->
 	<arg name="soma_topics" default="/soma /soma/status tf tf_static" />
 	<!-- marge topics -->
