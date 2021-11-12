@@ -7,6 +7,7 @@ from nav_msgs.msg import Odometry
 from gazebo_msgs.msg import ModelStates
 from tf.transformations import euler_from_quaternion
 from math import sqrt, atan2, pi
+from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from onlineSLAMSolver import OnlineSLAMSolver
@@ -14,7 +15,7 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=100, motion_model="odometry", motion_noise=[[0.007, 0.0, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.007]], observation_model="range_bearing"):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.001, 0.0], [0.0005, 0.01, 0.0005], [0.0, 0.001, 0.01]], observation_model="range_bearing"):
         self.solver = OnlineSLAMSolver(
             particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
 
@@ -127,6 +128,7 @@ class OnlineSLAMNode:
                 rot2 = new_theta - self.old_odom[2] - rot1
 
                 self.command = [rot1, trans, rot2]
+
             else:
                 self.old_odom = self.new_odom[:]
 
@@ -149,7 +151,8 @@ class OnlineSLAMNode:
             d = sqrt(pose.position.x**2 + pose.position.y**2)
             phi = atan2(pose.position.y, pose.position.x)
 
-            observation.append(np.array([[d], [phi]]))
+            if d < self.solver.visibility:
+                observation.append(np.array([[d], [phi]]))
 
         if self.solver.motion_model == "velocity":
             self.solver.motion_update(self.command, stop-self.command_start)
@@ -170,6 +173,7 @@ class OnlineSLAMNode:
         for p in self.solver.particles:
             if p.weight > highest_weight:
                 highest_weight = p.weight
+
         most_probable_particle = p.clone()
 
         self.features_x_data, self.features_y_data = [], []
