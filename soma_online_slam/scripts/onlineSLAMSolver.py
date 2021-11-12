@@ -54,7 +54,7 @@ class Particle:
 
 # Online SLAM solver based on FastSLAM (particles with robot pose and Kalman filters for each feature)
 class OnlineSLAMSolver:
-    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=30, observation_noise=[[0.05, 0.0], [0.0005, 0.0]]):
+    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=5, observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
         # Initial pose
         self.robot_initial_pose = np.array(initial_pose)
 
@@ -95,7 +95,8 @@ class OnlineSLAMSolver:
         return tmp
 
     def motion_update(self, command, dt=1):
-        print("Motion update")
+        print("Motion update: " + str(round(command[0], 2)) + ", " + str(
+            round(command[1], 2)) + ", " + str(round(command[2], 2)))
 
         for p in self.particles:
             p.pose = np.array([
@@ -104,7 +105,7 @@ class OnlineSLAMSolver:
         return
 
     def observation_update(self, observation):
-        print("Observation update")
+        print("Observation update: " + str(len(observation)))
 
         print("- Weights update")
 
@@ -120,12 +121,6 @@ class OnlineSLAMSolver:
         assert weights_sum > 0, "/!\ Sum of weights equals 0 !"
         for p in self.particles:
             p.weight /= weights_sum
-
-        # Find most probable pose and features
-        # max_weight = 0
-        # for i, p in enumerate(self.particles):
-            # if p.weight > max_weight:
-            # max_weight = p.weight
 
         print("- Resampling")
 
