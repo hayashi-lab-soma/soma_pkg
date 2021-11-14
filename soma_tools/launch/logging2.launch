@@ -4,8 +4,8 @@
 	<arg name="prefix" default="/home/soma1/" />
 	<arg name="is_lidar_topics" default="true" doc="" />
 	<arg name="is_camera_topics" default="true" doc="" />
-	<arg name="is_imu_topics" default="true" doc="" />
-	<arg name="is_motor_topics" default="true" doc="" />
+	<arg name="is_imu_topics" default="false" doc="" />
+	<arg name="is_motor_topics" default="false" doc="" />
 	<arg name="add_topics" default="" />
 	<!--
 	topic settings
@@ -15,10 +15,10 @@
 	<arg name="lidar_topics" default="/velodyne_points /filtered_points" if="$(arg is_lidar_topics)" />
 	<arg name="lidar_topics" default="" unless="$(arg is_lidar_topics)" />
 	<!-- rgbd camera topics -->
-	<arg name="rgb_image_topics" default="/camera_f/color/image_raw " />
-	<arg name="depth_image_topics" default="/camera_f/depth/image_rect_raw /camera_f/aligned_depth_to_color/image_raw " />
-	<arg name="camera_info_topics" default="/camera_f/color/camera_info /camera_f/depth/camera_info " />
-	<arg name="points_topics" default=" /camera_f/prefiltered" />
+	<arg name="rgb_image_topics" default="/d400/color/image_raw " />
+	<arg name="depth_image_topics" default="/d400/depth/image_rect_raw /d400/aligned_depth_to_color/image_raw " />
+	<arg name="camera_info_topics" default="/d400/color/camera_info /d400/depth/camera_info " />
+	<arg name="points_topics" default=" /d400/prefiltered" />
 	<arg name="camera_topics" default="$(arg rgb_image_topics) $(arg depth_image_topics) $(arg camera_info_topics) $(arg points_topics)" if="$(arg is_camera_topics)" />
 	<arg name="camera_topics" default="" unless="$(arg is_camera_topics)" />
 	<!-- IMU topics -->
@@ -28,12 +28,12 @@
 	<arg name="motor_topics" default="/maxon_bringup/steering/get_state /maxon_bringup/rear_brake/get_state /maxon_bringup/front_brake/get_state /maxon_bringup/throttle/get_state" if="$(arg is_motor_topics)" />
 	<arg name="motor_topics" default="" unless="$(arg is_motor_topics)" />
 	<!-- Odometry topics -->
-	<arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" />
-	<!-- <arg name="odom_topics" default="/soma /lidar_odom /vodom /odom /t265/odom/sample" doc="" /> -->
+	<!-- <arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" /> -->
+	<arg name="odom_topics" default="/t265/odom/sample" doc="" />
 	<!-- soma topics -->
 	<arg name="soma_topics" default="/soma /soma/status tf tf_static" />
 	<!-- marge topics -->
-	<arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg imu_topics) $(arg motor_topics) $(arg odom_topics) $(arg soma_topics)" />
+	<arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg odom_topics) $(arg soma_topics)" />
 	<!--  -->
 	<!--
 	Run logging
