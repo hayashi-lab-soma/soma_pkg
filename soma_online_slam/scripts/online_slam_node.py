@@ -15,9 +15,9 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.001, 0.0], [0.0005, 0.01, 0.0005], [0.0, 0.001, 0.01]], observation_model="range_bearing"):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.001, 0.0], [0.0005, 0.01, 0.0005], [0.0, 0.001, 0.01]], observation_model="range_bearing", observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
         self.solver = OnlineSLAMSolver(
-            particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model)
+            particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, observation_noise=observation_noise)
 
         self.first = True
 
