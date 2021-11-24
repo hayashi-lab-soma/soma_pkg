@@ -22,6 +22,8 @@ import time
 '''
 
 # Motion model (velocity-based/dead reckoning or odometry-based)
+
+
 def motion(motion_model, pose, command, noise, dt=1):
     x, y, theta = pose
 
@@ -45,12 +47,10 @@ def motion(motion_model, pose, command, noise, dt=1):
                  [0, omega_sigma]]
 
     elif motion_model == "odometry":
-        rot1_sigma = rot1_noise[0]*abs(rot1) + rot1_noise[1] * \
-            abs(trans) + rot1_noise[2]*abs(rot2)
-        trans_sigma = trans_noise[0]*abs(rot1) + trans_noise[1] * \
-            abs(trans) + trans_noise[2]*abs(rot2)
-        rot2_sigma = rot2_noise[0]*abs(rot1) + rot2_noise[1] * \
-            abs(trans) + rot2_noise[2]*abs(rot2)
+        rot1_sigma = rot1_noise[0] * abs(trans) + rot1_noise[1] * abs(rot1)
+        trans_sigma = trans_noise[0] * \
+            abs(trans) + trans_noise[1] * (abs(rot1) + abs(rot2))
+        rot2_sigma = rot2_noise[0] * abs(trans) + rot2_noise[1] * abs(rot2)
         sigma = [[rot1_sigma, 0, 0],
                  [0, trans_sigma, 0],
                  [0, 0, rot2_sigma]]
@@ -183,8 +183,16 @@ def delete_features(features, pose, observations, noise, visibility, threshold):
                     phi += 2*pi
 
                 d_interval, phi_interval = d_sigma/10, phi_sigma/10
-                feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
-                    [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
+
+                if d_sigma == 0 or phi_sigma == 0:
+                    if o[0] == d and o[1] == phi:
+                        feature_likelihood = 1
+                    else:
+                        feature_likelihood = 0
+
+                else:
+                    feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
+                        [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
                 assert feature_likelihood <= 1, feature_likelihood
 
@@ -193,6 +201,8 @@ def delete_features(features, pose, observations, noise, visibility, threshold):
 
             if highest_likelihood > threshold:
                 new_features.append(f)
+            else:
+                print("  Feature deleted")
 
         else:
             new_features.append(f)
