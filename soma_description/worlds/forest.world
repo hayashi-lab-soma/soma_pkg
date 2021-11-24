@@ -22,7 +22,7 @@
       <real_time_update_rate>1000</real_time_update_rate>
       <ode>
         <solver>
-          <iters>200</iters>
+          <iters>500</iters>
         </solver>
       </ode>
     </physics>
