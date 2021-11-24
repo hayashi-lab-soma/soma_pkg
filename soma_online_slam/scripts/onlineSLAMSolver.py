@@ -54,7 +54,7 @@ class Particle:
 
 # Online SLAM solver based on FastSLAM (particles with robot pose and Kalman filters for each feature)
 class OnlineSLAMSolver:
-    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=5, observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
+    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=5.0, observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
         # Initial pose
         self.robot_initial_pose = np.array(initial_pose)
 
@@ -138,9 +138,12 @@ class OnlineSLAMSolver:
                 cumulated_weights.append(cumulated_weights[-1] + p.weight)
 
             new_particles = []
-            resampling_sigma = [[0.01, 0, 0],
-                                [0, 0.01, 0],
-                                [0, 0, 0.0001]]
+            # resampling_sigma = [[0.01, 0.0, 0.0],
+            # [0.0, 0.01, 0.0],
+            # [0.0, 0.0, 0.0001]]
+            resampling_sigma = [[0.0, 0.0, 0.0],
+                                [0.0, 0.0, 0.0],
+                                [0.0, 0.0, 0.0]]
             for i in range(self.particles_num):
                 r = random()
                 for j in range(len(cumulated_weights)-1):

@@ -15,7 +15,7 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.001, 0.0], [0.0005, 0.01, 0.0005], [0.0, 0.001, 0.01]], observation_model="range_bearing", observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]], observation_model="range_bearing", observation_noise=[[0.0, 0.0], [0.0, 0.0]]):
         self.solver = OnlineSLAMSolver(
             particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, observation_noise=observation_noise)
 
@@ -51,6 +51,7 @@ class OnlineSLAMNode:
         self.ax.set_ylim(-15, 15)
 
         return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
+        # return self.real_ln, self.trees_ln
 
     def update_plot(self, frame):
         if self.motion_mutex or self.observation_mutex:
@@ -65,12 +66,23 @@ class OnlineSLAMNode:
             self.particles_x_data, self.particles_y_data)
 
         return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
+        # return self.real_ln, self.trees_ln
 
     def real_update(self, data):
-        self.real_x_data = data.pose[11].position.x
-        self.real_y_data = data.pose[11].position.y
+        # FOREST WITH UNEVEN GROUND
+        # soma_index = 11
+        # trees_start_index = 1
+        # trees_stop_index = 11
+
+        # FLAT FOREST
+        soma_index = 18
+        trees_start_index = 1
+        trees_stop_index = 17
+
+        self.real_x_data = data.pose[soma_index].position.x
+        self.real_y_data = data.pose[soma_index].position.y
         self.real_theta_data = euler_from_quaternion([
-            data.pose[11].orientation.x, data.pose[11].orientation.y, data.pose[11].orientation.z, data.pose[11].orientation.w])[2]
+            data.pose[soma_index].orientation.x, data.pose[soma_index].orientation.y, data.pose[soma_index].orientation.z, data.pose[soma_index].orientation.w])[2]
 
         if self.first:
             for p in self.solver.particles:
@@ -79,9 +91,9 @@ class OnlineSLAMNode:
                 p.pose[2][0] = self.real_theta_data
 
                 self.trees_x_data = [
-                    data.pose[i].position.x for i in range(1, 11)]
+                    data.pose[i].position.x for i in range(trees_start_index, trees_stop_index)]
                 self.trees_y_data = [
-                    data.pose[i].position.y for i in range(1, 11)]
+                    data.pose[i].position.y for i in range(trees_start_index, trees_stop_index)]
 
             self.first = False
 
