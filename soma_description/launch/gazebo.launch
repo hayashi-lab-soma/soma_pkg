@@ -3,14 +3,18 @@
 <launch>
     <arg name="namespace" default="/" />
 
+    <!-- Environment -->
+    <arg name="uneven_ground" default="false" />
+
     <!-- Robot model -->
     <arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
-    <arg name="z_offset" default="0.2" />
+    <arg name="z_offset" default="0.2" if="$(arg uneven_ground)"/>
+    <arg name="z_offset" default="0" unless="$(arg uneven_ground)"/>
 
     <!-- Launch Gazebo -->
-    <!-- <arg name="world_name" default="$(find soma_description)/worlds/forest.world" /> -->
-    <arg name="world_name" default="$(find soma_description)/worlds/flat_forest.world" />
+    <arg name="world_name" default="$(find soma_description)/worlds/forest.world" if="$(arg uneven_ground)"/>
+    <arg name="world_name" default="$(find soma_description)/worlds/flat_forest.world" unless="$(arg uneven_ground)"/>
     <arg name="paused" default="true"/>
     <arg name="use_sim_time" default="true"/>
     <arg name="gui" default="true"/>
