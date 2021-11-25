@@ -6,8 +6,7 @@ from geometry_msgs.msg import PoseArray, Twist
 from nav_msgs.msg import Odometry
 from gazebo_msgs.msg import ModelStates
 from tf.transformations import euler_from_quaternion
-from math import sqrt, atan2, pi
-from scipy.stats import multivariate_normal
+from math import sqrt, atan2, pi, cos, sin
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from onlineSLAMSolver import OnlineSLAMSolver
@@ -15,9 +14,9 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]], observation_model="range_bearing", observation_noise=[[0.0, 0.0], [0.0, 0.0]]):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=5.0, observation_noise=[[0.0, 0.0], [0.0, 0.0]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         self.solver = OnlineSLAMSolver(
-            particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, observation_noise=observation_noise)
+            particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, min_visibility=min_visibility, max_visibility=max_visibility, observation_noise=observation_noise, correspondence_threshold=correspondence_threshold, delete_threshold=delete_threshold)
 
         self.first = True
 
@@ -34,6 +33,9 @@ class OnlineSLAMNode:
         self.fig, self.ax = plt.subplots()
         self.real_ln, = plt.plot([], [], 'ro', markersize=5)
         self.real_x_data, self.real_y_data, self.real_theta_data = 0, 0, 0
+        self.heading_ln, = plt.plot([], [], 'k-', markersize=3)
+        self.min_visibility_ln, = plt.plot([], [], 'r--', markersize=1)
+        self.max_visibility_ln, = plt.plot([], [], 'r--', markersize=1)
         self.trees_ln, = plt.plot([], [], 'bx', markersize=10)
         self.trees_x_data, self.trees_y_data = [], []
         self.particles_ln, = plt.plot([], [], 'go', markersize=5)
@@ -50,7 +52,7 @@ class OnlineSLAMNode:
         self.ax.set_xlim(-15, 15)
         self.ax.set_ylim(-15, 15)
 
-        return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
+        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.features_ln
         # return self.real_ln, self.trees_ln
 
     def update_plot(self, frame):
@@ -64,8 +66,14 @@ class OnlineSLAMNode:
         self.features_ln.set_data(self.features_x_data, self.features_y_data)
         self.particles_ln.set_data(
             self.particles_x_data, self.particles_y_data)
+        self.heading_ln.set_data(np.linspace(self.real_x_data, self.real_x_data + cos(self.real_theta_data), 20),
+                                 np.linspace(self.real_y_data, self.real_y_data + sin(self.real_theta_data), 20))
+        self.min_visibility_ln.set_data([self.real_x_data + cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+                                        self.real_y_data + sin(theta) for theta in np.linspace(-pi, pi, 100)])
+        self.max_visibility_ln.set_data([self.real_x_data + 5 * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+                                        self.real_y_data + 5 * sin(theta) for theta in np.linspace(-pi, pi, 100)])
 
-        return self.real_ln, self.trees_ln, self.particles_ln, self.features_ln
+        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.features_ln
         # return self.real_ln, self.trees_ln
 
     def real_update(self, data):
@@ -163,7 +171,7 @@ class OnlineSLAMNode:
             d = sqrt(pose.position.x**2 + pose.position.y**2)
             phi = atan2(pose.position.y, pose.position.x)
 
-            if d < self.solver.visibility:
+            if d > self.solver.min_visibility and d < self.solver.max_visibility:
                 observation.append(np.array([[d], [phi]]))
 
         if self.solver.motion_model == "velocity":

@@ -2,7 +2,7 @@ import numpy as np
 from math import sqrt, pi, exp
 from random import random
 from scipy.stats import multivariate_normal
-from utils.fastslam import delete_features, motion, correspondence, h_inverse, h, H, Q, delete_features
+from utils.fastslam import motion, correspondence, h_inverse, h, H, Q, delete_features
 
 
 # Feature: distinctive object that we can clearly distinguish from others
@@ -54,7 +54,7 @@ class Particle:
 
 # Online SLAM solver based on FastSLAM (particles with robot pose and Kalman filters for each feature)
 class OnlineSLAMSolver:
-    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=5.0, observation_noise=[[0.5, 0.0], [0.05, 0.0]]):
+    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", min_visibility=1.0, max_visibility=5.0, observation_noise=[[0.5, 0.0], [0.05, 0.0]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         # Initial pose
         self.robot_initial_pose = np.array(initial_pose)
 
@@ -65,8 +65,11 @@ class OnlineSLAMSolver:
 
         # Observation
         self.observation_model = observation_model
-        self.visibility = visibility
+        self.min_visibility = min_visibility
+        self.max_visibility = max_visibility
         self.observation_noise = np.array(observation_noise)
+        self.correspondence_threshold = correspondence_threshold
+        self.delete_threshold = delete_threshold
 
         # Particles
         self.particles_num = particles_num
@@ -88,7 +91,8 @@ class OnlineSLAMSolver:
         tmp = "\nOnlineSLAMSolver from FASTSLAM\n"
         tmp += "\nRobot initial pose:\n" + str(self.robot_initial_pose)
         tmp += "\nMotion noise:\n" + str(self.motion_noise)
-        tmp += "\nVisibility: " + str(self.visibility)
+        tmp += "\nMinimum visibility: " + str(self.min_visibility)
+        tmp += "\nMaximum visibility: " + str(self.max_visibility)
         tmp += "\nObservation noise:\n" + str(self.observation_noise)
         tmp += "\nNumber of particles: " + str(self.particles_num) + "\n"
 
@@ -174,7 +178,7 @@ class OnlineSLAMSolver:
             for i in range(len(observation)):
 
                 corresponding_features, corresponding_likelihoods = correspondence(
-                    [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation[i].transpose()[0], self.visibility, self.observation_noise, 10**(-5))
+                    [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation[i].transpose()[0], self.min_visibility, self.max_visibility, self.observation_noise, self.correspondence_threshold)
 
                 features_preferences.append(corresponding_features)
                 features_likelihoods.append(corresponding_likelihoods)
@@ -263,11 +267,11 @@ class OnlineSLAMSolver:
                 # Bias to ensure non-zero weight
                 p.weight = max(p.weight*weight_update, 10**(-323))
 
-        new_features = delete_features(
-            [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation, self.observation_noise, self.visibility, 10**(-5))[:]
-        p.features = []
-        for feature in new_features:
-            p.features.append(Feature(feature[0].transpose()[0], feature[1]))
+        # new_features = delete_features(
+            # [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation, self.observation_noise, self.min_visibility, self.max_visibility, self.delete_threshold)[:]
+        # p.features = []
+        # for feature in new_features:
+            # p.features.append(Feature(feature[0].transpose()[0], feature[1]))
 
         return
 
