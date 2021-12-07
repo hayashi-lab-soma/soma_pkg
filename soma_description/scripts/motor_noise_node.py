@@ -17,8 +17,9 @@ def add_motor_noise(data):
     v_noise = [float(f) for f in v_noise]
     omega_noise = [float(f) for f in omega_noise]
 
-    v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
-    omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
+    v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega) + v_noise[2]
+    omega_sigma = omega_noise[0] * \
+        abs(v) + omega_noise[1]*abs(omega) + omega_noise[2]
     sigma = [[v_sigma, 0],
              [0, omega_sigma]]
 

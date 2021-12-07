@@ -4,7 +4,7 @@
     <!-- Arguments -->
     <arg name="namespace" default="/"/>
     <arg name="driving_gui" default="true"/>
-    <arg name="motor_noise_list" default="[[0.0,0.0],[0.0,0.0]]"/>
+    <arg name="motor_noise_list" default="[[0.0,0.0,0.0],[0.0,0.0,0.0]]"/>
 
     <!-- Launch controllers (joint state & driving) -->
     <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller"/>

@@ -40,17 +40,22 @@ def motion(motion_model, pose, command, noise, dt=1):
 
     # Covariance matrix
     if motion_model == "velocity":
-        v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
-        omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
-        yaw_sigma = yaw_noise[0]*abs(v) + yaw_noise[1]*abs(omega)
+        v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega) + v_noise[2]
+        omega_sigma = omega_noise[0] * \
+            abs(v) + omega_noise[1]*abs(omega) + omega_noise[2]
+        yaw_sigma = yaw_noise[0] * \
+            abs(v) + yaw_noise[1]*abs(omega) + yaw_noise[2]
         sigma = [[v_sigma, 0],
                  [0, omega_sigma]]
 
     elif motion_model == "odometry":
-        rot1_sigma = rot1_noise[0] * abs(trans) + rot1_noise[1] * abs(rot1)
+        rot1_sigma = rot1_noise[0] * abs(trans) + \
+            rot1_noise[1] * abs(rot1) + rot1_noise[2]
         trans_sigma = trans_noise[0] * \
-            abs(trans) + trans_noise[1] * (abs(rot1) + abs(rot2))
-        rot2_sigma = rot2_noise[0] * abs(trans) + rot2_noise[1] * abs(rot2)
+            abs(trans) + trans_noise[1] * \
+            (abs(rot1) + abs(rot2)) + trans_noise[2]
+        rot2_sigma = rot2_noise[0] * abs(trans) + \
+            rot2_noise[1] * abs(rot2) + rot2_noise[2]
         sigma = [[rot1_sigma, 0, 0],
                  [0, trans_sigma, 0],
                  [0, 0, rot2_sigma]]
@@ -97,8 +102,9 @@ def observation(pose, min_visibility, max_visibility, noise):
 
         d_noise, phi_noise = noise
         if distance > min_visibility and distance < max_visibility:
-            d_sigma = d_noise[0]*distance + d_noise[1]*abs(angle)
-            phi_sigma = phi_noise[0]*distance + phi_noise[1]*abs(angle)
+            d_sigma = d_noise[0]*distance + d_noise[1]*abs(angle) + d_noise[2]
+            phi_sigma = phi_noise[0]*distance + \
+                phi_noise[1]*abs(angle) + phi_noise[2]
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -109,6 +115,7 @@ def observation(pose, min_visibility, max_visibility, noise):
             elif noisy_observation[1] > pi:
                 noisy_observation -= 2*pi
             observation.append(list(noisy_observation))
+
     return observation
 
 
@@ -127,8 +134,8 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
 
         if d > min_visibility and d < max_visibility:
             d_noise, phi_noise = noise
-            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
-            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
+            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi) + phi_noise[2]
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -141,7 +148,7 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
             feature_likelihood = mvnun(np.array([observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0]), np.array(
                 [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
-            assert feature_likelihood <= 1, feature_likelihood
+            assert feature_likelihood <= 1, "Probability greater than 1 !"
 
             if feature_likelihood > threshold:
                 corresponding_features[i] = feature_likelihood
@@ -159,6 +166,7 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
     return corresponding_features, corresponding_likelihoods
 
 
+# /!\ Deprecated !
 def delete_features(features, pose, observations, noise, min_visibility, max_visibility, threshold):
     new_features = []
     for f in features:
@@ -172,8 +180,9 @@ def delete_features(features, pose, observations, noise, min_visibility, max_vis
                 phi = atan2(yf - pose[1], xf - pose[0]) - pose[2]
 
                 d_noise, phi_noise = noise
-                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
-                phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
+                phi_sigma = phi_noise[0]*d + \
+                    phi_noise[1]*abs(phi) + phi_noise[2]
                 sigma = [[d_sigma, 0],
                          [0, phi_sigma]]
 
@@ -316,7 +325,7 @@ if __name__ == '__main__':
     seed(0)
 
     # Parameters
-    
+
     max_time = 8
 
     # Command
