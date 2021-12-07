@@ -9,6 +9,8 @@
 	<!-- Robot model -->
 	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+	<arg name="x_offset" default="0.0"/>
+	<arg name="y_offset" default="0.0"/>
 	<arg name="z_offset" default="0.2" if="$(arg uneven_ground)"/>
 	<arg name="z_offset" default="0" unless="$(arg uneven_ground)"/>
 
