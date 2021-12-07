@@ -14,19 +14,23 @@ from onlineSLAMSolver import OnlineSLAMSolver
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=5.0, observation_noise=[[0.0, 0.0], [0.0, 0.0]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
+    def __init__(self, particles_num=50, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=10.0, observation_noise=[[0.0, 0.0, 0.1], [0.0, 0.0, 0.1]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         self.solver = OnlineSLAMSolver(
             particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, min_visibility=min_visibility, max_visibility=max_visibility, observation_noise=observation_noise, correspondence_threshold=correspondence_threshold, delete_threshold=delete_threshold)
 
         self.first = True
 
+        self.most_probable_index = 0
+
         if motion_model == "velocity":
             self.command = [0.0, 0.0]
             self.command_start = rospy.get_time()
+
         elif motion_model == "odometry":
             self.command = [0.0, 0.0, 0.0]
             self.old_odom = [0.0, 0.0, 0.0]
             self.new_odom = [0.0, 0.0, 0.0]
+
         else:
             assert False, "Invalid motion model: " + motion_model
 
@@ -40,6 +44,7 @@ class OnlineSLAMNode:
         self.trees_x_data, self.trees_y_data = [], []
         self.particles_ln, = plt.plot([], [], 'go', markersize=5)
         self.particles_x_data, self.particles_y_data = [], []
+        self.most_probable_ln, = plt.plot([], [], 'ko', markersize=5)
         self.features_ln, = plt.plot([], [], 'gx', markersize=10)
         self.features_x_data, self.features_y_data = [], []
 
@@ -52,8 +57,7 @@ class OnlineSLAMNode:
         self.ax.set_xlim(-15, 15)
         self.ax.set_ylim(-15, 15)
 
-        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.features_ln
-        # return self.real_ln, self.trees_ln
+        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.features_ln
 
     def update_plot(self, frame):
         if self.motion_mutex or self.observation_mutex:
@@ -66,15 +70,17 @@ class OnlineSLAMNode:
         self.features_ln.set_data(self.features_x_data, self.features_y_data)
         self.particles_ln.set_data(
             self.particles_x_data, self.particles_y_data)
+        if self.particles_x_data != []:
+            self.most_probable_ln.set_data(
+                self.particles_x_data[self.most_probable_index], self.particles_y_data[self.most_probable_index])
         self.heading_ln.set_data(np.linspace(self.real_x_data, self.real_x_data + cos(self.real_theta_data), 20),
                                  np.linspace(self.real_y_data, self.real_y_data + sin(self.real_theta_data), 20))
-        self.min_visibility_ln.set_data([self.real_x_data + cos(theta) for theta in np.linspace(-pi, pi, 100)], [
-                                        self.real_y_data + sin(theta) for theta in np.linspace(-pi, pi, 100)])
-        self.max_visibility_ln.set_data([self.real_x_data + 5 * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
-                                        self.real_y_data + 5 * sin(theta) for theta in np.linspace(-pi, pi, 100)])
+        self.min_visibility_ln.set_data([self.real_x_data + self.solver.min_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+                                        self.real_y_data + self.solver.min_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
+        self.max_visibility_ln.set_data([self.real_x_data + self.solver.max_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+                                        self.real_y_data + self.solver.max_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
 
-        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.features_ln
-        # return self.real_ln, self.trees_ln
+        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.features_ln
 
     def real_update(self, data):
         # FOREST WITH UNEVEN GROUND
@@ -190,11 +196,13 @@ class OnlineSLAMNode:
             self.particles_y_data.append(p.pose[1][0])
 
         highest_weight = 0
-        for p in self.solver.particles:
+        for i, p in enumerate(self.solver.particles):
             if p.weight > highest_weight:
                 highest_weight = p.weight
+                self.most_probable_index = i
 
-        most_probable_particle = p.clone()
+        most_probable_particle = self.solver.particles[self.most_probable_index].clone(
+        )
 
         self.features_x_data, self.features_y_data = [], []
         if highest_weight > 0:
