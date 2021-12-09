@@ -11,12 +11,12 @@
     </include>
 
     <!-- Run the map server which publish the global (static) map -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(find soma_base)/maps/mirais_map.yaml">
+    <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find soma_base)/maps/mirais_map.yaml"> -->
         <param name="frame_id" value="map"/>
     </node>
 
     <!--- Run AMCL for localization (necessary for tf from map to odom) -->
-    <include file="$(find soma_base)/launch/amcl.launch" />
+    <!-- <include file="$(find soma_base)/launch/amcl.launch" /> -->
 
     <!-- Core of the navigation stack: path planning -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
