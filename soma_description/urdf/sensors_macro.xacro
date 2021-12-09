@@ -104,7 +104,8 @@
 				<child link="camera_${prefix}_mount_link" />
 			</joint>
 
-			<sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" topics_ns="camera_${prefix}">
+			<!-- <sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" topics_ns="camera_${prefix}"> -->
+			<sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}">
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
 			</sensor_d435>
 
