@@ -2,12 +2,12 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
     <!-- Front wheel macro -->
-    <macro name="front_wheel_macro" params="parent prefix xyz">
+    <xacro:macro name="front_wheel_macro" params="parent prefix xyz">
 
         <!-- General properties used for inertia computation -->
-        <property name="mass" value="12" />
-        <property name="radius" value="0.2286" />
-        <property name="length" value="0.0889" />
+        <xacro:property name="mass" value="12" />
+        <xacro:property name="radius" value="0.2286" />
+        <xacro:property name="length" value="0.0889" />
 
         <!-- Joints -->
         <joint name="${prefix}_front_wheel_hinge" type="revolute">
@@ -77,7 +77,7 @@
             <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <mass value="${mass}"/>
-                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
+                <xacro:cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
             </inertial>
 
         </link>
@@ -105,7 +105,7 @@
             <inertial>
                 <origin xyz="0 0 0.3" rpy="0 0 0" />
                 <mass value="0.2"/>
-                <cylinder_inertia mass="0.2" radius="0.07" height="0.05"/>
+                <xacro:cylinder_inertia mass="0.2" radius="0.07" height="0.05"/>
             </inertial>
         </link>
 
@@ -130,7 +130,7 @@
             <!-- <kd value="10" /> -->
         </gazebo>
 
-    </macro>
+    </xacro:macro>
     <!-- END front wheel macro -->
 
 </robot> 
