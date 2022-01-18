@@ -7,6 +7,7 @@
 
 	<!-- Include files -->
 	<xacro:if value="${camera_enabled}">
+	 	<xacro:include filename="$(find husky_description)/urdf/accessories/intel_realsense.urdf.xacro"/>
 		<xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
 	</xacro:if>
 	<xacro:if value="${lidar_enabled}">
@@ -104,10 +105,11 @@
 				<child link="camera_${prefix}_mount_link" />
 			</joint>
 
-			<xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" >
+			<!-- <xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" >
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
-			</xacro:sensor_d435>
+			</xacro:sensor_d435> -->
 
+			<xacro:intel_realsense_mount prefix="${prefix}" parent_link="camera_${prefix}_mount_link" topic="camera_${prefix}" />
 		</xacro:macro>
 	</xacro:if>
 	<!-- END Realsense macro -->
