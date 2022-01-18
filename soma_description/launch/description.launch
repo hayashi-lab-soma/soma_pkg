@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+    <arg name="robot_namespace" default="/"/>
+
+    <arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model) robot_namespace:=$(arg robot_namespace)" />
+
+</launch>
