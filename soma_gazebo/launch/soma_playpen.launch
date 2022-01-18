@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- Environment -->
+	<arg name="uneven_ground" default="false" />
+
+  <include file="$(find soma_gazebo)/launch/playpen.launch" />
+  <include file="$(find soma_gazebo)/launch/spawn_soma.launch">
+  </include>
+
+</launch>

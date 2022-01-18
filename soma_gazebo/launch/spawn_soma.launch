@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="namespace" default="/"/>
+  <!-- Environment -->
+	<arg name="uneven_ground" default="false" />
+	<!-- Robot model -->
+	<arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+	<arg name="x_offset" default="0.0"/>
+	<arg name="y_offset" default="0.0"/>
+	<arg name="z_offset" default="0.2" if="$(arg uneven_ground)"/>
+	<arg name="z_offset" default="0" unless="$(arg uneven_ground)"/>
+  <!-- Optionally disable teleop control -->
+  <arg name="joystick" default="true" />
+
+
+  <group ns="$(arg namespace)">
+    <include file="$(find soma_atv_driver)/launch/control.launch" />
+    <!-- <include file="$(find soma_atv_driver)/launch/joy_teleop.launch">
+      <arg name="joystick" value="$(arg joystick)" />
+    </include> -->
+    <include file="$(find husky_gazebo)/launch/realsense.launch" />
+    <!-- Spawn robot in gazebo -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" 
+        args="-urdf 
+              -model soma 
+              -param robot_description 
+              -gazebo_namespace /$(arg namespace)gazebo 
+              -z $(arg z_offset)" 
+        respawn="false" 
+        output="screen" />
+  </group>
+
+</launch>
