@@ -25,7 +25,7 @@
 
 			<!-- Joint -->
 			<joint name="imu_joint" type="fixed">
-				<insert_block name="origin" />
+				<xacro:insert_block name="origin" />
 				<parent link="${parent}" />
 				<child link="imu_link" />
 			</joint>
@@ -99,14 +99,14 @@
 			<link name="camera_${prefix}_mount_link" />
 
 			<joint name="camera_${prefix}_mount_joint" type="fixed">
-				<insert_block name="origin" />
+				<xacro:insert_block name="origin" />
 				<parent link="${parent}" />
 				<child link="camera_${prefix}_mount_link" />
 			</joint>
 
-			<sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" topics_ns="camera_${prefix}">
+			<xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" >
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
-			</sensor_d435>
+			</xacro:sensor_d435>
 
 		</xacro:macro>
 	</xacro:if>
@@ -116,10 +116,10 @@
 	<!-- Velodyne macro -->
 	<xacro:if value="${lidar_enabled}">
 		<xacro:macro name="velodyne_macro" params="parent *origin">
-			<VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.0" max_range="5.0" noise="0.0">
-				<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008"> -->
-				<insert_block name="origin" />
-			</VLP-16>
+			<!-- <xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.0" max_range="5.0" noise="0.0"> -->
+				<xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008">
+				<xacro:insert_block name="origin" />
+			</xacro:VLP-16>
 		</xacro:macro>
 	</xacro:if>
 	<!-- END Velodyne macro -->
