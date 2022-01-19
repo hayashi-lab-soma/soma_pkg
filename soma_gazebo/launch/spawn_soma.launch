@@ -19,7 +19,7 @@
     <!-- <include file="$(find soma_atv_driver)/launch/joy_teleop.launch">
       <arg name="joystick" value="$(arg joystick)" />
     </include> -->
-    <include file="$(find husky_gazebo)/launch/realsense.launch" />
+    <include file="$(find soma_gazebo)/launch/realsense.launch" />
     <!-- Spawn robot in gazebo -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" 
         args="-urdf 
