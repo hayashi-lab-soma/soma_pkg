@@ -4,7 +4,7 @@
 	<arg name="uneven_ground" default="false" />
 
   <include file="$(find soma_gazebo)/launch/playpen.launch" />
-  <include file="$(find soma_gazebo)/launch/spawn_soma.launch">
-  </include>
+  <include file="$(find soma_gazebo)/launch/spawn_soma.launch" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find soma_viz)/rviz/simulation.rviz" />
 
 </launch>
