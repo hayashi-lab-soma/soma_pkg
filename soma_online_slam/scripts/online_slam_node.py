@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import rospy
 import numpy as np
+import os
 from geometry_msgs.msg import PoseArray, Twist
 from nav_msgs.msg import Odometry
 from gazebo_msgs.msg import ModelStates
@@ -12,9 +13,13 @@ from matplotlib.animation import FuncAnimation
 from onlineSLAMSolver import OnlineSLAMSolver
 
 
+DIR = os.path.dirname(__file__)
+SAVE_FILE_NAME = DIR + '/../data/results.txt'
+
+
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=50, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=10.0, observation_noise=[[0.0, 0.0, 0.1], [0.0, 0.0, 0.1]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=10.0, observation_noise=[[0.0, 0.0, 0.5], [0.0, 0.0, 0.01]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         self.solver = OnlineSLAMSolver(
             particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, min_visibility=min_visibility, max_visibility=max_visibility, observation_noise=observation_noise, correspondence_threshold=correspondence_threshold, delete_threshold=delete_threshold)
 
@@ -89,7 +94,12 @@ class OnlineSLAMNode:
         # trees_stop_index = 11
 
         # FLAT FOREST
-        soma_index = 18
+        # soma_index = 18
+        # trees_start_index = 1
+        # trees_stop_index = 17
+
+        # CYLINDER FOREST
+        soma_index = 17
         trees_start_index = 1
         trees_stop_index = 17
 
@@ -173,12 +183,14 @@ class OnlineSLAMNode:
 
         observation = []
         for pose in data.poses:
-            # Polar coordinates
-            d = sqrt(pose.position.x**2 + pose.position.y**2)
-            phi = atan2(pose.position.y, pose.position.x)
+            if pose.position.x != 0 and pose.position.y != 0:
 
-            if d > self.solver.min_visibility and d < self.solver.max_visibility:
-                observation.append(np.array([[d], [phi]]))
+                # Polar coordinates
+                d = sqrt(pose.position.x**2 + pose.position.y**2)
+                phi = atan2(pose.position.y, pose.position.x)
+
+                if d > self.solver.min_visibility and d < self.solver.max_visibility:
+                    observation.append(np.array([[d], [phi]]))
 
         if self.solver.motion_model == "velocity":
             self.solver.motion_update(self.command, stop-self.command_start)
@@ -218,6 +230,36 @@ class OnlineSLAMNode:
 
         self.update_plot(None)
 
+        fo = open(SAVE_FILE_NAME, "w")
+        fo.seek(0)
+        fo.truncate()
+
+        fo.write("Real pose: \n" + str([round(self.real_x_data, 3),
+                 round(self.real_y_data, 3), round(self.real_theta_data, 3)]))
+
+        fo.write("\n\nReal map:")
+        real_map = []
+        for i in range(len(self.trees_x_data)):
+            real_map.append([round(self.trees_x_data[i], 3),
+                            round(self.trees_y_data[i], 3)])
+        real_map.sort()
+        for e in real_map:
+            fo.write("\n- " + str(e))
+
+        fo.write("\n\nEstimated pose: \n" + str([round(most_probable_particle.pose[0][0], 3), round(
+            most_probable_particle.pose[1][0], 3), round(most_probable_particle.pose[2][0], 3)]))
+
+        fo.write("\n\nEstimated map:")
+        estimated_map = []
+        for feature in most_probable_particle.features:
+            estimated_map.append(
+                [round(feature.pose[0][0], 3), round(feature.pose[1][0], 3)])
+        estimated_map.sort()
+        for e in estimated_map:
+            fo.write("\n- " + str(e))
+
+        fo.close()
+
         return
 
 
@@ -239,7 +281,11 @@ if __name__ == '__main__':
     else:
         assert False, "Invalid motion model: " + motion_model
 
-    rospy.Subscriber('/tree_pose_array', PoseArray,
+    # With centers of clusters
+    # rospy.Subscriber('/tree_pose_array', PoseArray,
+                    #  callback=node.observation_update, queue_size=1)
+    # With circle recognition
+    rospy.Subscriber('/trees_centers', PoseArray,
                      callback=node.observation_update, queue_size=1)
 
     ani = FuncAnimation(node.fig, node.update_plot, init_func=node.plot_init)

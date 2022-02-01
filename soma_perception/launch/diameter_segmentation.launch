@@ -53,8 +53,7 @@
   </node>
 
   <!-- launch Plane Segmentation nodelet -->
-  <node pkg="nodelet" type="nodelet" name="diameter_estimation"
-        args="load soma_perception/DiameterEstimationNodelet $(arg nodelet_manager_name)">
+  <node pkg="nodelet" type="nodelet" name="diameter_estimation" args="load soma_perception/DiameterEstimationNodelet $(arg nodelet_manager_name)">
     <param name="base_link" value="$(arg frame_id)"/>
     <param name="normal_distance_weight" value="0.7" />
     <param name="max_iterations" value="10" />
