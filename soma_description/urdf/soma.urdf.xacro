@@ -26,15 +26,15 @@
 		<!-- Build Realsense -->
 		<!-- Front -->
 		<xacro:if value="${camera_enabled}">
-			<xacro:realsense_macro parent="body_bottom_link" prefix="f">
+			<xacro:camera_macro parent="body_bottom_link" prefix="f">
 				<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
-			</xacro:realsense_macro>
+			</xacro:camera_macro>
 		</xacro:if>
 		<!-- Rear -->
 		<xacro:if value="${camera_enabled}">
-			<xacro:realsense_macro parent="body_bottom_link" prefix="r">
+			<xacro:camera_macro parent="body_bottom_link" prefix="r">
 				<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
-			</xacro:realsense_macro>
+			</xacro:camera_macro>
 		</xacro:if>
 
 		<!-- Build Velodyne -->

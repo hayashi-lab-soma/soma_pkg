@@ -95,7 +95,7 @@
 
 	<!-- Realsense macro -->
 	<xacro:if value="${camera_enabled}">
-		<xacro:macro name="realsense_macro" params="parent prefix *origin">
+		<xacro:macro name="camera_macro" params="parent prefix *origin">
 
 			<link name="camera_${prefix}_mount_link" />
 
