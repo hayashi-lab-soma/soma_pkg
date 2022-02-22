@@ -7,8 +7,6 @@
     <arg name="clipped_lidar_topic" default="/filtered_map_points"/>
     <arg name="rvizconfig" value="$(find soma_online_slam)/rviz/trees.rviz" />
 
-    <!-- <node name="fix_update_rate" pkg="soma_online_slam" type="update_rate_node.py" output="screen"/> -->
-
     <!-- Clip pointcloud between min and max altitude -->
     <include file="$(find soma_mapping)/launch/map_range_clip.launch">
         <arg name="map_points_topic" default="$(arg lidar_topic)" />

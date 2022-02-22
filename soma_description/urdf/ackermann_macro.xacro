@@ -8,21 +8,22 @@ https://github.com/benwarrick/simple_ackermann.git -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
 	<!-- Include files -->
-	<include filename="$(find soma_description)/urdf/utils.xacro" />
-	<include filename="$(find soma_description)/urdf/front_steer_macro.xacro" />
-	<include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
-	<include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
-	<include filename="$(find soma_description)/urdf/virtual_rear_wheel_macro.xacro" />
+	<xacro:include filename="$(find soma_description)/urdf/utils.xacro" />
+	<xacro:include filename="$(find soma_description)/urdf/front_steer_macro.xacro" />
+	<xacro:include filename="$(find soma_description)/urdf/front_wheel_macro.xacro" />
+	<xacro:include filename="$(find soma_description)/urdf/rear_wheel_macro.xacro" />
+	<xacro:include filename="$(find soma_description)/urdf/virtual_rear_wheel_macro.xacro" />
 
 
 	<!-- Ackermann macro -->
-	<macro name="ackermann_macro" params="parent">
+	<xacro:macro name="ackermann_macro" params="parent">
 
 		<!-- General properties used for inertia computation -->
-		<property name="mass" value="250" />
-		<property name="width" value="1.05" />
-		<property name="depth" value="0.70" />
-		<property name="height" value="1.7" />
+		<!-- <xacro:property name="mass" value="250" /> -->
+		<xacro:property name="mass" value="10" />
+		<xacro:property name="width" value="1.05" />
+		<xacro:property name="depth" value="0.70" />
+		<xacro:property name="height" value="1.7" />
 
 		<!-- Bottom body joint -->
 		<joint name="body_bottom_joint" type="fixed">
@@ -40,7 +41,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.8*mass}" />
 
 				<!-- Inertia matrix of a parallelepiped -->
-				<parallelepiped_inertia mass="${0.8*mass}" width="${width}" height="0.5" depth="${depth}" />
+				<xacro:parallelepiped_inertia mass="${0.8*mass}" width="${width}" height="0.5" depth="${depth}" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 
@@ -57,7 +58,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
-					<box size="${width} ${depth} 0.5" />
+					<box size="${width}-0.2 ${depth}-0.1 0.5" />
 				</geometry>
 			</collision>
 
@@ -87,7 +88,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.19*mass}" />
 
 				<!-- Inertia matrix of a parallelepiped -->
-				<parallelepiped_inertia mass="${0.19*mass}" width="0.85" height="0.9" depth="${depth}" />
+				<xacro:parallelepiped_inertia mass="${0.19*mass}" width="0.85" height="0.9" depth="${depth}" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 
@@ -104,7 +105,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 			<collision>
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 				<geometry>
-					<box size="0.85 ${depth} 0.9" />
+					<box size="0.75 ${depth} 0.9" />
 				</geometry>
 			</collision>
 
@@ -135,7 +136,7 @@ https://github.com/benwarrick/simple_ackermann.git -->
 				<mass value="${0.01*mass}" />
 
 				<!-- Inertia matrix of a parallelepiped -->
-				<parallelepiped_inertia mass="${0.01*mass}" width="0.05" height="0.3" depth="0.05" />
+				<xacro:parallelepiped_inertia mass="${0.01*mass}" width="0.05" height="0.3" depth="0.05" />
 				<!-- Old values: ixx = iyy = izz = 0.001 -->
 			</inertial>
 
@@ -167,15 +168,15 @@ https://github.com/benwarrick/simple_ackermann.git -->
 		</gazebo>
 
 		<!-- Build links and joints for ackermann_steering_controller -->
-		<front_steer_macro parent="body_bottom_link" prefix="ackermann" xyz="${width/2} 0 ${-0.5/2}" />
-		<virtual_rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2} 0 ${-0.5/2}" />
+		<xacro:front_steer_macro parent="body_bottom_link" prefix="ackermann" xyz="${width/2} 0 ${-0.5/2}" />
+		<xacro:virtual_rear_wheel_macro parent="body_bottom_link" prefix="ackermann" xyz="${-width/2} 0 ${-0.5/2}" />
 
 		<!-- Build wheels -->
-		<front_wheel_macro parent="body_bottom_link" prefix="left" xyz="${width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
-		<front_wheel_macro parent="body_bottom_link" prefix="right" xyz="${width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
-		<rear_wheel_macro parent="body_bottom_link" prefix="left" xyz="${-width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
-		<rear_wheel_macro parent="body_bottom_link" prefix="right" xyz="${-width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
+		<xacro:front_wheel_macro parent="body_bottom_link" prefix="left" xyz="${width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
+		<xacro:front_wheel_macro parent="body_bottom_link" prefix="right" xyz="${width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
+		<xacro:rear_wheel_macro parent="body_bottom_link" prefix="left" xyz="${-width/2} ${depth/2 + 0.0889} ${-0.5/2}" />
+		<xacro:rear_wheel_macro parent="body_bottom_link" prefix="right" xyz="${-width/2} ${-depth/2 - 0.0889} ${-0.5/2}" />
 
-	</macro>
+	</xacro:macro>
 
 </robot> 

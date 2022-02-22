@@ -21,8 +21,7 @@ import time
 
 '''
 
-# Motion model (velocity-based or dead reckoning)
-# TODO: Odometry-based motion model
+# Motion model (velocity-based/dead reckoning or odometry-based)
 
 
 def motion(motion_model, pose, command, noise, dt=1):
@@ -41,19 +40,22 @@ def motion(motion_model, pose, command, noise, dt=1):
 
     # Covariance matrix
     if motion_model == "velocity":
-        v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega)
-        omega_sigma = omega_noise[0]*abs(v) + omega_noise[1]*abs(omega)
-        yaw_sigma = yaw_noise[0]*abs(v) + yaw_noise[1]*abs(omega)
+        v_sigma = v_noise[0]*abs(v) + v_noise[1]*abs(omega) + v_noise[2]
+        omega_sigma = omega_noise[0] * \
+            abs(v) + omega_noise[1]*abs(omega) + omega_noise[2]
+        yaw_sigma = yaw_noise[0] * \
+            abs(v) + yaw_noise[1]*abs(omega) + yaw_noise[2]
         sigma = [[v_sigma, 0],
                  [0, omega_sigma]]
 
     elif motion_model == "odometry":
-        rot1_sigma = rot1_noise[0]*abs(rot1) + rot1_noise[1] * \
-            abs(trans) + rot1_noise[2]*abs(rot2)
-        trans_sigma = trans_noise[0]*abs(rot1) + trans_noise[1] * \
-            abs(trans) + trans_noise[2]*abs(rot2)
-        rot2_sigma = rot2_noise[0]*abs(rot1) + rot2_noise[1] * \
-            abs(trans) + rot2_noise[2]*abs(rot2)
+        rot1_sigma = rot1_noise[0] * abs(trans) + \
+            rot1_noise[1] * abs(rot1) + rot1_noise[2]
+        trans_sigma = trans_noise[0] * \
+            abs(trans) + trans_noise[1] * \
+            (abs(rot1) + abs(rot2)) + trans_noise[2]
+        rot2_sigma = rot2_noise[0] * abs(trans) + \
+            rot2_noise[1] * abs(rot2) + rot2_noise[2]
         sigma = [[rot1_sigma, 0, 0],
                  [0, trans_sigma, 0],
                  [0, 0, rot2_sigma]]
@@ -91,18 +93,18 @@ def motion(motion_model, pose, command, noise, dt=1):
     return new_pose
 
 
-# Observation model
-
-def observation(pose, visibility, noise):
+# Observation model (lidar)
+def observation(pose, min_visibility, max_visibility, noise):
     observation = []
     for i, f in enumerate(features):
         distance = sqrt((f[0] - pose[0])**2 + (f[1] - pose[1])**2)
         angle = atan2(f[1] - pose[1], f[0] - pose[0]) - pose[2]
 
         d_noise, phi_noise = noise
-        if distance < visibility:
-            d_sigma = d_noise[0]*distance + d_noise[1]*abs(angle)
-            phi_sigma = phi_noise[0]*distance + phi_noise[1]*abs(angle)
+        if distance > min_visibility and distance < max_visibility:
+            d_sigma = d_noise[0]*distance + d_noise[1]*abs(angle) + d_noise[2]
+            phi_sigma = phi_noise[0]*distance + \
+                phi_noise[1]*abs(angle) + phi_noise[2]
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -113,10 +115,11 @@ def observation(pose, visibility, noise):
             elif noisy_observation[1] > pi:
                 noisy_observation -= 2*pi
             observation.append(list(noisy_observation))
+
     return observation
 
 
-def correspondence(features, pose, observation, visibility, noise, threshold):
+def correspondence(features, pose, observation, min_visibility, max_visibility, noise, threshold):
     if len(features) == 0:
         return [], []
 
@@ -129,10 +132,10 @@ def correspondence(features, pose, observation, visibility, noise, threshold):
         d = sqrt((xf - x)**2 + (yf - y)**2)
         phi = atan2(yf - y, xf - x) - theta
 
-        if d < visibility:
+        if d > min_visibility and d < max_visibility:
             d_noise, phi_noise = noise
-            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
-            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
+            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi) + phi_noise[2]
             sigma = [[d_sigma, 0],
                      [0, phi_sigma]]
 
@@ -145,7 +148,7 @@ def correspondence(features, pose, observation, visibility, noise, threshold):
             feature_likelihood = mvnun(np.array([observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0]), np.array(
                 [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
-            assert feature_likelihood <= 1, feature_likelihood
+            assert feature_likelihood <= 1, "Probability greater than 1 !"
 
             if feature_likelihood > threshold:
                 corresponding_features[i] = feature_likelihood
@@ -163,21 +166,23 @@ def correspondence(features, pose, observation, visibility, noise, threshold):
     return corresponding_features, corresponding_likelihoods
 
 
-def delete_features(features, pose, observations, noise, visibility, threshold):
+# /!\ Deprecated !
+def delete_features(features, pose, observations, noise, min_visibility, max_visibility, threshold):
     new_features = []
-    for i, f in enumerate(features):
+    for f in features:
         mu = f[0].transpose()[0]
         xf, yf = mu
         d = sqrt((xf - pose[0])**2 + (yf - pose[1])**2)
 
-        if d < visibility:
+        if d > min_visibility and d < max_visibility:
             highest_likelihood = 0
             for o in observations:
                 phi = atan2(yf - pose[1], xf - pose[0]) - pose[2]
 
                 d_noise, phi_noise = noise
-                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi)
-                phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi)
+                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
+                phi_sigma = phi_noise[0]*d + \
+                    phi_noise[1]*abs(phi) + phi_noise[2]
                 sigma = [[d_sigma, 0],
                          [0, phi_sigma]]
 
@@ -187,8 +192,16 @@ def delete_features(features, pose, observations, noise, visibility, threshold):
                     phi += 2*pi
 
                 d_interval, phi_interval = d_sigma/10, phi_sigma/10
-                feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
-                    [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
+
+                if d_sigma == 0 or phi_sigma == 0:
+                    if o[0] == d and o[1] == phi:
+                        feature_likelihood = 1
+                    else:
+                        feature_likelihood = 0
+
+                else:
+                    feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
+                        [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
                 assert feature_likelihood <= 1, feature_likelihood
 
@@ -247,7 +260,6 @@ def Q(z):
 
 
 # Display
-
 def display():
     plt.plot([0, 0, map_width, map_width], [
              0, map_height, 0, map_height], "y*")
@@ -258,8 +270,11 @@ def display():
 
     plt.plot(robot_pose[0], robot_pose[1], "ro", markersize=robot_radius)
     angle = np.linspace(0, 2*pi, 1000)
-    x = robot_pose[0] + visibility*np.cos(angle)
-    y = robot_pose[1] + visibility*np.sin(angle)
+    x = robot_pose[0] + min_visibility*np.cos(angle)
+    y = robot_pose[1] + min_visibility*np.sin(angle)
+    plt.plot(x, y, "ro", markersize=0.05)
+    x = robot_pose[0] + max_visibility*np.cos(angle)
+    y = robot_pose[1] + max_visibility*np.sin(angle)
     plt.plot(x, y, "ro", markersize=0.05)
     plt.arrow(robot_pose[0], robot_pose[1], 10 *
               cos(robot_pose[2]), 10*sin(robot_pose[2]), "ro")
@@ -307,7 +322,6 @@ def display():
 
 if __name__ == '__main__':
     # Init random seed
-
     seed(0)
 
     # Parameters
@@ -351,7 +365,8 @@ if __name__ == '__main__':
     initial_theta = 0
     robot_pose = [initial_x, initial_y, initial_theta]
     robot_radius = 10
-    visibility = 30
+    min_visibility = 0
+    max_visibility = 30
     print("\nInitial pose: " + str(robot_pose))
 
     # Particles
@@ -388,7 +403,7 @@ if __name__ == '__main__':
             "velocity", robot_pose, u, motion_noise)
         print("New pose: " + str(robot_pose))
         new_observation = observation(
-            robot_pose, visibility, observation_noise)
+            robot_pose, min_visibility, max_visibility, observation_noise)
         print("Observation: " + str(new_observation))
 
         # Particles update
@@ -413,7 +428,7 @@ if __name__ == '__main__':
 
                 for i in range(len(new_observation)):
                     corresponding_features, corresponding_likelihoods = correspondence(
-                        p[4], pose, new_observation[i], visibility, observation_noise, 10**(-5))
+                        p[4], pose, new_observation[i], min_visibility, max_visibility, observation_noise, 10**(-5))
 
                     features_preferences.append(corresponding_features)
                     features_likelihoods.append(corresponding_likelihoods)
@@ -503,7 +518,7 @@ if __name__ == '__main__':
                     p[3] = max(p[3]*weight_update, 10**(-323))
 
             p[4] = delete_features(p[4], p[:3], new_observation,
-                                   observation_noise, visibility, 10**(-5))[:]
+                                   observation_noise, min_visibility, max_visibility, 10**(-5))[:]
 
         # Normalization
         weights_sum = 0

@@ -2,9 +2,11 @@ import numpy as np
 from math import sqrt, pi, exp
 from random import random
 from scipy.stats import multivariate_normal
-from utils.fastslam import delete_features, motion, correspondence, h_inverse, h, H, Q, delete_features
+from scipy.stats.mvn import mvnun
+from utils.fastslam import motion, correspondence, h_inverse, h, H, Q, delete_features
 
 
+# Feature: distinctive object that we can clearly distinguish from others
 class Feature:
     def __init__(self, pose, sigma):
         self.pose = np.array([pose[:]]).transpose()
@@ -27,6 +29,7 @@ class Feature:
         return Feature(self.pose.transpose()[0], self.sigma)
 
 
+# Particle: robot pose and featured-map joint hypothesis
 class Particle:
     def __init__(self, pose, weight, features=[]):
         self.pose = np.array([pose[:]]).transpose()
@@ -50,8 +53,9 @@ class Particle:
         return Particle(self.pose.transpose()[0], self.weight, self.features)
 
 
+# Online SLAM solver based on FastSLAM (particles with robot pose and Kalman filters for each feature)
 class OnlineSLAMSolver:
-    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.01, 0.0], [0.0, 0.01], [0.0, 0.01]], observation_model="range_bearing", visibility=30, observation_noise=[[0.05, 0.0], [0.0005, 0.0]]):
+    def __init__(self, particles_num=100, initial_pose=[0.0, 0.0, 0.0], motion_model="velocity", motion_noise=[[0.0, 0.01, 0.0], [0.01, 0.0, 0.0], [0.0, 0.01, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=5.0, observation_noise=[[0.5, 0.0, 0.0], [0.05, 0.0, 0.0]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         # Initial pose
         self.robot_initial_pose = np.array(initial_pose)
 
@@ -62,8 +66,11 @@ class OnlineSLAMSolver:
 
         # Observation
         self.observation_model = observation_model
-        self.visibility = visibility
+        self.min_visibility = min_visibility
+        self.max_visibility = max_visibility
         self.observation_noise = np.array(observation_noise)
+        self.correspondence_threshold = correspondence_threshold
+        self.delete_threshold = delete_threshold
 
         # Particles
         self.particles_num = particles_num
@@ -85,14 +92,16 @@ class OnlineSLAMSolver:
         tmp = "\nOnlineSLAMSolver from FASTSLAM\n"
         tmp += "\nRobot initial pose:\n" + str(self.robot_initial_pose)
         tmp += "\nMotion noise:\n" + str(self.motion_noise)
-        tmp += "\nVisibility: " + str(self.visibility)
+        tmp += "\nMinimum visibility: " + str(self.min_visibility)
+        tmp += "\nMaximum visibility: " + str(self.max_visibility)
         tmp += "\nObservation noise:\n" + str(self.observation_noise)
         tmp += "\nNumber of particles: " + str(self.particles_num) + "\n"
 
         return tmp
 
     def motion_update(self, command, dt=1):
-        print("Motion update")
+        print("Motion update: " + str(round(command[0], 2)) + ", " + str(
+            round(command[1], 2)) + ", " + str(round(command[2], 2)))
 
         for p in self.particles:
             p.pose = np.array([
@@ -101,7 +110,7 @@ class OnlineSLAMSolver:
         return
 
     def observation_update(self, observation):
-        print("Observation update")
+        print("Observation update: " + str(len(observation)))
 
         print("- Weights update")
 
@@ -118,12 +127,6 @@ class OnlineSLAMSolver:
         for p in self.particles:
             p.weight /= weights_sum
 
-        # Find most probable pose and features
-        # max_weight = 0
-        # for i, p in enumerate(self.particles):
-            # if p.weight > max_weight:
-            # max_weight = p.weight
-
         print("- Resampling")
 
         # Resampling criteria (effective particles number)
@@ -134,26 +137,32 @@ class OnlineSLAMSolver:
 
         # Resampling
         if effective_particles_num < self.particles_num/2:
-            # if False:
+            print("  Yes")
             cumulated_weights = [0]
             for p in self.particles:
                 cumulated_weights.append(cumulated_weights[-1] + p.weight)
 
-            new_particles = []
-            resampling_sigma = [[0.01, 0, 0],
-                                [0, 0.01, 0],
-                                [0, 0, 0.0001]]
+            old_particles = self.particles[:]
+            self.particles = []
+            resampling_sigma = [[0.01, 0.0, 0.0],
+                                [0.0, 0.01, 0.0],
+                                [0.0, 0.0, 0.001]]
             for i in range(self.particles_num):
                 r = random()
                 for j in range(len(cumulated_weights)-1):
                     if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
                         new_pose = multivariate_normal.rvs(
-                            self.particles[j].pose.transpose()[0], resampling_sigma)[:]
+                            old_particles[j].pose.transpose()[0], resampling_sigma)[:]
                         new_weight = 1.0/self.particles_num
-                        new_features = self.particles[j].features[:]
+                        new_features = old_particles[j].features[:]
                         new_particle = Particle(
                             new_pose, new_weight, new_features)
-                        new_particles.append(new_particle.clone())
+                        self.particles.append(new_particle.clone())
+
+                        break
+
+        else:
+            print("  No")
 
         return
 
@@ -162,16 +171,16 @@ class OnlineSLAMSolver:
         p = self.particles[j]
 
         features_correspondences = len(observation)*[None]
+        features_preferences = []
+        features_likelihoods = []
 
         if len(p.features) > 0:
             correspondences_orders = len(observation)*[0]
-            features_preferences = []
-            features_likelihoods = []
 
             for i in range(len(observation)):
 
                 corresponding_features, corresponding_likelihoods = correspondence(
-                    [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation[i].transpose()[0], self.visibility, self.observation_noise, 10**(-5))
+                    [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation[i].transpose()[0], self.min_visibility, self.max_visibility, self.observation_noise, self.correspondence_threshold)
 
                 features_preferences.append(corresponding_features)
                 features_likelihoods.append(corresponding_likelihoods)
@@ -251,25 +260,43 @@ class OnlineSLAMSolver:
                 new_sigma = (np.identity(2) - K.dot(H1)).dot(sigma)
                 p.features[features_correspondences[i]] = Feature(
                     new_mu.transpose()[0], new_sigma)
-                tmp = (
-                    (new_z - predicted_z).transpose().dot(Q1_inverse)).dot(new_z - predicted_z)[0][0]
-                tmp = max(tmp, -709)
-                weight_update = 1 / \
-                    sqrt(2*pi*abs(np.linalg.det(Q1))) * exp(-1/2 * tmp)
+
+                if abs(new_z[1] - predicted_z[1]) > abs(new_z[1] - predicted_z[1] + 2*pi):
+                    predicted_z -= 2*pi
+                elif abs(new_z[1] - predicted_z[1]) > abs(new_z[1] - predicted_z[1] - 2*pi):
+                    predicted_z[1] += 2*pi
+
+                eigenvalues = np.linalg.eigvals(Q1)
+                d_interval, phi_interval = eigenvalues[0]/10, eigenvalues[1]/10
+                weight_update = mvnun(np.array([new_z[0]-d_interval/2.0, new_z[1]-phi_interval/2.0]), np.array(
+                    [new_z[0]+d_interval/2.0, new_z[1]+phi_interval/2.0]), np.array([predicted_z[0], predicted_z[1]]), np.array(Q1))[0]
+
+                assert weight_update <= 1, "Probability greater than 1 !"
 
                 # Bias to ensure non-zero weight
                 p.weight = max(p.weight*weight_update, 10**(-323))
 
-        new_features = delete_features(
-            [[feature.pose, feature.sigma] for feature in p.features], p.pose, observation, self.observation_noise, self.visibility, 10**(-5))[:]
-        p.features = []
-        for feature in new_features:
-            p.features.append(Feature(feature[0].transpose()[0], feature[1]))
+        # Delete unused features
+        if len(features_preferences) > 0:
+            features_to_delete = []
+            for i in range(len(features_preferences[0])):
+                delete = True
+                for e in features_preferences:
+                    if e[i] != 0:
+                        delete = False
+                if delete:
+                    features_to_delete.append(i)
+
+            old_features = p.features[:]
+            p.features = []
+            for i in range(len(old_features)):
+                if i not in features_to_delete:
+                    p.features.append(old_features[i].clone())
 
         return
 
 
-# Tests
+# TESTS
 
 if __name__ == '__main__':
     F = Feature([78.9, -14.26], [[0.52, 0.0], [0.0, 0.00187]])

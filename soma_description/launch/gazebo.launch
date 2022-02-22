@@ -3,14 +3,20 @@
 <launch>
     <arg name="namespace" default="/" />
 
+    <!-- Environment -->
+    <arg name="uneven_ground" default="false" />
+
     <!-- Robot model -->
     <arg name="model" default="$(find soma_description)/urdf/soma.urdf.xacro"/>
     <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
-    <arg name="z_offset" default="0.2" />
+    <arg name="x_offset" default="0.0"/>
+    <arg name="y_offset" default="0.0"/>
+    <arg name="z_offset" default="0.2" if="$(arg uneven_ground)"/>
+    <arg name="z_offset" default="0.0" unless="$(arg uneven_ground)"/>
 
     <!-- Launch Gazebo -->
-    <!-- <arg name="world_name" default="$(find soma_description)/worlds/forest.world" /> -->
-    <arg name="world_name" default="$(find soma_description)/worlds/flat_forest.world" />
+    <arg name="world_name" default="$(find soma_description)/worlds/forest.world" if="$(arg uneven_ground)"/>
+    <arg name="world_name" default="$(find soma_description)/worlds/flat_forest.world" unless="$(arg uneven_ground)"/>
     <arg name="paused" default="true"/>
     <arg name="use_sim_time" default="true"/>
     <arg name="gui" default="true"/>
@@ -40,5 +46,5 @@
     </node>
 
     <!-- Spawn robot in Gazebo -->
-    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)gazebo -z $(arg z_offset)" respawn="false" output="screen" />
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model soma -param robot_description -gazebo_namespace /$(arg namespace)gazebo -x $(arg x_offset) -y $(arg y_offset) -z $(arg z_offset)" respawn="false" output="screen" />
 </launch>

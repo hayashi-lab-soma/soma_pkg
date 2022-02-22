@@ -2,12 +2,12 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
     <!-- Rear wheel macro -->
-    <macro name="rear_wheel_macro" params="parent prefix xyz">
+    <xacro:macro name="rear_wheel_macro" params="parent prefix xyz">
 
         <!-- General properties used for inertia computation -->
-        <property name="mass" value="0.5" />
-        <property name="radius" value="0.2286" />
-        <property name="length" value="0.0889" />
+        <xacro:property name="mass" value="12" />
+        <xacro:property name="radius" value="0.2286" />
+        <xacro:property name="length" value="0.0889" />
 
         <!-- Joint -->
         <joint name="${prefix}_rear_wheel_rotate" type="continuous">
@@ -55,7 +55,7 @@
             <inertial>
                 <origin xyz="0 0 0" rpy="0 0 0" />
                 <mass value="${mass}"/>
-                <cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
+                <xacro:cylinder_inertia mass="${mass}" radius="${radius}" height="${length}" />
             </inertial>
 
         </link>
@@ -67,11 +67,11 @@
             </material>
             <mu1 value="Inf" />
             <mu2 value="Inf" />
-            <!-- <kp value="1000000000" />
-            <kd value="10" /> -->
+            <!-- <kp value="1000000000" /> -->
+            <!-- <kd value="10" /> -->
         </gazebo>
 
-    </macro>
+    </xacro:macro>
     <!-- END rear wheel macro -->
 
 </robot> 

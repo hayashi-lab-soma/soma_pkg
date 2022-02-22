@@ -1,31 +1,32 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
-	<property name="camera_enabled" value="true"/>
-	<property name="lidar_enabled" value="true"/>
-	<property name="imu_enabled" value="true"/>
+	<xacro:property name="camera_enabled" value="true"/>
+	<xacro:property name="lidar_enabled" value="true"/>
+	<xacro:property name="imu_enabled" value="false"/>
 
 	<!-- Include files -->
-	<if value="${camera_enabled}">
-		<include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
-	</if>
-	<if value="${lidar_enabled}">
-		<include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
-	</if>
+	<xacro:if value="${camera_enabled}">
+	 	<xacro:include filename="$(find soma_description)/urdf/intel_realsense.urdf.xacro"/>
+		<!-- <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" /> -->
+	</xacro:if>
+	<xacro:if value="${lidar_enabled}">
+		<xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
+	</xacro:if>
 
 	<!-- IMU macro -->
-	<if value="${imu_enabled}">
-		<macro name="imu_macro" params="parent *origin">
+	<xacro:if value="${imu_enabled}">
+		<xacro:macro name="imu_macro" params="parent *origin">
 
 			<!-- General properties used for inertia computation -->
-			<property name="mass" value="0.2" />
-			<property name="width" value="0.05" />
-			<property name="depth" value="0.05" />
-			<property name="height" value="0.025" />
+			<xacro:property name="mass" value="0.2" />
+			<xacro:property name="width" value="0.05" />
+			<xacro:property name="depth" value="0.05" />
+			<xacro:property name="height" value="0.025" />
 
 			<!-- Joint -->
 			<joint name="imu_joint" type="fixed">
-				<insert_block name="origin" />
+				<xacro:insert_block name="origin" />
 				<parent link="${parent}" />
 				<child link="imu_link" />
 			</joint>
@@ -87,41 +88,42 @@
 				</sensor>
 			</gazebo>
 
-		</macro>
-	</if>
+		</xacro:macro>
+	</xacro:if>
 	<!-- END IMU macro -->
 
 
 	<!-- Realsense macro -->
-	<if value="${camera_enabled}">
-		<macro name="realsense_macro" params="parent prefix *origin">
+	<xacro:if value="${camera_enabled}">
+		<xacro:macro name="camera_macro" params="parent prefix *origin">
 
 			<link name="camera_${prefix}_mount_link" />
 
 			<joint name="camera_${prefix}_mount_joint" type="fixed">
-				<insert_block name="origin" />
+				<xacro:insert_block name="origin" />
 				<parent link="${parent}" />
 				<child link="camera_${prefix}_mount_link" />
 			</joint>
 
-			<!-- <sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" topics_ns="camera_${prefix}"> -->
-			<sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}">
+			<!-- <xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" >
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
-			</sensor_d435>
+			</xacro:sensor_d435> -->
 
-		</macro>
-	</if>
+			<xacro:intel_realsense_mount prefix="${prefix}" parent_link="camera_${prefix}_mount_link" topic="camera_${prefix}" />
+		</xacro:macro>
+	</xacro:if>
 	<!-- END Realsense macro -->
 
 
 	<!-- Velodyne macro -->
-	<if value="${lidar_enabled}">
-		<macro name="velodyne_macro" params="parent *origin">
-			<VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points">
-				<insert_block name="origin" />
-			</VLP-16>
-		</macro>
-	</if>
+	<xacro:if value="${lidar_enabled}">
+		<xacro:macro name="velodyne_macro" params="parent *origin">
+			<!-- <xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.0" max_range="5.0" noise="0.0"> -->
+				<xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008">
+				<xacro:insert_block name="origin" />
+			</xacro:VLP-16>
+		</xacro:macro>
+	</xacro:if>
 	<!-- END Velodyne macro -->
 
 </robot>

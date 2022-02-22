@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="simulation" default="false"/>
+  <arg name="namespace" default="/"/>
+  <arg name="driving_gui" default="true"/>
+  <arg name="motor_noise_list" default="[[0.0,0.0,0.0],[0.0,0.0,0.0]]"/>
+
+  <!-- Load robot description -->
+  <include file="$(find soma_description)/launch/description.launch" >
+  </include>
+
+  <!-- Spawn controllers -->
+  <!-- Load controllers (joint state & driving) -->
+	<rosparam command="load" file="$(find soma_description)/config/simple_controllers/joint_state_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/differential/diff_drive_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/ackermann_steering_controller.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/ackermann_gains.yaml" ns="$(arg namespace)" />
+	<rosparam command="load" file="$(find soma_description)/config/driving_controllers/ackermann/steer_bot_hardware_gazebo.yaml" ns="$(arg namespace)" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+		<param name="publish_frequency" value="50.0" />
+	</node>
+
+  <!-- Launch controllers (joint state & driving) -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg namespace)" args="joint_state_controller ackermann_steering_controller"/>
+  <!-- Launch driving GUI -->
+  <node if="$(arg driving_gui)" name="robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+      <param name="default_topic" value="$(arg namespace)ackermann_steering_controller/command" />
+  </node>
+  <!-- Launch motor noise emulator -->
+  <node name="motor_noise" pkg="soma_description" type="motor_noise_node.py" args="$(arg motor_noise_list)" output="screen" />
+
+  <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
+    <param name="link_name" value="base_link" />
+  </node>
+
+  <node pkg="twist_mux" type="twist_mux" name="twist_mux">
+    <rosparam command="load" file="$(find husky_control)/config/twist_mux.yaml" />
+    <remap from="cmd_vel_out" to="/ackermann_steering_controller/cmd_vel"/>
+  </node>
+
+
+</launch>
