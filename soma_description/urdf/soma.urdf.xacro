@@ -23,6 +23,13 @@
 			</xacro:imu_macro>
 		</xacro:if>
 
+		<!-- Build GPS -->
+		<if value="${gps_enabled}">
+			<gps_macro parent="body_bottom_link">
+				<origin xyz="${-0.525 + 0.3 + 0.1/2} 0.0 ${1.40 - 0.25 + 0.1/2}" rpy="0.0 0.0 0.0" />
+			</gps_macro>
+		</if>
+
 		<!-- Build Realsense -->
 		<!-- Front -->
 		<xacro:if value="${camera_enabled}">

@@ -1,13 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
+	<xacro:property name="imu_enabled" value="false"/>
+	<xacro:property name="gps_enabled" value="false"/>
 	<xacro:property name="camera_enabled" value="true"/>
 	<xacro:property name="lidar_enabled" value="true"/>
-	<xacro:property name="imu_enabled" value="false"/>
 
 	<!-- Include files -->
 	<xacro:if value="${camera_enabled}">
-	 	<xacro:include filename="$(find soma_description)/urdf/intel_realsense.urdf.xacro"/>
+		<xacro:include filename="$(find soma_description)/urdf/intel_realsense.urdf.xacro"/>
 		<!-- <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" /> -->
 	</xacro:if>
 	<xacro:if value="${lidar_enabled}">
@@ -92,6 +93,81 @@
 	</xacro:if>
 	<!-- END IMU macro -->
 
+	<!-- GPS macro -->
+	<if value="${gps_enabled}">
+		<macro name="gps_macro" params="parent *origin">
+
+			<!-- General properties used for inertia computation -->
+			<property name="mass" value="0.2" />
+			<property name="width" value="0.1" />
+			<property name="depth" value="0.1" />
+			<property name="height" value="0.1" />
+
+			<!-- Joint -->
+			<joint name="gps_joint" type="fixed">
+				<insert_block name="origin" />
+				<parent link="${parent}" />
+				<child link="gps_link" />
+			</joint>
+
+			<!-- Link -->
+			<link name="gps_link">
+
+				<!-- Inertial part -->
+				<inertial>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<mass value="${mass}" />
+
+					<!-- Inertia matrix of a parallelepiped -->
+					<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0" ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+				</inertial>
+
+				<!-- Visual part -->
+				<visual>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+					<material name="gray" />
+				</visual>
+
+				<!-- Collision part -->
+				<collision>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+				</collision>
+
+			</link>
+			<!-- END link -->
+
+			<!-- Gazebo additional parameters -->
+			<!-- <gazebo> -->
+			<gazebo reference="gps_link">
+				<material>
+					Gazebo/Gray
+				</material>
+				<gravity>true</gravity>
+			</gazebo>
+
+			<gazebo>
+				<plugin filename="libhector_gazebo_ros_gps.so" name="gps_plugin">
+					<alwaysOn>1</alwaysOn>
+					<updateRate>10.0</updateRate>
+					<bodyName>gps_link</bodyName>
+					<topicName>fix</topicName>
+					<velocityTopicName>fix_velocity</velocityTopicName>
+					<drift>5.0 5.0 5.0</drift>
+					<gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+					<velocityDrift>0 0 0</velocityDrift>
+					<velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+				</plugin>
+			</gazebo>
+
+		</macro>
+	</if>
+	<!-- END GPS macro -->
 
 	<!-- Realsense macro -->
 	<xacro:if value="${camera_enabled}">
@@ -105,7 +181,7 @@
 				<child link="camera_${prefix}_mount_link" />
 			</joint>
 
-			<!-- <xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}" >
+			<!-- <xacro:sensor_d435 parent="camera_${prefix}_mount_link" name="camera_${prefix}">
 				<origin xyz="0.0 0.0 0.0" rpy="0.0 0.2617 0.0" />
 			</xacro:sensor_d435> -->
 
@@ -119,7 +195,7 @@
 	<xacro:if value="${lidar_enabled}">
 		<xacro:macro name="velodyne_macro" params="parent *origin">
 			<!-- <xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.0" max_range="5.0" noise="0.0"> -->
-				<xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008">
+			<xacro:VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008">
 				<xacro:insert_block name="origin" />
 			</xacro:VLP-16>
 		</xacro:macro>
