@@ -189,6 +189,7 @@ class OnlineSLAMNode:
                 d = sqrt(pose.position.x**2 + pose.position.y**2)
                 phi = atan2(pose.position.y, pose.position.x)
 
+                # Keep only observations within lidar visibility scope
                 if d > self.solver.min_visibility and d < self.solver.max_visibility:
                     observation.append(np.array([[d], [phi]]))
 
@@ -199,6 +200,7 @@ class OnlineSLAMNode:
             self.solver.motion_update(self.command)
 
             self.old_odom = self.new_odom[:]
+            self.command = [0.0, 0.0, 0.0]
 
         self.solver.observation_update(observation)
 
@@ -230,6 +232,7 @@ class OnlineSLAMNode:
 
         self.update_plot(None)
 
+        # Gather data for statistics
         fo = open(SAVE_FILE_NAME, "w")
         fo.seek(0)
         fo.truncate()
@@ -283,7 +286,7 @@ if __name__ == '__main__':
 
     # With centers of clusters
     # rospy.Subscriber('/tree_pose_array', PoseArray,
-                    #  callback=node.observation_update, queue_size=1)
+        #  callback=node.observation_update, queue_size=1)
     # With circle recognition
     rospy.Subscriber('/trees_centers', PoseArray,
                      callback=node.observation_update, queue_size=1)
