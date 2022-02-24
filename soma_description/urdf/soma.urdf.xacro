@@ -33,22 +33,22 @@
 		<!-- Build Realsense -->
 		<!-- Front -->
 		<if value="${camera_enabled}">
-			<realsense_macro parent="body_bottom_link" prefix="f">
+			<camera_macro parent="body_bottom_link" prefix="f">
 				<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
-			</realsense_macro>
+			</camera_macro>
 		</if>
 		<!-- Rear -->
 		<if value="${camera_enabled}">
-			<realsense_macro parent="body_bottom_link" prefix="r">
+			<camera_macro parent="body_bottom_link" prefix="r">
 				<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
-			</realsense_macro>
+			</camera_macro>
 		</if>
 
 		<!-- Build Velodyne -->
 		<if value="${lidar_enabled}">
-			<velodyne_macro parent="body_bottom_link">
+			<lidar_macro parent="body_bottom_link">
 				<origin xyz="0.075 0.0 ${1.70 - 0.25}" rpy="0.0 0.0 0.0" />
-			</velodyne_macro>
+			</lidar_macro>
 		</if>
 	</if>
 

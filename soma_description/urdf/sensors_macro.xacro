@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma">
 
-	<property name="camera_enabled" value="false"/>
-	<property name="lidar_enabled" value="true"/>
 	<property name="imu_enabled" value="false"/>
 	<property name="gps_enabled" value="false"/>
+	<property name="camera_enabled" value="false"/>
+	<property name="lidar_enabled" value="true"/>
 
 	<!-- Include files -->
 	<if value="${camera_enabled}">
@@ -168,7 +168,7 @@
 
 	<!-- Realsense macro -->
 	<if value="${camera_enabled}">
-		<macro name="realsense_macro" params="parent prefix *origin">
+		<macro name="camera_macro" params="parent prefix *origin">
 
 			<link name="camera_${prefix}_mount_link" />
 
@@ -189,7 +189,7 @@
 
 	<!-- Velodyne macro -->
 	<if value="${lidar_enabled}">
-		<macro name="velodyne_macro" params="parent *origin">
+		<macro name="lidar_macro" params="parent *origin">
 			<VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="1.0" max_range="10.0" noise="0.01">
 				<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="1.0" max_range="10.0" noise="0.0"> -->
 				<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008"> -->
