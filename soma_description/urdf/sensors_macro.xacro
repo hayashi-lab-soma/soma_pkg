@@ -4,6 +4,7 @@
 	<property name="camera_enabled" value="false"/>
 	<property name="lidar_enabled" value="true"/>
 	<property name="imu_enabled" value="false"/>
+	<property name="gps_enabled" value="false"/>
 
 	<!-- Include files -->
 	<if value="${camera_enabled}">
@@ -19,9 +20,9 @@
 
 			<!-- General properties used for inertia computation -->
 			<property name="mass" value="0.2" />
-			<property name="width" value="0.05" />
-			<property name="depth" value="0.05" />
-			<property name="height" value="0.025" />
+			<property name="width" value="0.1" />
+			<property name="depth" value="0.1" />
+			<property name="height" value="0.1" />
 
 			<!-- Joint -->
 			<joint name="imu_joint" type="fixed">
@@ -70,9 +71,7 @@
 				<gravity>true</gravity>
 				<sensor name="imu_sensor" type="imu">
 					<always_on>true</always_on>
-					<update_rate>100</update_rate>
 					<visualize>true</visualize>
-					<topic>__default_topic__</topic>
 					<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
 						<topicName>imu</topicName>
 						<bodyName>imu_link</bodyName>
@@ -91,6 +90,81 @@
 	</if>
 	<!-- END IMU macro -->
 
+	<!-- GPS macro -->
+	<if value="${gps_enabled}">
+		<macro name="gps_macro" params="parent *origin">
+
+			<!-- General properties used for inertia computation -->
+			<property name="mass" value="0.2" />
+			<property name="width" value="0.1" />
+			<property name="depth" value="0.1" />
+			<property name="height" value="0.1" />
+
+			<!-- Joint -->
+			<joint name="gps_joint" type="fixed">
+				<insert_block name="origin" />
+				<parent link="${parent}" />
+				<child link="gps_link" />
+			</joint>
+
+			<!-- Link -->
+			<link name="gps_link">
+
+				<!-- Inertial part -->
+				<inertial>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<mass value="${mass}" />
+
+					<!-- Inertia matrix of a parallelepiped -->
+					<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0" ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+				</inertial>
+
+				<!-- Visual part -->
+				<visual>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+					<material name="gray" />
+				</visual>
+
+				<!-- Collision part -->
+				<collision>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+				</collision>
+
+			</link>
+			<!-- END link -->
+
+			<!-- Gazebo additional parameters -->
+			<!-- <gazebo> -->
+			<gazebo reference="gps_link">
+				<material>
+					Gazebo/Gray
+				</material>
+				<gravity>true</gravity>
+			</gazebo>
+
+			<gazebo>
+				<plugin filename="libhector_gazebo_ros_gps.so" name="gps_plugin">
+					<alwaysOn>1</alwaysOn>
+					<updateRate>10.0</updateRate>
+					<bodyName>gps_link</bodyName>
+					<topicName>fix</topicName>
+					<velocityTopicName>fix_velocity</velocityTopicName>
+					<drift>5.0 5.0 5.0</drift>
+					<gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+					<velocityDrift>0 0 0</velocityDrift>
+					<velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+				</plugin>
+			</gazebo>
+
+		</macro>
+	</if>
+	<!-- END GPS macro -->
 
 	<!-- Realsense macro -->
 	<if value="${camera_enabled}">
@@ -117,7 +191,7 @@
 	<if value="${lidar_enabled}">
 		<macro name="velodyne_macro" params="parent *origin">
 			<VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="1.0" max_range="10.0" noise="0.01">
-			<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="1.0" max_range="10.0" noise="0.0"> -->
+				<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="1.0" max_range="10.0" noise="0.0"> -->
 				<!-- <VLP-16 parent="${parent}" name="velodyne" topic="/velodyne_points" min_range="0.9" max_range="130.0" noise="0.008"> -->
 				<insert_block name="origin" />
 			</VLP-16>
