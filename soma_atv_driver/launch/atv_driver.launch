@@ -2,7 +2,7 @@
 <launch>
 	<!-- arguments -->
 	<arg name="loop_rate" default="0.1" doc="ATV control loop rate (sec)" />
-	<arg name="twist_topic" default="/cmd_vel" doc="name of geometry_msgs::Twist topic which is control input" />
+	<arg name="twist_topic" default="/teleop/cmd_vel" doc="name of geometry_msgs::Twist topic which is control input" />
 	<!-- <arg name="twist_topic" default="/joy_teleop/cmd_vel"/> -->
 	
 	<arg name="wheel_vel_topic" default="/soma/wheel_vel" doc="name of std_msgs::Float32 topic which is wheel rotation speed feedback (m/s)" />
@@ -17,18 +17,18 @@
 		<remap from="/wheel_vel" to="$(arg wheel_vel_topic)" />
 		<remap from="/motor_states" to="$(arg motor_states_topic)" />
 		<!-- control parameters -->
-		<param name="target_vel" value="0.7" />
+		<param name="target_vel" value="1.0" />
 		<param name="steering_pos_min" value="-28.0" />
 		<param name="steering_pos_max" value="28.0" />
 		<param name="rear_brake_pos_min" value="0.0" />
-		<param name="rear_brake_pos_max" value="9.0" />
+		<param name="rear_brake_pos_max" value="3.0" />
 		<param name="front_brake_pos_min" value="0.0" />
 		<param name="front_brake_pos_max" value="12.0" />
 		<param name="throttle_pos_min" value="0.0" />
 		<param name="throttle_pos_max" value="13.0" />
 		<!-- starting state parameters -->
 		<param name="rear_brake_starting_state_low_rpm" value="100" />
-		<param name="throttle_regular" value="7.2" />
+		<param name="throttle_regular" value="7.0" />
 		<!--  -->
 		<param name="P" value="1.0" />
 		<param name="D" value="0.01" />
