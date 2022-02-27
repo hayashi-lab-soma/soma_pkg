@@ -147,40 +147,20 @@ Visualization Manager:
       Class: rviz/RobotModel
       Collision Enabled: false
       Enabled: true
-      Links:
-        All Links Enabled: true
-        Expand Joint Details: false
-        Expand Link Details: false
-        Expand Tree: false
-        Link Tree Style: Links in Alphabetic Order
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
         ackermann_front_steer:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         ackermann_virtual_rear_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
+          Value: true
         body_bottom_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         body_middle_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         body_top_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         camera_f_mount_link:
           Alpha: 1
@@ -232,35 +212,77 @@ Visualization Manager:
           Show Trail: false
           Value: true
         right_front_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         right_front_wheel_assembly:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         right_rear_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         velodyne:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
         velodyne_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
           Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        base_link:
+          body_bottom_link:
+            ackermann_front_steer:
+              {}
+            ackermann_virtual_rear_wheel:
+              {}
+            camera_f_mount_link:
+              camera_f_bottom_screw_frame:
+                camera_f_link:
+                  {}
+              camera_f_mount_color_frame:
+                camera_f_mount_color_optical_frame:
+                  {}
+              camera_f_mount_depth_frame:
+                camera_f_mount_depth_optical_frame:
+                  {}
+            camera_r_mount_link:
+              camera_r_bottom_screw_frame:
+                camera_r_link:
+                  {}
+            imu_link:
+              {}
+            left_front_wheel_assembly:
+              left_front_wheel:
+                {}
+            left_rear_wheel:
+              {}
+            right_front_wheel_assembly:
+              right_front_wheel:
+                {}
+            right_rear_wheel:
+              {}
+            velodyne_base_link:
+              velodyne:
+                {}
+          body_middle_link:
+            {}
+          body_top_link:
+            {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
