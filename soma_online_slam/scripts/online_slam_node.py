@@ -19,7 +19,7 @@ SAVE_FILE_NAME = DIR + '/../data/results.txt'
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=10.0, observation_noise=[[0.0, 0.0, 0.5], [0.0, 0.0, 0.01]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=10.0, observation_noise=[[0.0, 0.0, 0.5], [0.0, 0.0, 0.01]], correspondence_threshold=10**(-20), delete_threshold=10**(-20)):
         self.solver = OnlineSLAMSolver(
             particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, min_visibility=min_visibility, max_visibility=max_visibility, observation_noise=observation_noise, correspondence_threshold=correspondence_threshold, delete_threshold=delete_threshold)
 
