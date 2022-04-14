@@ -3,6 +3,7 @@
 import rospy
 import numpy as np
 import os
+from datetime import datetime
 from geometry_msgs.msg import PoseArray, Twist
 from nav_msgs.msg import Odometry
 from gazebo_msgs.msg import ModelStates
@@ -237,7 +238,25 @@ class OnlineSLAMNode:
         fo.seek(0)
         fo.truncate()
 
-        fo.write("Real pose: \n" + str([round(self.real_x_data, 3),
+        fo.write("Date & time: " + str(datetime.now()))
+
+        fo.write("\n\n\nPARAMETERS")
+
+        fo.write("\n\nparticles_num: " + str(self.solver.particles_num))
+        fo.write("\n\nmotion_model: " + str(self.solver.motion_model))
+        fo.write("\nmotion_noise:\n" + str(self.solver.motion_noise))
+        fo.write("\n\nobservation_model: " +
+                 str(self.solver.observation_model))
+        fo.write("\nmin_visibility: " + str(self.solver.min_visibility))
+        fo.write("\nmax_visibility: " + str(self.solver.max_visibility))
+        fo.write("\nobservation_noise:\n" + str(self.solver.observation_noise))
+        fo.write("\n\ncorrespondence_threshold: " +
+                 str(self.solver.correspondence_threshold))
+        fo.write("\ndelete_threshold: " + str(self.solver.delete_threshold))
+
+        fo.write("\n\n\nRESULTS")
+
+        fo.write("\n\nReal pose: \n" + str([round(self.real_x_data, 3),
                  round(self.real_y_data, 3), round(self.real_theta_data, 3)]))
 
         fo.write("\n\nReal map:")
@@ -246,20 +265,63 @@ class OnlineSLAMNode:
             real_map.append([round(self.trees_x_data[i], 3),
                             round(self.trees_y_data[i], 3)])
         real_map.sort()
-        for e in real_map:
-            fo.write("\n- " + str(e))
+        for i, e in enumerate(real_map):
+            fo.write("\n- " + str(i) + ": " + str(e))
 
         fo.write("\n\nEstimated pose: \n" + str([round(most_probable_particle.pose[0][0], 3), round(
             most_probable_particle.pose[1][0], 3), round(most_probable_particle.pose[2][0], 3)]))
 
+        position_error = sqrt((self.real_x_data - most_probable_particle.pose[0][0])**2 + (
+            self.real_y_data - most_probable_particle.pose[1][0])**2)
+        fo.write("\nPosition error: " + str(round(position_error, 3)))
+
         fo.write("\n\nEstimated map:")
         estimated_map = []
+        map_error = []
         for feature in most_probable_particle.features:
             estimated_map.append(
                 [round(feature.pose[0][0], 3), round(feature.pose[1][0], 3)])
-        estimated_map.sort()
-        for e in estimated_map:
-            fo.write("\n- " + str(e))
+            min_distance = 100
+            nearest_tree = 0
+            for i, e in enumerate(real_map):
+                new_distance = sqrt(
+                    (estimated_map[-1][0] - e[0])**2 + (estimated_map[-1][1] - e[1])**2)
+                if new_distance < min_distance:
+                    nearest_tree = i
+                    min_distance = new_distance
+            if min_distance > 1:
+                nearest_tree = None
+            map_error.append([nearest_tree, round(min_distance, 3)])
+
+        alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
+                    "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        for i, e in enumerate(estimated_map):
+            fo.write("\n- " + alphabet[i] + ": " + str(e) + " -> " +
+                     str(map_error[i][0]) + ", " + str(map_error[i][1]))
+
+        orphan_features = 0
+        redundant_features = 0
+        trees_error = len(real_map)*[0]
+        for i, e in enumerate(estimated_map):
+            tree = map_error[i][0]
+            tree_error = map_error[i][1]
+            if tree != None:
+                if trees_error[tree] > 0:
+                    redundant_features += 1
+                    trees_error[tree] = min(trees_error[tree], tree_error)
+                else:
+                    trees_error[tree] = tree_error
+            else:
+                orphan_features += 1
+        detected_features = len(estimated_map) - \
+            redundant_features-orphan_features
+        global_map_error = round(sum(trees_error)/float(detected_features), 3)
+
+        fo.write("\nDetected features: " + str(detected_features) + "/" + str(len(real_map)
+                                                                              ) + " -> " + str(int(float(detected_features)/float(len(real_map))*100)) + "%")
+        fo.write("\nGlobal map error: " + str(global_map_error))
+        fo.write("\nRedundant features: " + str(redundant_features))
+        fo.write("\nOrphan features: " + str(orphan_features))
 
         fo.close()
 
