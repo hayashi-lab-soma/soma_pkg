@@ -15,7 +15,7 @@
     <arg name="z_offset" default="0.0" unless="$(arg uneven_ground)"/>
 
     <!-- Launch Gazebo -->
-    <arg name="world_name" default="$(find soma_description)/worlds/forest.world" if="$(arg uneven_ground)"/>
+    <arg name="world_name" default="$(find soma_description)/worlds/forest_cylinders.world" if="$(arg uneven_ground)"/>
     <arg name="world_name" default="$(find soma_description)/worlds/flat_forest_cylinders.world" unless="$(arg uneven_ground)"/>
     <arg name="paused" default="true"/>
     <arg name="use_sim_time" default="true"/>
