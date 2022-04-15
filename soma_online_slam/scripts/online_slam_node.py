@@ -94,15 +94,20 @@ class OnlineSLAMNode:
         # trees_start_index = 1
         # trees_stop_index = 11
 
+        # CYLINDER FOREST WITH UNEVEN GROUND
+        soma_index = 18
+        trees_start_index = 1
+        trees_stop_index = 18
+
         # FLAT FOREST
         # soma_index = 18
         # trees_start_index = 1
         # trees_stop_index = 17
 
-        # CYLINDER FOREST
-        soma_index = 17
-        trees_start_index = 1
-        trees_stop_index = 17
+        # FLAT CYLINDER FOREST
+        # soma_index = 17
+        # trees_start_index = 1
+        # trees_stop_index = 17
 
         self.real_x_data = data.pose[soma_index].position.x
         self.real_y_data = data.pose[soma_index].position.y
