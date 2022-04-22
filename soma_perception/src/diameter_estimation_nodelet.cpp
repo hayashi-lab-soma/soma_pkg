@@ -106,6 +106,7 @@ namespace soma_perception
       pose.orientation.z = 0;
       pose.orientation.w = 1;
       trees_centers.header.frame_id = "velodyne";
+      trees_centers.header.stamp = ros::Time::now();
       trees_centers.poses.push_back(pose);
       pub_centers.publish(trees_centers);
     }
