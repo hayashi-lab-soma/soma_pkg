@@ -19,6 +19,15 @@ Online Simultaneous Localization And Mapping (SLAM)
   ```
 
 - In third terminal :
+
   ```
   roslaunch soma_online_slam tree_poses.launch
+  ```
+
+## Online SLAM
+
+- In fourth terminal :
+
+  ```
+  roslaunch soma_online_slam online_slam.launch
   ```
