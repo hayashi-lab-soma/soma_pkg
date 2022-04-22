@@ -36,6 +36,7 @@ class OnlineSLAMNode:
             self.command = [0.0, 0.0, 0.0]
             self.old_odom = [0.0, 0.0, 0.0]
             self.new_odom = [0.0, 0.0, 0.0]
+            self.last_odom_time = 0
 
         else:
             assert False, "Invalid motion model: " + motion_model
@@ -95,9 +96,9 @@ class OnlineSLAMNode:
         # trees_stop_index = 11
 
         # CYLINDER FOREST WITH UNEVEN GROUND
-        soma_index = 18
-        trees_start_index = 1
-        trees_stop_index = 18
+        # soma_index = 18
+        # trees_start_index = 1
+        # trees_stop_index = 18
 
         # FLAT FOREST
         # soma_index = 18
@@ -105,9 +106,9 @@ class OnlineSLAMNode:
         # trees_stop_index = 17
 
         # FLAT CYLINDER FOREST
-        # soma_index = 17
-        # trees_start_index = 1
-        # trees_stop_index = 17
+        soma_index = 17
+        trees_start_index = 1
+        trees_stop_index = 17
 
         self.real_x_data = data.pose[soma_index].position.x
         self.real_y_data = data.pose[soma_index].position.y
@@ -149,6 +150,8 @@ class OnlineSLAMNode:
                 print("END\n")
 
         elif self.solver.motion_model == "odometry":
+            self.last_odom_time = data.header.stamp
+
             new_x = data.pose.pose.position.x
             new_y = data.pose.pose.position.y
             new_theta = euler_from_quaternion([
@@ -186,6 +189,12 @@ class OnlineSLAMNode:
 
         self.observation_mutex = True
         print("SOLVER LOOP")
+        update_time = rospy.get_time()
+        print("Time: " + str(update_time) + " s")
+        print("Motion delay: " + str(round((update_time - self.last_odom_time.secs -
+              self.last_odom_time.nsecs * 10**(-9)) * 10**3, 3)) + " ms")
+        print("Observation delay: " + str(round((update_time - data.header.stamp.secs -
+              data.header.stamp.nsecs * 10**(-9)) * 10**3, 3)) + " ms")
 
         observation = []
         for pose in data.poses:
