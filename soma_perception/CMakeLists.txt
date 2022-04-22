@@ -44,6 +44,7 @@ add_library(${PROJECT_NAME}
     src/diameter_estimation_nodelet.cpp
     src/plane_segmentation_nodelet.cpp
     src/mlp_prefiltering_nodelet.cpp
+    src/multiple_diameter_estimation_nodelet.cpp
     )
 
 target_link_libraries(${PROJECT_NAME}
