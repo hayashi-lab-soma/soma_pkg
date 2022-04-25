@@ -20,6 +20,7 @@ find_package(catkin REQUIRED
     pluginlib
     nodelet
     tf
+    message_filters
     )
 
 find_package(PCL 1.7 REQUIRED)

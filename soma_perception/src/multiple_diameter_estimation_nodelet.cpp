@@ -39,8 +39,7 @@
 namespace soma_perception
 {
   typedef pcl::PointXYZRGB PointT;
-  // typedef message_filters::sync_policies::ExactTime<jsk_recognition_msgs::Int32Stamped, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy;
-  typedef message_filters::sync_policies::ExactTime<jsk_recognition_msgs::Int32Stamped, sensor_msgs::PointCloud2> MySyncPolicy;
+  typedef message_filters::sync_policies::ExactTime<jsk_recognition_msgs::Int32Stamped, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy;
   
   class MultipleDiameterEstimationNodelet : public nodelet::Nodelet
   {
@@ -69,19 +68,7 @@ namespace soma_perception
       points_sub4 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points4", 1);
       points_sub5 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points5", 1);
       points_sub6 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points6", 1);
-      points_sub7 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points7", 1);
-      points_sub8 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points8", 1);
-      points_sub9 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points9", 1);
-      points_sub10 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points10", 1);
-      points_sub11 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points11", 1);
-      points_sub12 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points12", 1);
-      points_sub13 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points13", 1);
-      points_sub14 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points14", 1);
-      points_sub15 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points15", 1);
-      // sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(300), *clusters_num_sub, *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4, *points_sub5, *points_sub6, *points_sub7, *points_sub8, *points_sub9, *points_sub10, *points_sub11, *points_sub12, *points_sub13, *points_sub14, *points_sub15);
-      // sync->registerCallback(boost::bind(&MultipleDiameterEstimationNodelet::callback, this, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17));
-      sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(1), *clusters_num_sub, *points_sub0);
-      // sync->registerCallback(boost::bind(&MultipleDiameterEstimationNodelet::callback, this, _1, _2));
+      sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(1), *clusters_num_sub, *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4, *points_sub5, *points_sub6);
       sync->registerCallback(&MultipleDiameterEstimationNodelet::callback, this);
     }
 
@@ -95,75 +82,39 @@ namespace soma_perception
       radius_max = pnh.param<double>("radius_max", 3);
     }
 
-    // void callback(const jsk_recognition_msgs::Int32Stamped &_clusters_num, const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4, const sensor_msgs::PointCloud2ConstPtr &_input5, const sensor_msgs::PointCloud2ConstPtr &_input6, const sensor_msgs::PointCloud2ConstPtr &_input7, const sensor_msgs::PointCloud2ConstPtr &_input8, const sensor_msgs::PointCloud2ConstPtr &_input9, const sensor_msgs::PointCloud2ConstPtr &_input10, const sensor_msgs::PointCloud2ConstPtr &_input11, const sensor_msgs::PointCloud2ConstPtr &_input12, const sensor_msgs::PointCloud2ConstPtr &_input13, const sensor_msgs::PointCloud2ConstPtr &_input14, const sensor_msgs::PointCloud2ConstPtr &_input15)
-    void callback(const jsk_recognition_msgs::Int32Stamped &_clusters_num, const sensor_msgs::PointCloud2ConstPtr &_input0)
+    void callback(const jsk_recognition_msgs::Int32Stamped &_clusters_num, const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4, const sensor_msgs::PointCloud2ConstPtr &_input5, const sensor_msgs::PointCloud2ConstPtr &_input6)
     {
-      printf("\nNew clusters received (%d)...", _clusters_num.data);
+      int clusters_number = _clusters_num.data;
+      trees_centers.poses.clear();
 
-      // if (_clusters_num > 0)
-      // {
+      if (clusters_number > 0)
+      {
         diameter_estimation(_input0);
-      // }
-      // if (_clusters_num > 1)
-      // {
-        // diameter_estimation(_input1);
-      // }
-      // if (_clusters_num > 2)
-      // {
-        // diameter_estimation(_input2);
-      // }
-      // if (_clusters_num > 3)
-      // {
-        // diameter_estimation(_input3);
-      // }
-      // if (_clusters_num > 4)
-      // {
-        // diameter_estimation(_input4);
-      // }
-      // if (_clusters_num > 5)
-      // {
-        // diameter_estimation(_input5);
-      // }
-      // if (_clusters_num > 6)
-      // {
-        // diameter_estimation(_input6);
-      // }
-      // if (_clusters_num > 7)
-      // {
-        // diameter_estimation(_input7);
-      // }
-      // if (_clusters_num > 8)
-      // {
-        // diameter_estimation(_input8);
-      // }
-      // if (_clusters_num > 9)
-      // {
-        // diameter_estimation(_input9);
-      // }
-      // if (_clusters_num > 10)
-      // {
-        // diameter_estimation(_input10);
-      // }
-      // if (_clusters_num > 11)
-      // {
-        // diameter_estimation(_input11);
-      // }
-      // if (_clusters_num > 12)
-      // {
-        // diameter_estimation(_input12);
-      // }
-      // if (_clusters_num > 13)
-      // {
-        // diameter_estimation(_input13);
-      // }
-      // if (_clusters_num > 14)
-      // {
-        // diameter_estimation(_input14);
-      // }
-      // if (_clusters_num > 15)
-      // {
-        // diameter_estimation(_input15);
-      // }
+      }
+      if (clusters_number > 1)
+      {
+        diameter_estimation(_input1);
+      }
+      if (clusters_number > 2)
+      {
+        diameter_estimation(_input2);
+      }
+      if (clusters_number > 3)
+      {
+        diameter_estimation(_input3);
+      }
+      if (clusters_number > 4)
+      {
+        diameter_estimation(_input4);
+      }
+      if (clusters_number > 5)
+      {
+        diameter_estimation(_input5);
+      }
+      if (clusters_number > 6)
+      {
+        diameter_estimation(_input6);
+      }
 
       pub_centers.publish(trees_centers);
 
@@ -277,7 +228,7 @@ namespace soma_perception
         }
         catch (const pcl::PCLException &e)
         {
-          // NODELET_WARN("Cylinder Model Detection Error");
+          NODELET_WARN("Cylinder Model Detection Error");
           // return 0; //failure
           // return NULL;
         }
@@ -299,15 +250,6 @@ namespace soma_perception
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub4;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub5;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub6;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub7;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub8;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub9;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub10;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub11;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub12;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub13;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub14;
-    message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub15;
     message_filters::Synchronizer<MySyncPolicy> *sync;
     
     ros::Publisher pub;

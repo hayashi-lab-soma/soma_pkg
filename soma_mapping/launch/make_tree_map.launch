@@ -53,6 +53,7 @@
 
 	<node name="find_circles" pkg="nodelet" type="nodelet" output="screen" args="load soma_perception/MultipleDiameterEstimationNodelet $(arg nodelet_manager)">
 		<param name="base_link" value="base_link" />
+		<!-- Maximum 7 trees in the lidar visibility scope at once (what to do if more ? make visibility scope smaller ?) -->
 		<remap from="clusters_num_topic" to="/clustering/cluster_num" />
 		<remap from="input_points0" to="/cluster_decomposer/output00" />
 		<remap from="input_points1" to="/cluster_decomposer/output01" />
@@ -61,15 +62,6 @@
 		<remap from="input_points4" to="/cluster_decomposer/output04" />
 		<remap from="input_points5" to="/cluster_decomposer/output05" />
 		<remap from="input_points6" to="/cluster_decomposer/output06" />
-		<remap from="input_points7" to="/cluster_decomposer/output07" />
-		<remap from="input_points8" to="/cluster_decomposer/output08" />
-		<remap from="input_points9" to="/cluster_decomposer/output09" />
-		<remap from="input_points10" to="/cluster_decomposer/output10" />
-		<remap from="input_points11" to="/cluster_decomposer/output11" />
-		<remap from="input_points12" to="/cluster_decomposer/output12" />
-		<remap from="input_points13" to="/cluster_decomposer/output13" />
-		<remap from="input_points14" to="/cluster_decomposer/output14" />
-		<remap from="input_points15" to="/cluster_decomposer/output15" />
 	</node>
 
 	<!-- <node name="find_circles1" pkg="nodelet" type="nodelet" args="load soma_perception/DiameterEstimationNodelet $(arg nodelet_manager)"> -->
