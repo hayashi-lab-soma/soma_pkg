@@ -36,7 +36,12 @@
 				<origin xyz="-0.525 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 ${-pi}" />
 			</xacro:camera_macro>
 		</xacro:if>
-
+		<!-- Build Realsense -->
+		<xacro:if value="${camera_enabled}">
+			<xacro:azure_macro parent="body_bottom_link" prefix="f">
+				<origin xyz="0.325 0.0 ${1.10 - 0.25}" rpy="0.0 0.0 0.0" />
+			</xacro:azure_macro>
+		</xacro:if>
 		<!-- Build Velodyne -->
 		<xacro:if value="${lidar_enabled}">
 			<xacro:velodyne_macro parent="body_bottom_link">

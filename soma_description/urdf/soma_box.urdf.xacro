@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="soma_box">
+
+	<xacro:property name="sensors_enabled" value="true"/>
+	<xacro:property name="laptop_enabled" value="false"/>
+	<xacro:property name="nuc_enabled" value="true"/>
+
+
+	<!-- Include files -->
+	<xacro:if value="${laptop_enabled}">
+		<xacro:include filename="$(find semantic_slam)/urdf/sensors_macro.xacro" />
+	</xacro:if>
+
+	<xacro:if value="${nuc_enabled}">
+		<xacro:include filename="$(find soma_description)/urdf/sensors_macro.xacro" />
+	</xacro:if>
+
+	<!-- Empty link to use Gazebo -->
+	<link name="base_link" />
+
+	<xacro:if value="${sensors_enabled}">
+		<!-- Build IMU -->
+		<xacro:if value="${imu_enabled}">
+			<xacro:imu_macro parent="base_link">
+				<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
+			</xacro:imu_macro>
+		</xacro:if>
+		<!-- Build Azure -->
+		<xacro:if value="${camera_enabled}">
+			<xacro:azure_macro parent="base_link" prefix="f">
+				<origin xyz="0.106 0.0 1.1" rpy="0.0 0.0 0.0" />
+			</xacro:azure_macro>
+		</xacro:if>
+		<!-- Build Velodyne -->
+		<xacro:if value="${lidar_enabled}">
+			<xacro:velodyne_macro parent="base_link">
+				<origin xyz="0.044 0.0 1.63" rpy="0.0 0.0 0.0" />
+			</xacro:velodyne_macro>
+		</xacro:if>
+	</xacro:if>
+
+</robot>

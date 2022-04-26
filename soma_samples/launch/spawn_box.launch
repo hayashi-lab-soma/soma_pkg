@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="simulation" default="false"/>
+  <arg name="namespace" default="/"/>
+  <arg name="driving_gui" default="true"/>
+  <arg name="motor_noise_list" default="[[0.0,0.0,0.0],[0.0,0.0,0.0]]"/>
+
+  <!-- Load robot description -->
+  <arg name="robot_namespace" default="/"/>
+
+  <arg name="model" default="$(find soma_description)/urdf/soma_box.urdf.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) robot_namespace:=$(arg robot_namespace)" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" value="50.0" />
+  </node>
+
+
+  <include file="$(find soma_bringup)/launch/sensor/velodyne.launch"/>
+
+  <!-- Azure camera -->
+  <include file="$(find soma_bringup)/launch/sensor/azure.launch" />
+
+  <!-- HDL LiDAR localization -->
+  <include file="$(find soma_localization)/launch/lidar_odom_hdl_ver.launch">
+    <arg name="base_frame_id" value="base_link" />
+    <arg name="lidar_link" value="velodyne" />
+    <arg name="odom_frame_id" value="lidar_odom" />
+    <arg name="points_topic" value="/velodyne_points"/>
+    <arg name="enable_manager" value="false" doc="If you publish PointCloud2 from bagfile, set true" />
+    <arg name="nodelet_manager" value="velodyne_nodelet_manager" />
+    <arg name="enable_tf_base2lidar" value="false" />
+    <!--
+	prefiltering arguments
+	distance filter
+	down sampling (voxel grid)
+	-->
+    <arg name="use_distance_filter" value="true" />
+    <arg name="distance_near_thresh" value="0.1" />
+    <arg name="distance_far_thresh" value="20.0" />
+    <arg name="down_sampling_resolution" value="0.1" />
+  </include>
+
+</launch>
