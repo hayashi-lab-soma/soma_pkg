@@ -24,9 +24,6 @@
         <arg name="centroids_poses_topic" default="/tree_pose_array" />
     </include>
 
-    <!-- Extract centers of mass of clusters -->
-    <!-- <node name="get_tree_poses" pkg="soma_localization" type="save_tree_locations.py"/> -->
-
     <!-- Vizualization in Rviz (with adequate configuration) -->
     <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 </launch>

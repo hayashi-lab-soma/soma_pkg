@@ -49,8 +49,6 @@ namespace soma_perception
 
     virtual void onInit()
     {
-      // NODELET_INFO("Initializing MultipleDiameterEstimationNodelet");
-
       nh = getNodeHandle();
       nh2 = getNodeHandle();
       pnh = getPrivateNodeHandle();
@@ -83,7 +81,7 @@ namespace soma_perception
     }
 
     void callback(const jsk_recognition_msgs::Int32Stamped &_clusters_num, const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4, const sensor_msgs::PointCloud2ConstPtr &_input5, const sensor_msgs::PointCloud2ConstPtr &_input6)
-    {
+    { 
       int clusters_number = _clusters_num.data;
       trees_centers.poses.clear();
 
@@ -118,7 +116,7 @@ namespace soma_perception
 
       pub_centers.publish(trees_centers);
 
-      printf("Trees positions updated");
+      NODELET_INFO("Trees positions updated");
     }
 
     void diameter_estimation(const sensor_msgs::PointCloud2ConstPtr &_input)
