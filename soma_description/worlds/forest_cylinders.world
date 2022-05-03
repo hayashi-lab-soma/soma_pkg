@@ -148,178 +148,168 @@
       <pose frame=''>-2.49043 -1.66733 0 0 -0 0</pose>
     </model>
     <state world_name='default'>
-      <sim_time>637 685000000</sim_time>
-      <real_time>0 0</real_time>
-      <wall_time>1649930539 272513800</wall_time>
-      <iterations>0</iterations>
+      <sim_time>655 443000000</sim_time>
+      <real_time>245 12963500</real_time>
+      <wall_time>1651580966 329158000</wall_time>
+      <iterations>17758</iterations>
       <model name='Cylinder_tree'>
-        <pose frame=''>-3.79519 6.39375 0.541453 0 -0 0</pose>
+        <pose frame=''>-4.47194 5.5227 0.650348 -0.000442 -0.006293 -0.006346</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-3.79519 6.39375 0.541453 0 -0 0</pose>
+          <pose frame=''>-4.47194 5.5227 0.650348 -0.000442 -0.006293 -0.006346</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 -0 -0 -0 -0</acceleration>
+          <wrench>-0 0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone'>
-        <pose frame=''>5.30139 6.99715 0.541453 0 -0 0</pose>
+        <pose frame=''>4.73932 5.45658 0.690154 -0.005934 -0.025362 0.002708</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>5.30139 6.99715 0.541453 0 -0 0</pose>
+          <pose frame=''>4.73932 5.45658 0.690154 -0.005934 -0.025362 0.002708</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0.119142 -0.052804 -0.010166 0.10617 -0.238515 0.003373</acceleration>
+          <wrench>-0.119142 -0.052804 -0.010166 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_0'>
-        <pose frame=''>11.9052 7.94025 0.541453 0 -0 0</pose>
+        <pose frame=''>12.4496 9.00782 0.648892 -0.004476 0.001208 -0.000231</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>11.9052 7.94025 0.541453 0 -0 0</pose>
+          <pose frame=''>12.4496 9.00782 0.648892 -0.004476 0.001208 -0.000231</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 0 0 -0 0</acceleration>
+          <wrench>-0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_1'>
-        <pose frame=''>8.81988 11.675 0.541453 0 -0 0</pose>
+        <pose frame=''>7.04601 14.8766 0.612871 -0.004569 -0.004014 0.021683</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>8.81988 11.675 0.541453 0 -0 0</pose>
+          <pose frame=''>7.04601 14.8766 0.612871 -0.004569 -0.004014 0.021683</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>3.86768 -2.01562 -0.573621 -2.2571 1.44734 -0.015045</acceleration>
+          <wrench>3.86768 -2.01562 -0.573621 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_10'>
-        <pose frame=''>-4.77426 -12.5196 0.541453 0 -0 0</pose>
+        <pose frame=''>-6.37125 -14.0331 0.584358 0.004258 -0.004003 -0.031359</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-4.77426 -12.5196 0.541453 0 -0 0</pose>
+          <pose frame=''>-6.37125 -14.0331 0.584358 0.004258 -0.004003 -0.031359</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 -0 -0 -0 -0</acceleration>
+          <wrench>-0 0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_11'>
-        <pose frame=''>5.49468 -12.2709 0.541453 0 -0 0</pose>
+        <pose frame=''>7.22242 -13.6761 0.640883 0.003308 -0.004 -0.040845</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>5.49468 -12.2709 0.541453 0 -0 0</pose>
+          <pose frame=''>7.22242 -13.6761 0.640883 0.003308 -0.004 -0.040845</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
-        </link>
-      </model>
-      <model name='Cylinder_tree_clone_12'>
-        <pose frame=''>-11.0175 -12.2656 0.541453 0 -0 0</pose>
-        <scale>1 1 1</scale>
-        <link name='link_0'>
-          <pose frame=''>-11.0175 -12.2656 0.541453 0 -0 0</pose>
-          <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0.001329 -0.0006 0.000478 0.001197 -0.002654 -3e-06</acceleration>
+          <wrench>-0.001329 -0.0006 0.000478 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_13'>
-        <pose frame=''>11.8841 -11.4561 0.541453 0 -0 0</pose>
+        <pose frame=''>12.4447 -7.09868 0.66646 0.003293 0.003662 0.031455</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>11.8841 -11.4561 0.541453 0 -0 0</pose>
+          <pose frame=''>12.4447 -7.09868 0.66646 0.003293 0.003662 0.031455</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-1e-06 -2e-06 0 3e-06 -2e-06 0</acceleration>
+          <wrench>-1e-06 -2e-06 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_14'>
-        <pose frame=''>1.42705 11.8738 0.541453 0 -0 0</pose>
+        <pose frame=''>0.194014 11.7146 0.615285 -0.014169 -0.004031 0.02333</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>1.42705 11.8738 0.541453 0 -0 0</pose>
+          <pose frame=''>0.194014 11.7146 0.615285 -0.014169 -0.004031 0.02333</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>0 0 -0 0 -0 0</acceleration>
+          <wrench>0 0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_2'>
-        <pose frame=''>-5.84526 12.1349 0.541453 0 -0 0</pose>
+        <pose frame=''>-6.77093 14.3703 0.559174 -0.005468 -0.0041 0.001919</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-5.84526 12.1349 0.541453 0 -0 0</pose>
+          <pose frame=''>-6.77093 14.3703 0.559174 -0.005468 -0.0041 0.001919</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 -0 -0 -0 -0</acceleration>
+          <wrench>-0 0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_3'>
-        <pose frame=''>-14.3549 0.137475 0.541453 0 -0 0</pose>
+        <pose frame=''>-13.4763 0.534592 0.554169 -0.000503 -0.014114 0.00055</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-14.3549 0.137475 0.541453 0 -0 0</pose>
+          <pose frame=''>-13.4763 0.534592 0.554169 -0.000503 -0.014114 0.00055</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0.003737 3e-06 0.010982 5e-06 -0.007168 3e-06</acceleration>
+          <wrench>-0.003737 3e-06 0.010982 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_4'>
-        <pose frame=''>-11.7865 10.1463 0.541453 0 -0 0</pose>
+        <pose frame=''>-12.1358 8.86831 0.555119 -0.002576 -0.013255 0.000556</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-11.7865 10.1463 0.541453 0 -0 0</pose>
+          <pose frame=''>-12.1358 8.86831 0.555119 -0.002576 -0.013255 0.000556</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 -0 -0 0 -0 0</acceleration>
+          <wrench>-0 -0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_5'>
-        <pose frame=''>-5.45628 -6.44713 0.541453 0 -0 0</pose>
+        <pose frame=''>-3.93029 -3.9595 0.676636 -0.002772 0.010347 -0.044946</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-5.45628 -6.44713 0.541453 0 -0 0</pose>
+          <pose frame=''>-3.93029 -3.9595 0.676636 -0.002772 0.010347 -0.044946</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 0 0 0 -0 0</acceleration>
+          <wrench>-0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_6'>
-        <pose frame=''>0.535489 -9.07555 0.541453 0 -0 0</pose>
+        <pose frame=''>0.3726 -10.8905 0.640273 0.009943 -0.003379 0.001814</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>0.535489 -9.07555 0.541453 0 -0 0</pose>
+          <pose frame=''>0.3726 -10.8905 0.640273 0.009943 -0.003379 0.001814</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 -0 -0 0 -0 0</acceleration>
+          <wrench>-0 -0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_7'>
-        <pose frame=''>6.57941 -6.61245 0.541453 0 -0 0</pose>
+        <pose frame=''>4.65707 -4.11129 0.685924 -0.00198 -0.009855 0.036441</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>6.57941 -6.61245 0.541453 0 -0 0</pose>
+          <pose frame=''>4.65707 -4.11129 0.685924 -0.00198 -0.009855 0.036441</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>0 -0 -0 0 -0 0</acceleration>
+          <wrench>0 -0 -0 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_8'>
-        <pose frame=''>14.1911 -0.285375 0.541453 0 -0 0</pose>
+        <pose frame=''>13.2386 0.73629 0.659923 0.001277 0.002832 0.008653</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>14.1911 -0.285375 0.541453 0 -0 0</pose>
+          <pose frame=''>13.2386 0.73629 0.659923 0.001277 0.002832 0.008653</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>0.00425 -0.001561 0.013381 0.003088 0.008424 2e-06</acceleration>
+          <wrench>0.00425 -0.001561 0.013381 0 -0 0</wrench>
         </link>
       </model>
       <model name='Cylinder_tree_clone_9'>
-        <pose frame=''>-12.3201 -6.35574 0.541453 0 -0 0</pose>
+        <pose frame=''>-11.5802 -8.05986 0.574744 0.003699 -0.006654 0.013713</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose frame=''>-12.3201 -6.35574 0.541453 0 -0 0</pose>
+          <pose frame=''>-11.5802 -8.05986 0.574744 0.003699 -0.006654 0.013713</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 0 0 0 -0 0</acceleration>
-          <wrench>0 0 0 0 -0 0</wrench>
+          <acceleration>-0 -0 0 0 -0 0</acceleration>
+          <wrench>-0 -0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='forest_ground'>
@@ -338,7 +328,7 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose frame=''>-0.235038 -5.09192 59.5957 0 1.5698 -0.008003</pose>
+        <pose frame=''>-0.605608 -4.40009 63.3715 0 1.5698 -0.008003</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -1812,111 +1802,6 @@
       <static>0</static>
       <allow_auto_disable>1</allow_auto_disable>
       <pose frame=''>6.43037 -11.0801 0.541453 0 -0 0</pose>
-    </model>
-    <model name='Cylinder_tree_clone_12'>
-      <link name='link_0'>
-        <inertial>
-          <mass>1</mass>
-          <inertia>
-            <ixx>0.145833</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.145833</iyy>
-            <iyz>0</iyz>
-            <izz>0.125</izz>
-          </inertia>
-          <pose frame=''>0 0 0 0 -0 0</pose>
-        </inertial>
-        <pose frame=''>0 0 0 0 -0 0</pose>
-        <gravity>1</gravity>
-        <self_collide>0</self_collide>
-        <kinematic>0</kinematic>
-        <enable_wind>0</enable_wind>
-        <visual name='visual'>
-          <pose frame=''>0 0 0.5 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>1.5</radius>
-              <length>2</length>
-            </cylinder>
-          </geometry>
-          <material>
-            <lighting>1</lighting>
-            <script>
-              <uri>file://media/materials/scripts/gazebo.material</uri>
-              <name>Gazebo/Grey</name>
-            </script>
-            <shader type='vertex'>
-              <normal_map>__default__</normal_map>
-            </shader>
-            <ambient>0.3 0.3 0.3 1</ambient>
-            <diffuse>0.7 0.7 0.7 1</diffuse>
-            <specular>0.01 0.01 0.01 1</specular>
-            <emissive>0 0 0 1</emissive>
-          </material>
-          <transparency>0</transparency>
-          <cast_shadows>1</cast_shadows>
-        </visual>
-        <collision name='collision'>
-          <laser_retro>0</laser_retro>
-          <max_contacts>10</max_contacts>
-          <pose frame=''>0 0 0.5 0 -0 0</pose>
-          <geometry>
-            <cylinder>
-              <radius>1.5</radius>
-              <length>2</length>
-            </cylinder>
-          </geometry>
-          <surface>
-            <friction>
-              <ode>
-                <mu>1</mu>
-                <mu2>1</mu2>
-                <fdir1>0 0 0</fdir1>
-                <slip1>0</slip1>
-                <slip2>0</slip2>
-              </ode>
-              <torsional>
-                <coefficient>1</coefficient>
-                <patch_radius>0</patch_radius>
-                <surface_radius>0</surface_radius>
-                <use_patch_radius>1</use_patch_radius>
-                <ode>
-                  <slip>0</slip>
-                </ode>
-              </torsional>
-            </friction>
-            <bounce>
-              <restitution_coefficient>0</restitution_coefficient>
-              <threshold>1e+06</threshold>
-            </bounce>
-            <contact>
-              <collide_without_contact>0</collide_without_contact>
-              <collide_without_contact_bitmask>1</collide_without_contact_bitmask>
-              <collide_bitmask>1</collide_bitmask>
-              <ode>
-                <soft_cfm>0</soft_cfm>
-                <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
-                <kd>1</kd>
-                <max_vel>0.01</max_vel>
-                <min_depth>0</min_depth>
-              </ode>
-              <bullet>
-                <split_impulse>1</split_impulse>
-                <split_impulse_penetration_threshold>-0.01</split_impulse_penetration_threshold>
-                <soft_cfm>0</soft_cfm>
-                <soft_erp>0.2</soft_erp>
-                <kp>1e+13</kp>
-                <kd>1</kd>
-              </bullet>
-            </contact>
-          </surface>
-        </collision>
-      </link>
-      <static>0</static>
-      <allow_auto_disable>1</allow_auto_disable>
-      <pose frame=''>-11.0276 -12.6866 0.541453 0 -0 0</pose>
     </model>
     <model name='Cylinder_tree_clone_13'>
       <link name='link_0'>
