@@ -2,6 +2,7 @@ from random import uniform, random, seed
 import matplotlib.pyplot as plt
 from math import pi, cos, sin, sqrt, atan2, exp, tan
 import numpy as np
+from numpy.compat.py3k import _PurePath__fspath__
 from scipy.stats import multivariate_normal
 from scipy.stats.mvn import mvnun
 import time
@@ -21,9 +22,347 @@ import time
 
 '''
 
+
+# Convenient representation of particles set history
+class History:
+    def __init__(self, particles_num):
+        self.particles_num = particles_num
+        self.particles_sets = [[[i, 0.0, 0.0, 1.0/particles_num]
+                                for i in range(particles_num)]]
+        self.steps = []
+        self.final_most_probable_particle_history = []
+
+        return
+
+    def add_generation(self, new_particles_set, step):
+        new_particles_set.sort()
+        self.particles_sets.append(new_particles_set[:])
+        self.steps.append(step)
+
+        return
+
+    def add_most_probable_particle(self, index):
+        self.final_most_probable_particle_history.append(index)
+
+        for t in range(len(self.steps)-1, -1, -1):
+            previous = self.final_most_probable_particle_history[-1]
+            self.final_most_probable_particle_history.append(
+                self.particles_sets[t][previous][0])
+
+        self.final_most_probable_particle_history.reverse()
+
+        return
+
+    def separator(self, lengths):
+        tmp = "                   |"
+        for l in lengths:
+            for i in range(6*l-1):
+                tmp += "-"
+            tmp += "|"
+        tmp += "\n"
+
+        return tmp
+
+    def particles(self, lengths, generation, previous_generation, ps):
+        if generation > previous_generation:
+            tmp = " GENERATION " + str(generation)
+            if generation < 10:
+                tmp += " "
+            tmp += "     |"
+        else:
+            tmp = "                   |"
+
+        index = 0
+        for l in lengths:
+            for i in range((6*l-4)/2):
+                tmp += " "
+            n = ps[index][0]
+            tmp += " " + str(n) + " "
+            if n < 10:
+                tmp += " "
+            for i in range(6*l-5 - (6*l-4)/2):
+                tmp += " "
+            tmp += "|"
+            index += l
+
+        tmp += "                 " + str(len(lengths)) + " particles\n"
+
+        return tmp
+
+    def values(self, type, lengths, previous_lengths, ps, t, best, worst):
+        if type == "weight":
+            v_index = 3
+            tmp = "    WEIGHT         |"
+        elif type == "position":
+            v_index = 1
+            tmp = "POSITION ERROR     |"
+        elif type == "map":
+            v_index = 2
+            tmp = "  MAP ERROR        |"
+
+        average = 0
+        index = 0
+        for j in range(len(lengths)):
+            l = lengths[j]
+            for i in range((6*l-5)/2):
+                tmp += " "
+            if j > 0:
+                index += lengths[j-1]
+            v = ps[index][v_index]
+
+            tmp += str(round(v, 1)) + " "
+
+            if t == 0 or self.steps[t-1] == "RESAMPLING":
+                tmp += "o"
+            else:
+                old_index = 0
+                for pl in previous_lengths:
+                    if old_index + pl > index:
+                        break
+                    else:
+                        old_index += pl
+                old_v = self.particles_sets[t-1][old_index][v_index]
+
+                if round(v, 1) < round(old_v, 1):
+                    tmp += "-"
+                elif round(v, 1) == round(old_v, 1):
+                    tmp += "="
+                if round(v, 1) > round(old_v, 1):
+                    tmp += "+"
+
+            if type == "weight":
+                average += v * lengths[j]
+            else:
+                average += v * ps[index][3] * lengths[j]
+            for i in range(6*l-6 - (6*l-5)/2):
+                tmp += " "
+            tmp += "|"
+
+        if type == "weight":
+            average /= self.particles_num
+        tmp += "     Average: " + str(round(average, 1)) + " / Worst: " + str(
+            round(worst, 1)) + " / Best: " + str(round(best, 1)) + "\n"
+
+        return tmp
+
+    def step(self, t):
+        tmp = "\n                   "
+        l = len(self.steps[t])
+        for i in range(3*self.particles_num - l/2):
+            tmp += " "
+        tmp += self.steps[t]
+        for i in range(3*self.particles_num - l + l/2):
+            tmp += " "
+        tmp += "\n\n"
+
+        return tmp
+
+    def __str__(self):
+        tmp = "\n"
+        previous_generation = -1
+        generation = 0
+
+        for t, ps in enumerate(self.particles_sets):
+            position_best = ps[0][1]
+            position_worst = position_best
+            map_best = ps[0][2]
+            map_worst = map_best
+            weight_best = ps[0][3]
+            weight_worst = weight_best
+            if t > 0:
+                previous_lengths = lengths[:]
+            else:
+                previous_lengths = []
+            lengths = []
+            previous = ps[0][0]
+            current_length = 1
+
+            for p in ps[1:]:
+                if p[0] != previous:
+                    lengths.append(current_length)
+                    if p[1] < position_best:
+                        position_best = p[1]
+                    elif p[1] > position_worst:
+                        position_worst = p[1]
+                    if p[2] < map_best:
+                        map_best = p[2]
+                    elif p[2] > map_worst:
+                        map_worst = p[2]
+                    if p[3] > weight_best:
+                        weight_best = p[3]
+                    elif p[3] < weight_worst:
+                        weight_worst = p[3]
+                    current_length = 1
+                else:
+                    current_length += 1
+                previous = p[0]
+            lengths.append(current_length)
+
+            tmp += self.separator(lengths)
+            tmp += self.particles(lengths, generation, previous_generation, ps)
+            tmp += self.separator(lengths)
+            tmp += self.values("weight", lengths,
+                               previous_lengths, ps, t, weight_best, weight_worst)
+            tmp += self.separator(lengths)
+            tmp += self.values("position", lengths,
+                               previous_lengths, ps, t, position_best, position_worst)
+            tmp += self.values("map", lengths,
+                               previous_lengths, ps, t, map_best, map_worst)
+            tmp += self.separator(lengths)
+
+            if t < len(self.particles_sets) - 1:
+                tmp += self.step(t)
+
+            previous_generation = generation
+            if t < len(self.particles_sets) - 1 and self.steps[t] == "UPDATE":
+                generation += 1
+
+        return tmp
+
+    def display(self):
+        highest_weight = 0
+        highest_position_error = 0
+        highest_map_error = 0
+
+        for t, ps in enumerate(self.particles_sets):
+            previous = -1
+            for p in ps:
+                if p[0] != previous:
+                    highest_weight = max(highest_weight, p[3])
+                    highest_position_error = max(highest_position_error, p[1])
+                    highest_map_error = max(highest_map_error, p[2])
+                    previous = p[0]
+
+        particles_weight_evolution = []
+        particles_position_error_evolution = []
+        particles_map_error_evolution = []
+
+        generation = 0
+        previous_generation = 0
+        for t, ps in enumerate(self.particles_sets):
+            new_weights = self.particles_num*[None]
+            new_position_errors = self.particles_num*[None]
+            new_map_errors = self.particles_num*[None]
+
+            previous = -1
+            for p in ps:
+                if p[0] != previous:
+                    new_weights[p[0]] = p[3]
+                    new_position_errors[p[0]] = p[1]
+                    new_map_errors[p[0]] = p[2]
+
+                    previous = p[0]
+
+            particles_weight_evolution.append(new_weights)
+            particles_position_error_evolution.append(new_position_errors)
+            particles_map_error_evolution.append(new_map_errors)
+
+            generation += 1
+
+            if t > 0 and (self.steps[t-1] == "RESAMPLING" or t == len(self.particles_sets)-1):
+                if self.steps[t-1] == "RESAMPLING":
+                    generation -= 2
+                else:
+                    generation -= 1
+
+                for f, highest_value in enumerate([highest_weight, highest_position_error, highest_map_error]):
+                    plt.figure(f+1)
+                    if self.steps[t-1] == "RESAMPLING":
+                        for n in range(previous_generation, generation+1):
+                            plt.plot([n for i in range(100)], np.linspace(
+                                0, highest_value, 100), 'k--', lw=2)
+                            plt.plot([generation-0.5 for i in range(100)],
+                                     np.linspace(0, highest_value, 100), 'k', lw=3)
+                    else:
+                        for n in range(previous_generation, generation+1):
+                            plt.plot([n for i in range(100)], np.linspace(
+                                0, highest_value, 100), 'k--', lw=2)
+
+                for p in range(self.particles_num):
+                    X = [i for i in range(previous_generation, generation)]
+                    if self.steps[t-1] == "RESAMPLING":
+                        X += [generation-0.5, generation]
+                    else:
+                        X += [generation]
+
+                    plt.figure(1)
+                    highest_value = highest_weight
+                    Y = [particles_weight_evolution[i][p]
+                         for i in range(len(particles_weight_evolution))]
+                    plt.plot(X, Y, marker='.', markersize=10)
+
+                    plt.figure(2)
+                    highest_value = highest_position_error
+                    Y = [particles_position_error_evolution[i][p]
+                         for i in range(len(particles_position_error_evolution))]
+                    plt.plot(X, Y, marker='.', markersize=10)
+
+                    plt.figure(3)
+                    highest_value = highest_map_error
+                    Y = [particles_map_error_evolution[i][p]
+                         for i in range(len(particles_map_error_evolution))]
+                    plt.plot(X, Y, marker='.', markersize=10)
+
+                new_weights = []
+                new_position_errors = []
+                new_map_errors = []
+
+                previous = -1
+                current_weight = 0
+                current_position_error = 0
+                current_map_error = 0
+                for p in ps:
+                    if p[0] != previous:
+                        current_weight = p[3]
+                        current_position_error = p[1]
+                        current_map_error = p[2]
+                        previous = p[0]
+                    new_weights.append(current_weight)
+                    new_position_errors.append(current_position_error)
+                    new_map_errors.append(current_map_error)
+
+                particles_weight_evolution = [new_weights]
+                particles_position_error_evolution = [new_position_errors]
+                particles_map_error_evolution = [new_map_errors]
+
+                previous_generation = generation
+                generation += 1
+
+        X = [0.0]
+        for i in range(len(self.steps)):
+            if self.steps[i] == "RESAMPLING" or (i < len(self.steps)-1 and self.steps[i+1] == "RESAMPLING"):
+                X.append(X[-1] + 0.5)
+            else:
+                X.append(X[-1] + 1)
+
+        Y1 = []
+        Y2 = []
+        Y3 = []
+        for t in range(len(self.final_most_probable_particle_history)):
+            n = self.final_most_probable_particle_history[t]
+            for p in self.particles_sets[t]:
+                if p[0] == n:
+                    break
+            Y1.append(p[3])
+            Y2.append(p[1])
+            Y3.append(p[2])
+
+        plt.figure(1)
+        plt.plot(X, Y1, 'r', lw=3, marker='.', markersize=15)
+        plt.title("Weight")
+        plt.figure(2)
+        plt.plot(X, Y2, 'r', lw=3, marker='.', markersize=15)
+        plt.title("Position error (m)")
+        plt.figure(3)
+        plt.plot(X, Y3, 'r', lw=3, marker='.', markersize=15)
+        plt.title("Map error (m)")
+
+        plt.show()
+
+        return
+
+
 # Motion model (velocity-based/dead reckoning or odometry-based)
-
-
 def motion(motion_model, pose, command, noise, dt=1):
     x, y, theta = pose
 
@@ -119,6 +458,7 @@ def observation(pose, min_visibility, max_visibility, noise):
     return observation
 
 
+# Data association: observation -> map feature
 def correspondence(features, pose, observation, min_visibility, max_visibility, noise, threshold):
     if len(features) == 0:
         return [], []
@@ -164,57 +504,6 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
             corresponding_features[i] = None
 
     return corresponding_features, corresponding_likelihoods
-
-
-# /!\ Deprecated !
-def delete_features(features, pose, observations, noise, min_visibility, max_visibility, threshold):
-    new_features = []
-    for f in features:
-        mu = f[0].transpose()[0]
-        xf, yf = mu
-        d = sqrt((xf - pose[0])**2 + (yf - pose[1])**2)
-
-        if d > min_visibility and d < max_visibility:
-            highest_likelihood = 0
-            for o in observations:
-                phi = atan2(yf - pose[1], xf - pose[0]) - pose[2]
-
-                d_noise, phi_noise = noise
-                d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
-                phi_sigma = phi_noise[0]*d + \
-                    phi_noise[1]*abs(phi) + phi_noise[2]
-                sigma = [[d_sigma, 0],
-                         [0, phi_sigma]]
-
-                if abs(o[1] - phi) > abs(o[1] - phi + 2*pi):
-                    phi -= 2*pi
-                elif abs(o[1] - phi) > abs(o[1] - phi - 2*pi):
-                    phi += 2*pi
-
-                d_interval, phi_interval = d_sigma/10, phi_sigma/10
-
-                if d_sigma == 0 or phi_sigma == 0:
-                    if o[0] == d and o[1] == phi:
-                        feature_likelihood = 1
-                    else:
-                        feature_likelihood = 0
-
-                else:
-                    feature_likelihood = mvnun(np.array([o[0]-d_interval/2.0, o[1]-phi_interval/2.0]), np.array(
-                        [o[0]+d_interval/2.0, o[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
-
-                assert feature_likelihood <= 1, feature_likelihood
-
-                if feature_likelihood > highest_likelihood:
-                    highest_likelihood = feature_likelihood
-
-            if highest_likelihood > threshold:
-                new_features.append(f)
-
-        else:
-            new_features.append(f)
-
-    return new_features
 
 
 # EKF
@@ -318,6 +607,29 @@ def display():
     plt.plot()
 
 
+# Error computation
+
+def position_error(real, particle):
+    res = sqrt((real[0] - particle[0])**2 + (real[1] - particle[1])**2)
+
+    return res
+
+
+def map_error(features, particle):
+    res = 0
+    for f1 in particle[4]:
+        best = 1000
+        for f2 in features:
+            tmp = sqrt((f1[0].transpose()[0][0] - f2[0])**2 +
+                       (f1[0].transpose()[0][1] - f2[1])**2)
+            if tmp < best:
+                best = tmp
+        res += best
+    res /= len(particle[4])
+
+    return res
+
+
 # TESTS
 
 if __name__ == '__main__':
@@ -326,27 +638,27 @@ if __name__ == '__main__':
 
     # Parameters
 
-    max_time = 8
+    max_time = 20
 
     # Command
-    v = 5
-    omega = 0.1
+    v = 2
+    omega = 0.01
     u = [v, omega]
 
     # Motion noise
-    v_noise = [0.01, 0]
-    omega_noise = [0, 0.01]
-    yaw_noise = [0, 0.01]
+    v_noise = [0.01, 0, 0]
+    omega_noise = [0, 0.01, 0]
+    yaw_noise = [0, 0.01, 0]
     motion_noise = [v_noise, omega_noise, yaw_noise]
 
     # Observation noise
-    d_noise = [0.05, 0]
-    phi_noise = [0.0005, 0]
+    d_noise = [0.05, 0, 0]
+    phi_noise = [0.0005, 0, 0]
     observation_noise = [d_noise, phi_noise]
 
     # Map
-    map_width = 100
-    map_height = 100
+    map_width = 50
+    map_height = 50
 
     # Features
     features_num = 10
@@ -367,11 +679,12 @@ if __name__ == '__main__':
     robot_radius = 10
     min_visibility = 0
     max_visibility = 30
-    print("\nInitial pose: " + str(robot_pose))
+    # print("\nInitial pose: " + str(robot_pose))
 
     # Particles
 
-    particles_num = 100
+    particles_num = 10
+    history = History(particles_num)
     particles = []
 
     for i in range(particles_num):
@@ -386,10 +699,14 @@ if __name__ == '__main__':
                         new_particle_theta, new_particle_w, new_particle_f]
         particles.append(new_particle)
 
+    # Resampling type
+    resampling_type = "random"
+    # resampling_type = "deterministic"
+
     # Init display
-    subplot = 200 + max_time/2*10 + 1
-    ax = plt.subplot(subplot)
-    display()
+    # subplot = 200 + max_time/2*10 + 1
+    # ax = plt.subplot(subplot)
+    # display()
 
     # Simulation
 
@@ -397,14 +714,14 @@ if __name__ == '__main__':
         start = time.time()
 
         # Real world simulation
-        print("\nStep: " + str(t+1))
-        print("Command: " + str(u))
+        # print("\nStep: " + str(t+1))
+        # print("Command: " + str(u))
         robot_pose[0], robot_pose[1], robot_pose[2] = motion(
             "velocity", robot_pose, u, motion_noise)
-        print("New pose: " + str(robot_pose))
+        # print("New pose: " + str(robot_pose))
         new_observation = observation(
             robot_pose, min_visibility, max_visibility, observation_noise)
-        print("Observation: " + str(new_observation))
+        # print("Observation: " + str(new_observation))
 
         # Particles update
         for j, p in enumerate(particles):
@@ -420,11 +737,11 @@ if __name__ == '__main__':
             # print("Predicted pose: \n" + str(pose))
 
             features_correspondences = len(new_observation)*[None]
+            features_preferences = []
+            features_likelihoods = []
 
             if len(p[4]) > 0:
                 correspondences_orders = len(new_observation)*[0]
-                features_preferences = []
-                features_likelihoods = []
 
                 for i in range(len(new_observation)):
                     corresponding_features, corresponding_likelihoods = correspondence(
@@ -517,8 +834,22 @@ if __name__ == '__main__':
                     # Bias to ensure non-zero weight
                     p[3] = max(p[3]*weight_update, 10**(-323))
 
-            p[4] = delete_features(p[4], p[:3], new_observation,
-                                   observation_noise, min_visibility, max_visibility, 10**(-5))[:]
+            # Delete unused features
+            if len(features_preferences) > 0:
+                features_to_delete = []
+                for i in range(len(features_preferences[0])):
+                    delete = True
+                    for e in features_preferences:
+                        if e[i] != 0:
+                            delete = False
+                    if delete:
+                        features_to_delete.append(i)
+
+                old_features = p[4][:]
+                p[4] = []
+                for i in range(len(old_features)):
+                    if i not in features_to_delete:
+                        p[4].append(old_features[i][:])
 
         # Normalization
         weights_sum = 0
@@ -528,6 +859,12 @@ if __name__ == '__main__':
         for p in particles:
             p[3] /= weights_sum
 
+        new_particles_set = []
+        for j, p in enumerate(particles):
+            new_particles_set.append(
+                [j, position_error(robot_pose, p), map_error(features, p), p[3]])
+        history.add_generation(new_particles_set, "UPDATE")
+
         # Find most probable pose and features
         max_weight = 0
         for i, p in enumerate(particles):
@@ -535,11 +872,11 @@ if __name__ == '__main__':
                 max_weight = p[3]
                 most_probable_particle_index = i
         # print("Most probable particle: " + str(most_probable_particle_index))
-        print("Most probable pose: " +
-              str(particles[most_probable_particle_index][:3]))
-        print("Most probable features: ")
-        for i, f in enumerate(particles[most_probable_particle_index][4]):
-            print(str(i) + ": " + str(f[0].transpose()[0]))
+        # print("Most probable pose: " +
+            #   str(particles[most_probable_particle_index][:3]))
+        # print("Most probable features: ")
+        # for i, f in enumerate(particles[most_probable_particle_index][4]):
+            # print(str(i) + ": " + str(f[0].transpose()[0]))
 
         # Resampling criteria (effective particles number)
         effective_particles_num = 0
@@ -550,10 +887,7 @@ if __name__ == '__main__':
         # Resampling
         if effective_particles_num < particles_num/2:
             # if False:
-            print("Resampling: Yes")
-            cumulated_weights = [0]
-            for p in particles:
-                cumulated_weights.append(cumulated_weights[-1] + p[3])
+            # print("Resampling: Yes")
 
             old_particles = []
             for p in particles:
@@ -563,33 +897,74 @@ if __name__ == '__main__':
                                 [0, 0.01, 0],
                                 [0, 0, 0.0001]]
             survivors = []
-            for i in range(particles_num):
-                r = random()
-                for j in range(len(cumulated_weights)-1):
-                    if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
-                        new_particle = list(multivariate_normal.rvs(
-                            old_particles[j][:3], resampling_sigma))
-                        new_particle.append(1.0/particles_num)
-                        new_particle.append(old_particles[j][4][:])
-                        if j not in survivors:
-                            survivors.append(j)
-                        particles.append(new_particle)
+            new_particles_set = []
+
+            # Random resampling
+            if resampling_type == "random":
+                cumulated_weights = [0]
+                for p in old_particles:
+                    cumulated_weights.append(cumulated_weights[-1] + p[3])
+
+                for i in range(particles_num):
+                    r = random()
+                    for j in range(len(cumulated_weights)-1):
+                        if r >= cumulated_weights[j] and r < cumulated_weights[j+1]:
+                            new_particle = list(multivariate_normal.rvs(
+                                old_particles[j][:3], resampling_sigma))
+                            new_particle.append(1.0/particles_num)
+                            new_particle.append(old_particles[j][4][:])
+                            if j not in survivors:
+                                survivors.append(j)
+                            particles.append(new_particle)
+                            new_particles_set.append(
+                                [j, position_error(robot_pose, new_particle), map_error(features, new_particle), 1.0/particles_num])
+
+            # Deterministic resampling
+            elif resampling_type == "deterministic":
+                order = list(np.argsort([p[3] for p in old_particles]))
+                order.reverse()
+
+                p_index = 0
+                current_weight = old_particles[order[p_index]][3]
+                tmp_w = 0.0
+                for i in range(particles_num):
+                    if tmp_w > current_weight:
+                        p_index += 1
+                        current_weight += old_particles[order[p_index]][3]
+
+                    new_particle = list(multivariate_normal.rvs(
+                        old_particles[order[p_index]][:3], resampling_sigma))
+                    new_particle.append(1.0/particles_num)
+                    new_particle.append(old_particles[order[p_index]][4][:])
+
+                    if p_index not in survivors:
+                        survivors.append(order[p_index])
+                    particles.append(new_particle)
+                    new_particles_set.append([order[p_index], position_error(
+                        robot_pose, new_particle), map_error(features, new_particle), 1.0/particles_num])
+
+                    tmp_w += 1.0/particles_num
+
             survivors.sort()
             # print("Survivors: " + str(survivors))
-            print("Survivors: " + str(len(survivors)))
+            # print("Survivors: " + str(len(survivors)))
+            history.add_generation(new_particles_set, "RESAMPLING")
 
-        else:
-            print("Resampling: No")
+        # else:
+            # print("Resampling: No")
 
         stop = time.time()
 
-        subplot += 1
-        ax = plt.subplot(subplot)
-        display()
+        # subplot += 1
+        # ax = plt.subplot(subplot)
+        # display()
 
-        print("Time: " + str(stop-start))
+        # print("Time: " + str(stop-start))
 
         # plt.show()
 
-    print("\n")
-    plt.show()
+    # print("\nHistory of particles set:")
+    history.add_most_probable_particle(most_probable_particle_index)
+
+    # print(history)
+    history.display()
