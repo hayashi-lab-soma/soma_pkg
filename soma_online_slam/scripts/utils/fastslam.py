@@ -350,12 +350,15 @@ class History:
         plt.figure(1)
         plt.plot(X, Y1, 'r', lw=3, marker='.', markersize=15)
         plt.title("Weight")
+        plt.tick_params(labelright=True)
         plt.figure(2)
         plt.plot(X, Y2, 'r', lw=3, marker='.', markersize=15)
         plt.title("Position error (m)")
+        plt.tick_params(labelright=True)
         plt.figure(3)
         plt.plot(X, Y3, 'r', lw=3, marker='.', markersize=15)
         plt.title("Map error (m)")
+        plt.tick_params(labelright=True)
 
         plt.show()
 
@@ -633,12 +636,13 @@ def map_error(features, particle):
 # TESTS
 
 if __name__ == '__main__':
-    # Init random seed
+    # Init random seeds
     seed(0)
+    np.random.seed(0)
 
     # Parameters
 
-    max_time = 20
+    max_time = 10
 
     # Command
     v = 2
@@ -682,7 +686,6 @@ if __name__ == '__main__':
     # print("\nInitial pose: " + str(robot_pose))
 
     # Particles
-
     particles_num = 10
     history = History(particles_num)
     particles = []
