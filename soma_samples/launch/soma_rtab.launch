@@ -1,0 +1,25 @@
+<launch>
+    <!-- Start rtabmap_ros node -->
+    <include file="$(find rtabmap_ros)/launch/rtabmap.launch" ns="rtabmap">
+        <arg name="rgb_topic" value="/rgb/image_raw" />
+        <arg name="depth_topic" value="/depth_to_rgb/image_raw" />
+        <arg name="camera_info_topic" value="/rgb/camera_info" />
+        <arg name="approx_sync" value="true" />
+        <arg name="frame_id" value="base_link" />
+        <!-- Chnage to base link? -->
+        <arg name="args" value="--delete_db_on_start --Odom/ResetCountdown 2" />
+        <arg name="rtabmapviz" value="false" />
+        <arg name="visual_odometry" value="false"/>
+        <!-- Launch rtabmap visual odometry node -->
+        <arg name="icp_odometry" value="false"/>
+        <!-- Launch rtabmap icp odometry node -->
+        <!--arg name="imu_topic" value="/imu/data"/> -->        <!-- only used with VIO approaches -->
+        <arg name="odom_frame_id" value="lidar_odom"/>
+        <arg name="subscribe_scan_cloud" value="true"/>
+        <arg name="scan_cloud_topic" value="/velodyne_points"/>
+        <!-- dont need to subscribe because already get odom from TF that is produced using HDL slam -->
+        <!-- if set rtabmap wont sub to get odom but get from tf from this odom frame id -->
+    </include>
+    <!-- check if rtabmap publish odom -->
+
+</launch>
