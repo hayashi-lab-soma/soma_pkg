@@ -1,6 +1,6 @@
 from random import uniform, random, seed
 import matplotlib.pyplot as plt
-from math import pi, cos, sin, sqrt, atan2, exp, tan
+from math import pi, cos, sin, sqrt, atan2, exp, tan, ceil
 import numpy as np
 from numpy.compat.py3k import _PurePath__fspath__
 from scipy.stats import multivariate_normal
@@ -240,6 +240,8 @@ class History:
         generation = 0
         previous_generation = 0
         for t, ps in enumerate(self.particles_sets):
+            # print(generation)
+
             new_weights = self.particles_num*[None]
             new_position_errors = self.particles_num*[None]
             new_map_errors = self.particles_num*[None]
@@ -414,6 +416,7 @@ def motion(motion_model, pose, command, noise, dt=1):
         if omega == 0:
             new_x = x + v*cos(theta)*dt
             new_y = y + v*sin(theta)*dt
+            new_theta = theta
         else:
             new_x = x - v/omega*sin(theta)*dt + v/omega*sin(theta + omega)*dt
             new_y = y + v/omega*cos(theta)*dt - v/omega*cos(theta + omega)*dt
@@ -552,13 +555,13 @@ def Q(z):
 
 
 # Display
-def display():
+def display(step):
     plt.plot([0, 0, map_width, map_width], [
              0, map_height, 0, map_height], "y*")
 
     for i, f in enumerate(features):
         plt.plot(f[0], f[1], "bo", markersize=feature_radius)
-        plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
+        # plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
 
     plt.plot(robot_pose[0], robot_pose[1], "ro", markersize=robot_radius)
     angle = np.linspace(0, 2*pi, 1000)
@@ -584,9 +587,9 @@ def display():
         for i, [mu, sigma] in enumerate(most_probable_particle[4]):
             f = mu.transpose()[0]
             plt.plot(f[0], f[1], "go", markersize=feature_radius)
-            plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
+            # plt.annotate(xy=f, s=i, xytext=[f[0]-2, f[1]+2])
 
-            delta = 0.5
+            delta = 1
             window = 50
             x = np.arange(f[0]-window/2, f[0]+window/2, delta)
             y = np.arange(f[1]-window/2, f[1]+window/2, delta)
@@ -607,6 +610,7 @@ def display():
 
             CS2 = ax.contour(X, Y, Z, levels=[0.002], colors=['g'])
 
+    plt.title("Step " + str(step))
     plt.plot()
 
 
@@ -619,6 +623,9 @@ def position_error(real, particle):
 
 
 def map_error(features, particle):
+    if len(particle[4]) == 0:
+        return 0
+
     res = 0
     for f1 in particle[4]:
         best = 1000
@@ -637,52 +644,67 @@ def map_error(features, particle):
 
 if __name__ == '__main__':
     # Init random seeds
-    seed(0)
-    np.random.seed(0)
+    # seed(0)
+    # np.random.seed(0)
 
     # Parameters
 
-    max_time = 10
+    max_time = 50
 
     # Command
-    v = 2
-    omega = 0.01
+    v = 0.05
+    omega = 0
     u = [v, omega]
 
     # Motion noise
-    v_noise = [0.01, 0, 0]
-    omega_noise = [0, 0.01, 0]
-    yaw_noise = [0, 0.01, 0]
+    v_noise = [0.1, 0.01, 0]
+    # omega_noise = [0.01, 0.1, 0]
+    omega_noise = [0, 0, 0]
+    # yaw_noise = [0.01, 0.1, 0]
+    yaw_noise = [0, 0, 0]
     motion_noise = [v_noise, omega_noise, yaw_noise]
 
     # Observation noise
-    d_noise = [0.05, 0, 0]
-    phi_noise = [0.0005, 0, 0]
+    d_noise = [0, 0, 0.5]
+    phi_noise = [0, 0, 0.01]
     observation_noise = [d_noise, phi_noise]
 
     # Map
-    map_width = 50
-    map_height = 50
+    map_width = 30
+    map_height = 30
 
     # Features
-    features_num = 10
+
+    features_num = 14
     # Only for display (features are collapsed to their center of mass)
     feature_radius = 3
-    features = []
-    for i in range(features_num):
-        new_feature_x = uniform(0, map_width)
-        new_feature_y = uniform(0, map_height)
-        new_feature = [new_feature_x, new_feature_y]
-        features.append(new_feature)
+    # positions_type = "random"
+    positions_type = "forest"
+
+    if positions_type == "random":
+        # Random positions
+        features = []
+        for i in range(features_num):
+            new_feature_x = uniform(0, map_width)
+            new_feature_y = uniform(0, map_height)
+            new_feature = [new_feature_x, new_feature_y]
+            features.append(new_feature)
+
+    elif positions_type == "forest":
+        # Forest positions
+        features = [[0, 25], [5, 20], [10, 25], [15, 20], [20, 25], [25, 20], [30, 25],
+                    [0, 5], [5, 10], [10, 5], [15, 10], [20, 5], [25, 10], [30, 5]]
+
+    correspondence_threshold = 10**(-20)
 
     # Initial robot pose
-    initial_x = map_width/2
+    initial_x = 0
     initial_y = map_height/2
     initial_theta = 0
     robot_pose = [initial_x, initial_y, initial_theta]
     robot_radius = 10
-    min_visibility = 0
-    max_visibility = 30
+    min_visibility = 1
+    max_visibility = 10
     # print("\nInitial pose: " + str(robot_pose))
 
     # Particles
@@ -707,9 +729,16 @@ if __name__ == '__main__':
     # resampling_type = "deterministic"
 
     # Init display
-    # subplot = 200 + max_time/2*10 + 1
-    # ax = plt.subplot(subplot)
-    # display()
+    # display_frequency = 20
+    # lines_num = ceil(sqrt(max_time*0.5 / display_frequency))
+    # columns_num = ceil((max_time / display_frequency + 1) / lines_num)
+    # subplot_num = 1
+    # ax = plt.subplot(lines_num, columns_num, subplot_num)
+    # ax.set_xlim(0, map_width)
+    # ax.set_ylim(0, map_height)
+    # ax.xaxis.set_visible(False)
+    # ax.yaxis.set_visible(False)
+    # display(0)
 
     # Simulation
 
@@ -717,7 +746,7 @@ if __name__ == '__main__':
         start = time.time()
 
         # Real world simulation
-        # print("\nStep: " + str(t+1))
+        print("\nStep: " + str(t+1))
         # print("Command: " + str(u))
         robot_pose[0], robot_pose[1], robot_pose[2] = motion(
             "velocity", robot_pose, u, motion_noise)
@@ -748,7 +777,7 @@ if __name__ == '__main__':
 
                 for i in range(len(new_observation)):
                     corresponding_features, corresponding_likelihoods = correspondence(
-                        p[4], pose, new_observation[i], min_visibility, max_visibility, observation_noise, 10**(-5))
+                        p[4], pose, new_observation[i], min_visibility, max_visibility, observation_noise, correspondence_threshold)
 
                     features_preferences.append(corresponding_features)
                     features_likelihoods.append(corresponding_likelihoods)
@@ -922,6 +951,8 @@ if __name__ == '__main__':
                             new_particles_set.append(
                                 [j, position_error(robot_pose, new_particle), map_error(features, new_particle), 1.0/particles_num])
 
+                            break
+
             # Deterministic resampling
             elif resampling_type == "deterministic":
                 order = list(np.argsort([p[3] for p in old_particles]))
@@ -958,13 +989,27 @@ if __name__ == '__main__':
 
         stop = time.time()
 
-        # subplot += 1
-        # ax = plt.subplot(subplot)
-        # display()
+        # if (t+1) % display_frequency == 0 or t == max_time-2:
+        # subplot_num += 1
+        # ax = plt.subplot(lines_num, columns_num, subplot_num)
+        # ax.set_xlim(0, map_width)
+        # ax.set_ylim(0, map_height)
+        # ax.xaxis.set_visible(False)
+        # ax.yaxis.set_visible(False)
+        # display(t+1)
 
         # print("Time: " + str(stop-start))
 
-        # plt.show()
+    # h_outer_space = 0.02
+    # v_outer_space = 0.04
+    # inner_space = 0.2
+    # plt.subplots_adjust(left=h_outer_space,
+        # bottom=v_outer_space,
+        # right=1-h_outer_space,
+        # top=1-v_outer_space,
+        # wspace=inner_space,
+        # hspace=inner_space)
+    # plt.show()
 
     # print("\nHistory of particles set:")
     history.add_most_probable_particle(most_probable_particle_index)
