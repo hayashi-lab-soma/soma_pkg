@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="is_record_camera" default="false"/>
+    <arg name="is_record_velodyne" default="false"/>
+    <arg name="is_record_both" default="true"/>
+    <arg name="bags_directory" value="/home/soma1/bc-2022-5-2/bag"/>
+
+    <!-- TF and velodyne -->
+    <include file="$(find soma_samples)/launch/spawn_soma.launch"/>
+
+    <!-- Record bag -->
+    <node name="bag_record" pkg="rosbag" type="record" args="record -o $(arg bags_directory)/images/images /rosout /tf /lidar_odom /rgb/camera_info /rgb/image_raw /depth_to_rgb/image_raw /depth/camera_info /fix" if="$(eval is_record_camera)"/>
+
+    <node name="bag_record" pkg="rosbag" type="record" args="record -o $(arg bags_directory)/lidar/lidar /rosout /tf /lidar_odom /velodyne_points /fix" if="$(eval is_record_velodyne)"/>
+
+    <node name="bag_record" pkg="rosbag" type="record" args="record -o $(arg bags_directory)/both/both /rosout /tf /tf_static /joint_states /lidar_odom /rgb/camera_info /rgb/image_raw /depth_to_rgb/image_raw /velodyne_points /depth/camera_info /fix" if="$(eval is_record_both)"/>
+</launch>

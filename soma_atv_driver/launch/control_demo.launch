@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="simulation" default="false"/>
+  <arg name="namespace" default="/"/>
+  <arg name="driving_gui" default="true"/>
+  <arg name="motor_noise_list" default="[[0.0,0.0,0.0],[0.0,0.0,0.0]]"/>
+
+  <!-- Load robot description -->
+  <include file="$(find soma_description)/launch/description.launch">
+  </include>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" value="50.0" />
+  </node>
+</launch>
