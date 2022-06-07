@@ -21,9 +21,9 @@
 		<param name="steering_pos_min" value="-28.0" />
 		<param name="steering_pos_max" value="28.0" />
 		<param name="rear_brake_pos_min" value="0.0" />
-		<param name="rear_brake_pos_max" value="3.0" />
-		<param name="front_brake_pos_min" value="0.0" />
-		<param name="front_brake_pos_max" value="12.0" />
+		<param name="rear_brake_pos_max" value="9.0" />
+		<param name="front_brake_pos_min" value="-10.0" />
+		<param name="front_brake_pos_max" value="9.0" />
 		<param name="throttle_pos_min" value="0.0" />
 		<param name="throttle_pos_max" value="13.0" />
 		<!-- starting state parameters -->
