@@ -12,32 +12,32 @@
 
     <!-- Run the map server which publish the global (static) map -->
     <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find soma_base)/maps/mirais_map.yaml"> -->
-        <param name="frame_id" value="map"/>
-    </node>
+    <param name="frame_id" value="map"/>
+</node>
 
-    <!--- Run AMCL for localization (necessary for tf from map to odom) -->
-    <!-- <include file="$(find soma_base)/launch/amcl.launch" /> -->
+<!--- Run AMCL for localization (necessary for tf from map to odom) -->
+<!-- <include file="$(find soma_base)/launch/amcl.launch" /> -->
 
-    <!-- Core of the navigation stack: path planning -->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-        <!-- To publish commands on the right topic -->
-        <remap from="/cmd_vel" to="/ackermann_steering_controller/cmd_vel" />
+<!-- Core of the navigation stack: path planning -->
+<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <!-- To publish commands on the right topic -->
+    <remap from="/cmd_vel" to="/ackermann_steering_controller/cmd_vel" />
 
-        <!-- Parameters common to global and local costmaps -->
-        <rosparam file="$(find soma_base)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
-        <rosparam file="$(find soma_base)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <!-- Parameters for global costmap -->
-        <rosparam file="$(find soma_base)/config/global_costmap_params.yaml" command="load" />
-        <!-- Parameters for local costmap -->
-        <rosparam file="$(find soma_base)/config/local_costmap_params.yaml" command="load" />
+    <!-- Parameters common to global and local costmaps -->
+    <rosparam file="$(find soma_base)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find soma_base)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <!-- Parameters for global costmap -->
+    <rosparam file="$(find soma_base)/config/global_costmap_params.yaml" command="load" />
+    <!-- Parameters for local costmap -->
+    <rosparam file="$(find soma_base)/config/local_costmap_params.yaml" command="load" />
 
-        <!-- Parameters for planner -->
-        <rosparam file="$(find soma_base)/config/base_local_planner_params.yaml" command="load" />
+    <!-- Parameters for planner -->
+    <rosparam file="$(find soma_base)/config/base_local_planner_params.yaml" command="load" />
 
-        <!-- Other parameters (controller and planner frequencies) -->
-        <rosparam file="$(find soma_base)/config/move_base_params.yaml" command="load" />
-    </node>
+    <!-- Other parameters (controller and planner frequencies) -->
+    <rosparam file="$(find soma_base)/config/move_base_params.yaml" command="load" />
+</node>
 
-    <!-- Vizualization in Rviz (with adequate configuration) -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+<!-- Vizualization in Rviz (with adequate configuration) -->
+<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 </launch>
