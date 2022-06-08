@@ -35,14 +35,22 @@ class History:
         return
 
     def add_generation(self, new_particles_set, step):
-        new_particles_set.sort()
         self.particles_sets.append(new_particles_set[:])
         self.steps.append(step)
 
         return
 
-    def add_most_probable_particle(self, index):
-        self.final_most_probable_particle_history.append(index)
+    def stop(self):
+        for ps in self.particles_sets:
+            ps.sort()
+
+        max_weight = 0
+        for p in self.particles_sets[-1]:
+            if p[3] > max_weight:
+                max_weight = p[3]
+                final_most_probable_particle_index = p[0]
+        self.final_most_probable_particle_history.append(
+            final_most_probable_particle_index)
 
         for t in range(len(self.steps)-1, -1, -1):
             previous = self.final_most_probable_particle_history[-1]
@@ -52,6 +60,8 @@ class History:
         self.final_most_probable_particle_history.reverse()
 
         return
+
+    # Print
 
     def separator(self, lengths):
         tmp = "                   |"
@@ -66,9 +76,11 @@ class History:
     def particles(self, lengths, generation, previous_generation, ps):
         if generation > previous_generation:
             tmp = " GENERATION " + str(generation)
+            if generation < 100:
+                tmp += " "
             if generation < 10:
                 tmp += " "
-            tmp += "     |"
+            tmp += "    |"
         else:
             tmp = "                   |"
 
@@ -123,11 +135,11 @@ class History:
                         old_index += pl
                 old_v = self.particles_sets[t-1][old_index][v_index]
 
-                if round(v, 1) < round(old_v, 1):
+                if v < old_v:
                     tmp += "-"
-                elif round(v, 1) == round(old_v, 1):
+                elif v == old_v:
                     tmp += "="
-                if round(v, 1) > round(old_v, 1):
+                if v > old_v:
                     tmp += "+"
 
             if type == "weight":
@@ -218,6 +230,8 @@ class History:
                 generation += 1
 
         return tmp
+
+    # Display
 
     def display(self):
         highest_weight = 0
@@ -465,13 +479,14 @@ def observation(pose, min_visibility, max_visibility, noise):
 
 
 # Data association: observation -> map feature
-def correspondence(features, pose, observation, min_visibility, max_visibility, noise, threshold):
+def correspondence(features, pose, observation, min_visibility, max_visibility, noise, correspondence_threshold, delete_threshold):
     if len(features) == 0:
         return [], []
 
-    corresponding_features = len(features)*[0]
-    x, y, theta = pose.transpose()[0]
+    likelihoods = len(features)*[-1]
+    visible_features = []
 
+    x, y, theta = pose.transpose()[0]
     for i, f in enumerate(features):
         mu = f[0].transpose()[0]
         xf, yf = mu
@@ -479,6 +494,8 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
         phi = atan2(yf - y, xf - x) - theta
 
         if d > min_visibility and d < max_visibility:
+            visible_features.append(i)
+
             d_noise, phi_noise = noise
             d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
             phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi) + phi_noise[2]
@@ -496,20 +513,24 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
 
             assert feature_likelihood <= 1, "Probability greater than 1 !"
 
-            if feature_likelihood > threshold:
-                corresponding_features[i] = feature_likelihood
+            if feature_likelihood > correspondence_threshold:
+                likelihoods[i] = feature_likelihood
 
-    corresponding_likelihoods = list(
-        np.sort(np.array(corresponding_features)))
-    corresponding_features = list(np.argsort(
-        np.array(corresponding_features)))
-    corresponding_likelihoods.reverse()
-    corresponding_features.reverse()
-    for i, e in enumerate(corresponding_likelihoods):
-        if e == 0:
-            corresponding_features[i] = None
+    _corresponding_likelihoods = list(np.sort(np.array(likelihoods)))
+    _corresponding_features = list(np.argsort(np.array(likelihoods)))
+    _corresponding_likelihoods.reverse()
+    _corresponding_features.reverse()
+    corresponding_likelihoods = []
+    corresponding_features = []
+    i = 0
+    l = _corresponding_likelihoods[0]
+    while l != -1:
+        corresponding_likelihoods.append(l)
+        corresponding_features.append(_corresponding_features[i])
+        i += 1
+        l = _corresponding_likelihoods[i]
 
-    return corresponding_features, corresponding_likelihoods
+    return visible_features, corresponding_features, corresponding_likelihoods
 
 
 # EKF
@@ -649,7 +670,7 @@ if __name__ == '__main__':
 
     # Parameters
 
-    max_time = 50
+    max_time = 15
 
     # Command
     v = 0.05
@@ -708,7 +729,7 @@ if __name__ == '__main__':
     # print("\nInitial pose: " + str(robot_pose))
 
     # Particles
-    particles_num = 10
+    particles_num = 15
     history = History(particles_num)
     particles = []
 
@@ -729,16 +750,17 @@ if __name__ == '__main__':
     # resampling_type = "deterministic"
 
     # Init display
-    # display_frequency = 20
-    # lines_num = ceil(sqrt(max_time*0.5 / display_frequency))
-    # columns_num = ceil((max_time / display_frequency + 1) / lines_num)
-    # subplot_num = 1
-    # ax = plt.subplot(lines_num, columns_num, subplot_num)
-    # ax.set_xlim(0, map_width)
-    # ax.set_ylim(0, map_height)
-    # ax.xaxis.set_visible(False)
-    # ax.yaxis.set_visible(False)
-    # display(0)
+    plt.figure(5)
+    display_frequency = 2
+    lines_num = ceil(sqrt(max_time*0.5 / display_frequency))
+    columns_num = ceil((max_time / display_frequency + 1) / lines_num)
+    subplot_num = 1
+    ax = plt.subplot(lines_num, columns_num, subplot_num)
+    ax.set_xlim(0, map_width)
+    ax.set_ylim(0, map_height)
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+    display(0)
 
     # Simulation
 
@@ -746,7 +768,7 @@ if __name__ == '__main__':
         start = time.time()
 
         # Real world simulation
-        print("\nStep: " + str(t+1))
+        # print("\nStep: " + str(t+1))
         # print("Command: " + str(u))
         robot_pose[0], robot_pose[1], robot_pose[2] = motion(
             "velocity", robot_pose, u, motion_noise)
@@ -989,30 +1011,31 @@ if __name__ == '__main__':
 
         stop = time.time()
 
-        # if (t+1) % display_frequency == 0 or t == max_time-2:
-        # subplot_num += 1
-        # ax = plt.subplot(lines_num, columns_num, subplot_num)
-        # ax.set_xlim(0, map_width)
-        # ax.set_ylim(0, map_height)
-        # ax.xaxis.set_visible(False)
-        # ax.yaxis.set_visible(False)
-        # display(t+1)
+        if (t+1) % display_frequency == 0 or t == max_time-2:
+            subplot_num += 1
+            ax = plt.subplot(lines_num, columns_num, subplot_num)
+            ax.set_xlim(0, map_width)
+            ax.set_ylim(0, map_height)
+            ax.xaxis.set_visible(False)
+            ax.yaxis.set_visible(False)
+            display(t+1)
 
         # print("Time: " + str(stop-start))
 
-    # h_outer_space = 0.02
-    # v_outer_space = 0.04
-    # inner_space = 0.2
-    # plt.subplots_adjust(left=h_outer_space,
-        # bottom=v_outer_space,
-        # right=1-h_outer_space,
-        # top=1-v_outer_space,
-        # wspace=inner_space,
-        # hspace=inner_space)
-    # plt.show()
+    h_outer_space = 0.02
+    v_outer_space = 0.04
+    inner_space = 0.2
+    plt.subplots_adjust(left=h_outer_space,
+                        bottom=v_outer_space,
+                        right=1-h_outer_space,
+                        top=1-v_outer_space,
+                        wspace=inner_space,
+                        hspace=inner_space)
+
+    history.stop()
 
     # print("\nHistory of particles set:")
-    history.add_most_probable_particle(most_probable_particle_index)
+    print(history)
 
-    # print(history)
     history.display()
+    plt.show()
