@@ -39,11 +39,20 @@
 namespace soma_perception
 {
   typedef pcl::PointXYZRGB PointT;
-  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy;
+
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy1;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy2;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy3;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy4;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy5;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy6;
 
   class MultipleDiameterEstimationNodelet : public nodelet::Nodelet
   {
   public:
+    int clusters_num;
+    bool clusters_num_update;
+
     MultipleDiameterEstimationNodelet(){};
     virtual ~MultipleDiameterEstimationNodelet(){};
 
@@ -54,16 +63,32 @@ namespace soma_perception
       
       initialize_params();
 
-      pub = nh.advertise<sensor_msgs::PointCloud2>("cylinder", 1);
       pub_centers = nh.advertise<geometry_msgs::PoseArray>("trees_centers", 1);
       
+      clusters_num_sub = nh.subscribe("clusters_num_topic", 1, &MultipleDiameterEstimationNodelet::callback, this);
+      clusters_num = 0;
+      clusters_num_update = false;
+      
+      points_sub00 = nh.subscribe("input_point0", 1, &MultipleDiameterEstimationNodelet::callback0, this);
       points_sub0 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points0", 1);
       points_sub1 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points1", 1);
       points_sub2 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points2", 1);
       points_sub3 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points3", 1);
       points_sub4 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points4", 1);
-      sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(1), *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4);
-      sync->registerCallback(&MultipleDiameterEstimationNodelet::callback, this);
+      points_sub5 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points5", 1);
+      points_sub6 = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, "input_points6", 1);
+      sync1 = new message_filters::Synchronizer<MySyncPolicy1>(MySyncPolicy1(1), *points_sub0, *points_sub1);
+      sync2 = new message_filters::Synchronizer<MySyncPolicy2>(MySyncPolicy2(1), *points_sub0, *points_sub1, *points_sub2);
+      sync3 = new message_filters::Synchronizer<MySyncPolicy3>(MySyncPolicy3(1), *points_sub0, *points_sub1, *points_sub2, *points_sub3);
+      sync4 = new message_filters::Synchronizer<MySyncPolicy4>(MySyncPolicy4(1), *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4);
+      sync5 = new message_filters::Synchronizer<MySyncPolicy5>(MySyncPolicy5(1), *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4, *points_sub5);
+      sync6 = new message_filters::Synchronizer<MySyncPolicy6>(MySyncPolicy6(1), *points_sub0, *points_sub1, *points_sub2, *points_sub3, *points_sub4, *points_sub5, *points_sub6);
+      sync1->registerCallback(&MultipleDiameterEstimationNodelet::callback1, this);
+      sync2->registerCallback(&MultipleDiameterEstimationNodelet::callback2, this);
+      sync3->registerCallback(&MultipleDiameterEstimationNodelet::callback3, this);
+      sync4->registerCallback(&MultipleDiameterEstimationNodelet::callback4, this);
+      sync5->registerCallback(&MultipleDiameterEstimationNodelet::callback5, this);
+      sync6->registerCallback(&MultipleDiameterEstimationNodelet::callback6, this);
     }
 
     void initialize_params()
@@ -76,26 +101,152 @@ namespace soma_perception
       radius_max = pnh.param<double>("radius_max", 3);
     }
 
-    void callback(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4)
+    void callback(const jsk_recognition_msgs::Int32Stamped &_clusters_num)
+    {
+      clusters_num = _clusters_num.data;
+      clusters_num_update = true;
+      
+      NODELET_INFO("Number of trees: %d", clusters_num);
+      
+      return;
+    }
+
+    void callback0(const sensor_msgs::PointCloud2ConstPtr &_input0)
     { 
-      trees_centers.poses.clear();
+      if(clusters_num_update && clusters_num == 1)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        pub_centers.publish(trees_centers);
 
-      diameter_estimation(_input0);
-      diameter_estimation(_input1);
-      diameter_estimation(_input2);
-      diameter_estimation(_input3);
-      diameter_estimation(_input4);
+        NODELET_INFO("Trees positions updated (1)");
 
-      pub_centers.publish(trees_centers);
+        clusters_num_update = false;
+      }
+      return;
+    }
 
-      NODELET_INFO("Trees positions updated");
+    void callback1(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1)
+    { 
+      if(clusters_num_update && clusters_num == 2)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (2)");
+
+        clusters_num_update = false;
+
+      }
+      return;
+    }
+
+    void callback2(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2)
+    { 
+      if(clusters_num_update && clusters_num == 3)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        diameter_estimation(_input2);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (3)");
+
+        clusters_num_update = false;
+      }
+      return;
+    }
+
+    void callback3(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3)
+    { 
+      if(clusters_num_update && clusters_num == 4)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        diameter_estimation(_input2);
+        diameter_estimation(_input3);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (4)");
+
+        clusters_num_update = false;
+      }
+      return;
+    }
+
+    void callback4(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4)
+    { 
+      if(clusters_num_update && clusters_num == 5)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        diameter_estimation(_input2);
+        diameter_estimation(_input3);
+        diameter_estimation(_input4);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (5)");
+
+        clusters_num_update = false;
+      }
+      return;
+    }
+
+    void callback5(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4, const sensor_msgs::PointCloud2ConstPtr &_input5)
+    { 
+      if(clusters_num_update && clusters_num == 6)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        diameter_estimation(_input2);
+        diameter_estimation(_input3);
+        diameter_estimation(_input4);
+        diameter_estimation(_input5);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (6)");
+
+        clusters_num_update = false;
+      }
+      return;
+    }
+
+    void callback6(const sensor_msgs::PointCloud2ConstPtr &_input0, const sensor_msgs::PointCloud2ConstPtr &_input1, const sensor_msgs::PointCloud2ConstPtr &_input2, const sensor_msgs::PointCloud2ConstPtr &_input3, const sensor_msgs::PointCloud2ConstPtr &_input4, const sensor_msgs::PointCloud2ConstPtr &_input5, const sensor_msgs::PointCloud2ConstPtr &_input6)
+    { 
+      if(clusters_num_update && clusters_num >= 7)
+      {
+        trees_centers.poses.clear();
+        diameter_estimation(_input0);
+        diameter_estimation(_input1);
+        diameter_estimation(_input2);
+        diameter_estimation(_input3);
+        diameter_estimation(_input4);
+        diameter_estimation(_input5);
+        diameter_estimation(_input6);
+        pub_centers.publish(trees_centers);
+
+        NODELET_INFO("Trees positions updated (%d)", clusters_num);
+        if(clusters_num > 7)
+        {
+          NODELET_INFO("Too many trees (>7)");
+        }
+
+        clusters_num_update = false;
+      }
+      return;
     }
 
     void diameter_estimation(const sensor_msgs::PointCloud2ConstPtr &_input)
     {
-      // NODELET_INFO("point size: %d", _input->data.size());
       if(_input->data.size() == 0)
       {
+        NODELET_INFO("Empty pointcloud");
         return;
       }
 
@@ -123,7 +274,6 @@ namespace soma_perception
       sensor_msgs::PointCloud2 pc_output;
       pcl::toROSMsg(*pc_cylinder, pc_output);
       pc_output.header.frame_id = base_link_frame;
-      pub.publish(pc_output);
       // NODELET_INFO("pub points size: %5d", (int)pc_cylinder->size());
       // NODELET_INFO("radius: %5lf [m]", coeffs[6]);
       // NODELET_INFO("center_x: %5lf [m]", coeffs[0]);
@@ -216,7 +366,8 @@ namespace soma_perception
 
     tf::TransformListener tf_listener;
 
-    message_filters::Subscriber<jsk_recognition_msgs::Int32Stamped> *clusters_num_sub;
+    ros::Subscriber clusters_num_sub;
+    ros::Subscriber points_sub00;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub0;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub1;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub2;
@@ -224,9 +375,13 @@ namespace soma_perception
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub4;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub5;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *points_sub6;
-    message_filters::Synchronizer<MySyncPolicy> *sync;
+    message_filters::Synchronizer<MySyncPolicy1> *sync1;
+    message_filters::Synchronizer<MySyncPolicy2> *sync2;
+    message_filters::Synchronizer<MySyncPolicy3> *sync3;
+    message_filters::Synchronizer<MySyncPolicy4> *sync4;
+    message_filters::Synchronizer<MySyncPolicy5> *sync5;
+    message_filters::Synchronizer<MySyncPolicy6> *sync6;
 
-    ros::Publisher pub;
     ros::Publisher pub_centers;
 
     std::string base_link_frame;
