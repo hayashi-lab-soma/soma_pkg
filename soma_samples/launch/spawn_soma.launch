@@ -27,7 +27,7 @@
     <arg name="points_topic" value="/velodyne_points"/>
     <arg name="enable_manager" value="false" doc="If you publish PointCloud2 from bagfile, set true" />
     <arg name="nodelet_manager" value="velodyne_nodelet_manager" />
-    <arg name="enable_tf_base2lidar" value="false" />
+    <arg name="enable_tf_base2lidar" value="true" />
     <!--
 	prefiltering arguments
 	distance filter

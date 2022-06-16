@@ -3,7 +3,7 @@
 
 	<xacro:property name="camera_enabled" value="true"/>
 	<xacro:property name="lidar_enabled" value="true"/>
-	<xacro:property name="imu_enabled" value="false"/>
+	<xacro:property name="imu_enabled" value="true"/>
 
 	<!-- Include files -->
 	<xacro:if value="${camera_enabled}">
@@ -29,11 +29,11 @@
 			<joint name="imu_joint" type="fixed">
 				<xacro:insert_block name="origin" />
 				<parent link="${parent}" />
-				<child link="imu_link" />
+				<child link="imu" />
 			</joint>
 
 			<!-- Link -->
-			<link name="imu_link">
+			<link name="imu">
 
 				<!-- Inertial part -->
 				<inertial>
@@ -65,7 +65,7 @@
 			<!-- END link -->
 
 			<!-- Gazebo additional parameters -->
-			<gazebo reference="imu_link">
+			<!-- <gazebo reference="imu_link">
 				<material>
 					Gazebo/Red
 				</material>
@@ -87,7 +87,7 @@
 					</plugin>
 					<pose>0 0 0 0 0 0</pose>
 				</sensor>
-			</gazebo>
+			</gazebo> -->
 
 		</xacro:macro>
 	</xacro:if>
