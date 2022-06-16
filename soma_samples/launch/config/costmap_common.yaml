@@ -23,5 +23,5 @@ obstacles_laser:
     max_obstacle_height: 99999.0}
 
 inflation:
-    inflation_radius: 0.1
+    inflation_radius: 0.3
 

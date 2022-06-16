@@ -110,19 +110,21 @@ TebLocalPlannerROS:
     
   # Robot
           
-  max_vel_x: 1.0
+  max_vel_x: 0.5
   max_vel_x_backwards: -1.0
   max_vel_theta: 0.8
   #max_vel_y: 0.1
+  # acc_lim_x: 0.1
   acc_lim_x: 0.3
   #acc_lim_y: 0.1
-  acc_lim_theta: 0.4
-  min_turning_radius: 1.0
+  # acc_lim_theta: 0.1
+  acc_lim_theta: 0.3
+  min_turning_radius: 2.0
   footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
     type: "line"
     radius: 0.2 # for type "circular"
-    line_start: [-0.5, 0.0] # for type "line"
-    line_end: [0.5, 0.0] # for type "line"
+    line_start: [-1.0, 0.0] # for type "line"
+    line_end: [1.0, 0.0] # for type "line"
     front_offset: 0.2 # for type "two_circles"
     front_radius: 0.2 # for type "two_circles"
     rear_offset: 0.2 # for type "two_circles"
@@ -137,7 +139,7 @@ TebLocalPlannerROS:
     
   # Obstacles
     
-  min_obstacle_dist: 0.5
+  min_obstacle_dist: 0.7
   include_costmap_obstacles: True
   costmap_obstacles_behind_robot_dist: 1.0
   obstacle_poses_affected: 30
