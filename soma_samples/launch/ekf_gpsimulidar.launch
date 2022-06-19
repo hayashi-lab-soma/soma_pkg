@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-	<node name="navsat_trasnform_node" pkg="robot_localization" type="navsat_trasnform_node" clear_params="true" output="screen">
+	<node name="navsat_transform_node" pkg="robot_localization" type="navsat_transform_node" clear_params="true" output="screen">
 		<!-- load yaml file -->
 		<rosparam command="load" file="$(find soma_samples)/launch/config/navsat_transform_template.yaml" />
 		<!--  -->
