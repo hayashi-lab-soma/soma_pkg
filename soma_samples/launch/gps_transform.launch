@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="navsat_transform_node" pkg="robot_localization" type="navsat_transform_node" clear_params="true" output="screen">
+    <!-- load yaml file -->
+    <rosparam command="load" file="$(find soma_samples)/launch/config/navsat_transform_template.yaml" />
+    <!--  -->
+    <param name="magnetic_declination_radians" value="0"/>
+    <param name="yaw_offset" value="0"/>
+    <!-- <param name="frame_id" value="gps_odom"/> -->
+    <remap from="/odometry/filtered" to="/lidar_odom" />
+    <remap from="/gps/fix" to="/fix/gps" />
+    <remap from="imu_data" to="/imu/data" />
+  </node>
+</launch>

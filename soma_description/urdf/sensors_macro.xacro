@@ -93,6 +93,57 @@
 	</xacro:if>
 	<!-- END IMU macro -->
 
+	<!-- GPS macro -->
+	<xacro:if value="${imu_enabled}">
+		<xacro:macro name="gps_macro" params="parent *origin">
+
+			<!-- General properties used for inertia computation -->
+			<xacro:property name="mass" value="0.2" />
+			<xacro:property name="width" value="0.05" />
+			<xacro:property name="depth" value="0.05" />
+			<xacro:property name="height" value="0.025" />
+
+			<!-- Joint -->
+			<joint name="gps_joint" type="fixed">
+				<xacro:insert_block name="origin" />
+				<parent link="${parent}" />
+				<child link="gps" />
+			</joint>
+
+			<!-- Link -->
+			<link name="gps">
+
+				<!-- Inertial part -->
+				<inertial>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<mass value="${mass}" />
+
+					<!-- Inertia matrix of a parallelepiped -->
+					<inertia ixx="${mass / 12 * (depth ** 2 + height ** 2)}" ixy="0.0" ixz="0.0" iyy="${mass / 12 * (width ** 2 + height ** 2)}" iyz="0.0" izz="${mass / 12 * (width ** 2 + depth ** 2)}" />
+				</inertial>
+
+				<!-- Visual part -->
+				<visual>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+					<material name="red" />
+				</visual>
+
+				<!-- Collision part -->
+				<collision>
+					<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+					<geometry>
+						<box size="${width} ${depth} ${height}" />
+					</geometry>
+				</collision>
+
+			</link>
+
+		</xacro:macro>
+	</xacro:if>
+	<!-- END GPS macro -->
 
 	<!-- Realsense macro -->
 	<xacro:if value="${camera_enabled}">

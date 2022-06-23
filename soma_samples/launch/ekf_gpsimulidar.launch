@@ -7,8 +7,8 @@
 		<param name="magnetic_declination_radians" value="0"/>
 		<param name="yaw_offset" value="0"/>
 
-		<remap from="/odometry/filtered" to="/gps_odom" />
-		<remap from="/gps/fix" to="/fix" />
+		<remap from="/odometry/filtered" to="/lidar_odom" />
+		<remap from="/gps/fix" to="/fix/gps" />
 		<remap from="imu_data" to="/imu/data" />
 	</node>
 
@@ -18,7 +18,7 @@
 		<!--  -->
 		<remap from="/odometry/filtered" to="/combined_odom" />
 		<remap from="odom0" to="/lidar_odom" />
-		<remap from="odom1" to="/gps_odom" />
+		<remap from="odom1" to="/odometry/gps" />
 		<remap from="imu_data" to="/imu/data" />
 	</node>
 </launch>

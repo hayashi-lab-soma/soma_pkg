@@ -22,7 +22,12 @@
 				<origin xyz="${-0.525 + 0.05/2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
 			</xacro:imu_macro>
 		</xacro:if>
-
+		<!-- Build GPS -->
+		<xacro:if value="${imu_enabled}">
+			<xacro:gps_macro parent="body_bottom_link">
+				<origin xyz="${-0.525 + 0.05*2} 0.0 ${1.40 - 0.25 + 0.025/2}" rpy="0.0 0.0 0.0" />
+			</xacro:gps_macro>
+		</xacro:if>
 		<!-- Build Realsense -->
 		<!-- Front -->
 		<xacro:if value="${camera_enabled}">

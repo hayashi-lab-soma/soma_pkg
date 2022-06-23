@@ -9,16 +9,16 @@ print_diagnostics: true
 publish_tf: true
 publish_acceleration: false
 
-world_frame: map
-map_frame: map
+world_frame: m_map
+map_frame: m_map
 odom_frame: lidar_odom
 base_link_frame: base_link
 
 #odom0: lidar odometry
 odom0: odom0
-odom0_config: [true, true, false,
-               false, false, false,
-               true, false, false,
+odom0_config: [false, false, false,
+               false, false, true,
+               true, true, false,
                false, false, true,
                false, false, false]
 odom0_differential: true
@@ -27,7 +27,7 @@ odom0_relative: true
 #odom1: gps odometry
 odom1: odom1
 odom1_config: [true, true, false,
-               false, false, false,
+               true, false, false,
                false, false, false,
                false, false, false,
                false, false, false]
@@ -37,9 +37,9 @@ odom1_relative: true
 #imu0: imu data
 imu0: imu_data
 imu0_config: [false, false, false,
-              true, true, true,
               false, false, false,
-              false, false, true,
-              false, false, false]
+              false, false, false,
+              false, false, false,
+              False, false, false]
 imu0_differential: false
 imu0_relative: false

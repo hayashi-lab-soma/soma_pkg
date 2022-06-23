@@ -38,4 +38,7 @@
     <arg name="distance_far_thresh" value="20.0" />
     <arg name="down_sampling_resolution" value="0.1" />
   </include>
+
+  <include file="$(find soma_bringup)/launch/sensor/imu.launch" />
+  <include file="$(find soma_bringup)/launch/sensor/gps.launch" />
 </launch>
