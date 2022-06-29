@@ -14,7 +14,9 @@
         <arg name="icp_odometry" value="false"/>
         <!-- Launch rtabmap icp odometry node -->
         <!--arg name="imu_topic" value="/imu/data"/> -->        <!-- only used with VIO approaches -->
-        <arg name="odom_frame_id" value="lidar_odom"/>
+        <arg name="odom_frame_id" value="m_map"/>
+        <arg name="publish_tf_map" value="false"/>
+        <arg name="map_frame_id" value="m_map"/>
         <arg name="subscribe_scan_cloud" value="true"/>
         <arg name="scan_cloud_topic" value="/velodyne_points"/>
         <!-- dont need to subscribe because already get odom from TF that is produced using HDL slam -->

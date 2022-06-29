@@ -96,8 +96,8 @@ DWAPlannerROS:
 
 TebLocalPlannerROS:
 
-  odom_topic: /odometry/gps
-  map_frame: /map
+  odom_topic: /odometry/filtered/global
+  map_frame: /m_map
     
   # Trajectory
 

@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Azure camera -->
+    <include file="$(find soma_bringup)/launch/sensor/rotary_wheel_vel.launch" />
+    <include file="$(find soma_bringup)/launch/sensor/wheel_odometry.launch" />
+
+    <node name="ekf_local" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+        <!-- load yaml file -->
+        <rosparam command="load" file="$(find soma_samples)/launch/config/ekf_local.yaml" />
+        <!-- output-->
+        <remap from="/odometry/filtered" to="/odometry/filtered/local" />
+        <!-- input-->
+        <remap from="odom0" to="/wheel/odometry" />
+        <!-- <remap from="odom1" to="/lidar_odom" /> -->
+        <remap from="imu_data" to="/imu/data" />
+    </node>
+
+    <node name="ekf_global" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+        <!-- load yaml file -->
+        <rosparam command="load" file="$(find soma_samples)/launch/config/ekf_global.yaml" />
+        <!--  -->
+        <!-- input-->
+        <remap from="odom0" to="/wheel/odometry" />
+        <!-- <remap from="odom1" to="/lidar_odom" /> -->
+        <remap from="odom1" to="/odometry/gps" />
+        <remap from="imu_data" to="/imu/data" />
+        <!-- output frame odom-->
+        <remap from="/odometry/filtered" to="/odometry/filtered/global" />
+    </node>
+
+    <node name="navsat_transform_node" pkg="robot_localization" type="navsat_transform_node" clear_params="true" output="screen">
+        <!-- load yaml file -->
+        <rosparam command="load" file="$(find soma_samples)/launch/config/navsat_transform_new.yaml" />
+        <!-- input-->
+        <remap from="/odometry/filtered" to="/odometry/filtered/global" />
+        <remap from="/gps/fix" to="/fix/gps" />
+        <remap from="imu_data" to="/imu/data" />
+        <!-- output-->
+        <remap from="odometry/gps" to="/odometry/gps" />
+    </node>
+
+
+</launch>

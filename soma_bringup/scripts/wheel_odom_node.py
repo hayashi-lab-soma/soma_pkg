@@ -46,8 +46,8 @@ def timer_callback(event):
   _y = wheel_vel*sin(theta)
   _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE
 
-  # x = x + _x
-  # y = y + _y
+  x = x + _x
+  y = y + _y
   theta = theta + _theta*dt
 
   rospy.loginfo('(x, y, th)=({:.3f}, {:.3f}, {:.3f})'.format(x, y, theta))
@@ -58,9 +58,9 @@ def timer_callback(event):
   odom.header.frame_id = ODOM_FRAME_ID
   odom.child_frame_id = BASE_FRAME_ID
   # set pose
-  # odom.pose.pose.position.x = x
-  # odom.pose.pose.position.y = y
-  # odom.pose.pose.position.z = 0.0  # 2D
+  odom.pose.pose.position.x = x
+  odom.pose.pose.position.y = y
+  odom.pose.pose.position.z = 0.0  # 2D
   # q = quaternion_from_euler(0.0, 0.0, theta)
   # odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
   odom.twist.twist.linear.x = wheel_vel
