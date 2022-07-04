@@ -424,6 +424,7 @@ def motion(motion_model, pose, command, noise, dt=1):
 
     elif motion_model == "odometry":
         rot1, trans, rot2 = multivariate_normal.rvs(command, sigma)
+        assert command[1] < 0.5 or command[1] * trans >= 0
 
     # New pose
     if motion_model == "velocity":
@@ -480,11 +481,32 @@ def observation(pose, min_visibility, max_visibility, noise):
 
 # Data association: observation -> map feature
 def correspondence(features, pose, observation, min_visibility, max_visibility, noise, correspondence_threshold, delete_threshold):
+    visible = True
+
+    d_noise, phi_noise = noise
+    d_sigma = d_noise[0]*max_visibility + \
+        d_noise[1]*abs(observation[1]) + d_noise[2]
+    phi_sigma = phi_noise[0]*max_visibility + \
+        phi_noise[1]*abs(observation[1]) + phi_noise[2]
+    sigma = [[d_sigma, 0],
+             [0, phi_sigma]]
+
+    d_interval, phi_interval = d_sigma/10, phi_sigma/10
+    o_visibility_likelihood = mvnun(np.array([observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0]), np.array(
+        [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0]), np.array([max_visibility, observation[1]]), np.array(sigma))[0]
+
+    assert o_visibility_likelihood <= 1, "Probability greater than 1 !"
+
+    if o_visibility_likelihood >= correspondence_threshold:
+        visible = False
+
     if len(features) == 0:
-        return [], []
+        return visible, [], [], [], []
 
     likelihoods = len(features)*[-1]
     visible_features = []
+    invisible_features = []
+    global_visible_features = []
 
     x, y, theta = pose.transpose()[0]
     for i, f in enumerate(features):
@@ -493,28 +515,39 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
         d = sqrt((xf - x)**2 + (yf - y)**2)
         phi = atan2(yf - y, xf - x) - theta
 
+        d_noise, phi_noise = noise
+        d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
+        phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi) + phi_noise[2]
+        sigma = [[d_sigma, 0],
+                 [0, phi_sigma]]
+
+        if abs(observation[1] - phi) > abs(observation[1] - phi + 2*pi):
+            phi -= 2*pi
+        elif abs(observation[1] - phi) > abs(observation[1] - phi - 2*pi):
+            phi += 2*pi
+
         if d > min_visibility and d < max_visibility:
-            visible_features.append(i)
-
-            d_noise, phi_noise = noise
-            d_sigma = d_noise[0]*d + d_noise[1]*abs(phi) + d_noise[2]
-            phi_sigma = phi_noise[0]*d + phi_noise[1]*abs(phi) + phi_noise[2]
-            sigma = [[d_sigma, 0],
-                     [0, phi_sigma]]
-
-            if abs(observation[1] - phi) > abs(observation[1] - phi + 2*pi):
-                phi -= 2*pi
-            elif abs(observation[1] - phi) > abs(observation[1] - phi - 2*pi):
-                phi += 2*pi
 
             d_interval, phi_interval = d_sigma/10, phi_sigma/10
+            f_visibility_likelihood = mvnun(np.array([max_visibility-d_interval/2.0, phi-phi_interval/2.0]), np.array(
+                [max_visibility+d_interval/2.0, phi+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
+
+            assert f_visibility_likelihood <= 1, "Probability greater than 1 !"
+
             feature_likelihood = mvnun(np.array([observation[0]-d_interval/2.0, observation[1]-phi_interval/2.0]), np.array(
                 [observation[0]+d_interval/2.0, observation[1]+phi_interval/2.0]), np.array([d, phi]), np.array(sigma))[0]
 
             assert feature_likelihood <= 1, "Probability greater than 1 !"
 
-            if feature_likelihood > correspondence_threshold:
-                likelihoods[i] = feature_likelihood
+            if f_visibility_likelihood < delete_threshold:
+                global_visible_features.append(i)
+
+                if feature_likelihood > correspondence_threshold:
+                    visible_features.append(i)
+                    likelihoods[i] = feature_likelihood
+            else:
+                if feature_likelihood > correspondence_threshold:
+                    invisible_features.append(i)
 
     _corresponding_likelihoods = list(np.sort(np.array(likelihoods)))
     _corresponding_features = list(np.argsort(np.array(likelihoods)))
@@ -523,14 +556,14 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
     corresponding_likelihoods = []
     corresponding_features = []
     i = 0
-    l = _corresponding_likelihoods[0]
-    while l != -1:
+    l = _corresponding_likelihoods[i]
+    while i < len(_corresponding_likelihoods) and l != -1:
         corresponding_likelihoods.append(l)
         corresponding_features.append(_corresponding_features[i])
         i += 1
         l = _corresponding_likelihoods[i]
 
-    return visible_features, corresponding_features, corresponding_likelihoods
+    return visible, global_visible_features, visible_features, invisible_features, corresponding_features, corresponding_likelihoods
 
 
 # EKF
@@ -642,12 +675,15 @@ def position_error(real, particle):
 
     return res
 
+# TODO: Correspondence threshold should be taken into account !
 
-def map_error(features, particle):
+
+def map_error(features, particle, correspondence_threshold):
     if len(particle[4]) == 0:
         return 0
 
     res = 0
+    features_num = 0
     for f1 in particle[4]:
         best = 1000
         for f2 in features:
@@ -655,8 +691,10 @@ def map_error(features, particle):
                        (f1[0].transpose()[0][1] - f2[1])**2)
             if tmp < best:
                 best = tmp
-        res += best
-    res /= len(particle[4])
+        if best >= correspondence_threshold:
+            res += best
+            features_num += 1
+    res /= features_num
 
     return res
 
@@ -916,7 +954,7 @@ if __name__ == '__main__':
         new_particles_set = []
         for j, p in enumerate(particles):
             new_particles_set.append(
-                [j, position_error(robot_pose, p), map_error(features, p), p[3]])
+                [j, position_error(robot_pose, p), map_error(features, p, correspondence_threshold), p[3]])
         history.add_generation(new_particles_set, "UPDATE")
 
         # Find most probable pose and features
@@ -971,7 +1009,7 @@ if __name__ == '__main__':
                                 survivors.append(j)
                             particles.append(new_particle)
                             new_particles_set.append(
-                                [j, position_error(robot_pose, new_particle), map_error(features, new_particle), 1.0/particles_num])
+                                [j, position_error(robot_pose, new_particle), map_error(features, new_particle, correspondence_threshold), 1.0/particles_num])
 
                             break
 
@@ -997,7 +1035,7 @@ if __name__ == '__main__':
                         survivors.append(order[p_index])
                     particles.append(new_particle)
                     new_particles_set.append([order[p_index], position_error(
-                        robot_pose, new_particle), map_error(features, new_particle), 1.0/particles_num])
+                        robot_pose, new_particle), map_error(features, new_particle, correspondence_threshold), 1.0/particles_num])
 
                     tmp_w += 1.0/particles_num
 

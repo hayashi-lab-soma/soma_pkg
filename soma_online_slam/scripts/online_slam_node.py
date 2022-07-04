@@ -22,7 +22,7 @@ RAW_HISTORY_FILE_NAME = DIR + '/../data/raw_history.txt'
 
 # Online SLAM ROS node for Gazebo simulation
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.01, 0.1, 0.0], [0.1, 0.01, 0.0], [0.01, 0.1, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=8.0, observation_noise=[[0.0, 0.0, 0.5], [0.0, 0.0, 0.01]], correspondence_threshold=10**(-10), delete_threshold=10**(-10)):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.005, 0.05, 0.0], [0.05, 0.005, 0.0], [0.005, 0.05, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=8.0, observation_noise=[[0.0, 0.0, 0.1], [0.0, 0.0, 0.02]], correspondence_threshold=10**(-5), delete_threshold=10**(-5)):
         self.real = []
         self.features = []
 
@@ -52,7 +52,7 @@ class OnlineSLAMNode:
         self.fig, self.ax = plt.subplots()
         self.real_ln, = plt.plot([], [], 'ro', markersize=5)
         self.real_x_data, self.real_y_data, self.real_theta_data = 0, 0, 0
-        self.heading_ln, = plt.plot([], [], 'k-', markersize=3)
+        # self.heading_ln, = plt.plot([], [], 'k-', markersize=3)
         self.min_visibility_ln, = plt.plot([], [], 'r--', markersize=1)
         self.max_visibility_ln, = plt.plot([], [], 'r--', markersize=1)
         self.trees_ln, = plt.plot([], [], 'bx', markersize=10)
@@ -60,6 +60,10 @@ class OnlineSLAMNode:
         self.particles_ln, = plt.plot([], [], 'go', markersize=5)
         self.particles_x_data, self.particles_y_data = [], []
         self.most_probable_ln, = plt.plot([], [], 'ko', markersize=5)
+        self.particle_min_visibility_ln, = plt.plot(
+            [], [], 'k--', markersize=1)
+        self.particle_max_visibility_ln, = plt.plot(
+            [], [], 'k--', markersize=1)
         self.features_ln, = plt.plot([], [], 'gx', markersize=10)
         self.features_x_data, self.features_y_data = [], []
 
@@ -110,32 +114,55 @@ class OnlineSLAMNode:
 
         for l in mem:
             fo.write(l)
+        fo.write("\nReal pose: \n" + "[")
+        if self.real_x_data >= 0:
+            fo.write(" ")
+        fo.write(format(self.real_x_data, '.1E') + ", ")
+        if self.real_y_data >= 0:
+            fo.write(" ")
+        fo.write(format(self.real_y_data, '.1E') + ", ")
+        if self.real_theta_data >= 0:
+            fo.write(" ")
+        fo.write(format(self.real_theta_data, '.1E') + "]")
 
-        fo.write("\nReal pose: \n" + str([round(self.real_x_data, 3),
-                 round(self.real_y_data, 3), round(self.real_theta_data, 3)]))
+        fo.write("\n\nEstimated pose: \n" + "[")
+        if most_probable_particle.pose[0][0] >= 0:
+            fo.write(" ")
+        fo.write(format(most_probable_particle.pose[0][0], '.1E') + ", ")
+        if most_probable_particle.pose[1][0] >= 0:
+            fo.write(" ")
+        fo.write(format(most_probable_particle.pose[1][0], '.1E') + ", ")
+        if most_probable_particle.pose[2][0] >= 0:
+            fo.write(" ")
+        fo.write(format(most_probable_particle.pose[2][0], '.1E') + "]")
+
+        position_error = sqrt((self.real_x_data - most_probable_particle.pose[0][0])**2 + (
+            self.real_y_data - most_probable_particle.pose[1][0])**2)
+        fo.write("\nPosition error: " + format(position_error, '.1E'))
 
         fo.write("\n\nReal map:")
         real_map = []
         for i in range(len(self.trees_x_data)):
-            real_map.append([round(self.trees_x_data[i], 3),
-                            round(self.trees_y_data[i], 3)])
+            real_map.append([self.trees_x_data[i], self.trees_y_data[i]])
         real_map.sort()
         for i, e in enumerate(real_map):
-            fo.write("\n- " + str(i) + ": " + str(e))
-
-        fo.write("\n\nEstimated pose: \n" + str([round(most_probable_particle.pose[0][0], 3), round(
-            most_probable_particle.pose[1][0], 3), round(most_probable_particle.pose[2][0], 3)]))
-
-        position_error = sqrt((self.real_x_data - most_probable_particle.pose[0][0])**2 + (
-            self.real_y_data - most_probable_particle.pose[1][0])**2)
-        fo.write("\nPosition error: " + str(round(position_error, 3)))
+            fo.write("\n- ")
+            if i < 10:
+                fo.write(" ")
+            fo.write(str(i) + ": [")
+            if e[0] >= 0:
+                fo.write(" ")
+            fo.write(format(e[0], '.1E') + ", ")
+            if e[1] >= 0:
+                fo.write(" ")
+            fo.write(format(e[1], '.1E') + "]")
 
         fo.write("\n\nEstimated map:")
         estimated_map = []
         map_error = []
-        for feature in most_probable_particle.features:
-            estimated_map.append(
-                [round(feature.pose[0][0], 3), round(feature.pose[1][0], 3)])
+        detected_features = dict()
+        for f, feature in enumerate(most_probable_particle.features):
+            estimated_map.append([feature.pose[0][0], feature.pose[1][0]])
             min_distance = 100
             nearest_tree = 0
             for i, e in enumerate(real_map):
@@ -146,38 +173,71 @@ class OnlineSLAMNode:
                     min_distance = new_distance
             if min_distance > 1:
                 nearest_tree = None
-            map_error.append([nearest_tree, round(min_distance, 3)])
+            else:
+                if nearest_tree not in detected_features:
+                    detected_features[nearest_tree] = 0
+            map_error.append([nearest_tree, min_distance])
 
         alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",
                     "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
         for i, e in enumerate(estimated_map):
             if i < 26:
-                fo.write("\n- " + alphabet[i] + ": " + str(e) + " -> " +
-                         str(map_error[i][0]) + ", " + str(map_error[i][1]))
+                fo.write("\n-  " + alphabet[i] + ": [")
+                if e[0] >= 0:
+                    fo.write(" ")
+                fo.write(format(e[0], '.1E') + ", ")
+                if e[1] >= 0:
+                    fo.write(" ")
+                fo.write(format(e[1], '.1E') + "]")
+                fo.write(" -> ")
+                if map_error[i][0] != None and map_error[i][0] < 10:
+                    fo.write(" ")
+                fo.write(str(map_error[i][0]))
+                if map_error[i][0] != None:
+                    fo.write(" (" + format(map_error[i][1], '.1E') + ")")
 
-        orphan_features = 0
-        redundant_features = 0
+        orphan_features = []
+        redundant_features = []
         trees_error = len(real_map)*[0]
         for i, e in enumerate(estimated_map):
             tree = map_error[i][0]
             tree_error = map_error[i][1]
             if tree != None:
                 if trees_error[tree] > 0:
-                    redundant_features += 1
+                    redundant_features.append(alphabet[i])
                     trees_error[tree] = min(trees_error[tree], tree_error)
                 else:
                     trees_error[tree] = tree_error
             else:
-                orphan_features += 1
-        detected_features = len(estimated_map) - \
-            redundant_features-orphan_features
-        global_map_error = round(sum(trees_error)/float(detected_features), 3)
+                orphan_features.append(alphabet[i])
+        if len(detected_features) == 0:
+            global_map_error = 0
+        else:
+            global_map_error = sum(trees_error)/float(len(detected_features))
 
-        fo.write("\nDetected features: " + str(detected_features) + "/" + str(len(real_map)
-                                                                              ) + " -> " + str(int(float(detected_features)/float(len(real_map))*100)) + "%")
-        fo.write("\nGlobal map error: " + str(global_map_error))
-        fo.write("\nRedundant features: " + str(redundant_features))
-        fo.write("\nOrphan features: " + str(orphan_features))
+        fo.write("\nGlobal map error: " + format(global_map_error, '.1E'))
+        fo.write("\nDetected features: ")
+        if len(detected_features) > 0:
+            fo.write(str(list(detected_features)[0]))
+            for f in list(detected_features)[1:]:
+                fo.write(", " + str(f))
+            fo.write(" ")
+        fo.write("(" + str(len(detected_features)) + "/" + str(len(real_map)) + " -> " +
+                 str(int(float(len(detected_features))/float(len(real_map))*100)) + "%)")
+        fo.write("\nRedundant features: ")
+        if len(redundant_features) > 0:
+            fo.write(str(redundant_features[0]))
+            for f in redundant_features[1:]:
+                fo.write(", " + str(f))
+            fo.write(" ")
+        fo.write("(" + str(len(redundant_features)) + ")")
+        fo.write("\nOrphan features: ")
+        if len(orphan_features) > 0:
+            fo.write(str(orphan_features[0]))
+            for f in orphan_features[1:]:
+                fo.write(", " + str(f))
+            fo.write(" ")
+        fo.write("(" + str(len(orphan_features)) + ")")
 
         fo.close()
 
@@ -214,7 +274,7 @@ class OnlineSLAMNode:
         fo.write("\n\n" + str(timestamp) + " " + str(resampling))
         for i, p in enumerate(self.solver.particles):
             new = [indexes[i], round(position_error(self.real, [p.pose.transpose()[0][0], p.pose.transpose()[0][1]]), 3),
-                   round(map_error(self.features, [None, None, None, None, [[f.pose] for f in p.features]]), 3), round(p.weight, 3)]
+                   round(map_error(self.features, [None, None, None, None, [[f.pose] for f in p.features]], self.solver.correspondence_threshold), 3), round(p.weight, 3)]
             fo.write("\n" + str(new))
 
         fo.close()
@@ -227,7 +287,7 @@ class OnlineSLAMNode:
         self.ax.set_xlim(-15, 15)
         self.ax.set_ylim(-15, 15)
 
-        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.features_ln
+        return self.real_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.particle_min_visibility_ln, self.particle_max_visibility_ln, self.features_ln
 
     def update_plot(self, frame):
         if self.motion_mutex or self.observation_mutex:
@@ -243,14 +303,18 @@ class OnlineSLAMNode:
         if self.particles_x_data != []:
             self.most_probable_ln.set_data(
                 self.particles_x_data[self.most_probable_index], self.particles_y_data[self.most_probable_index])
-        self.heading_ln.set_data(np.linspace(self.real_x_data, self.real_x_data + cos(self.real_theta_data), 20),
-                                 np.linspace(self.real_y_data, self.real_y_data + sin(self.real_theta_data), 20))
+        # self.heading_ln.set_data(np.linspace(self.real_x_data, self.real_x_data + cos(self.real_theta_data), 20),
+            #  np.linspace(self.real_y_data, self.real_y_data + sin(self.real_theta_data), 20))
         self.min_visibility_ln.set_data([self.real_x_data + self.solver.min_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
                                         self.real_y_data + self.solver.min_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
         self.max_visibility_ln.set_data([self.real_x_data + self.solver.max_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
                                         self.real_y_data + self.solver.max_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
+        self.particle_min_visibility_ln.set_data([self.particles_x_data[self.most_probable_index] + self.solver.min_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+            self.particles_y_data[self.most_probable_index] + self.solver.min_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
+        self.particle_max_visibility_ln.set_data([self.particles_x_data[self.most_probable_index] + self.solver.max_visibility * cos(theta) for theta in np.linspace(-pi, pi, 100)], [
+            self.particles_y_data[self.most_probable_index] + self.solver.max_visibility * sin(theta) for theta in np.linspace(-pi, pi, 100)])
 
-        return self.real_ln, self.heading_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.features_ln
+        return self.real_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.particle_min_visibility_ln, self.particle_max_visibility_ln, self.features_ln
 
     # Update
 
@@ -389,6 +453,7 @@ class OnlineSLAMNode:
             self.command = [0.0, 0.0, 0.0]
 
         self.solver.observation_update(observation)
+
         # Log history (update)
         self.log_history(round(update_time, 3), "UPDATE", [
                          i for i in range(self.solver.particles_num)])
@@ -403,11 +468,11 @@ class OnlineSLAMNode:
             self.particles_x_data.append(p.pose[0][0])
             self.particles_y_data.append(p.pose[1][0])
 
-        highest_weight = 0
-        for i, p in enumerate(self.solver.particles):
-            if p.weight > highest_weight:
-                highest_weight = p.weight
-                self.most_probable_index = i
+        highest_weight = 1
+        # for i, p in enumerate(self.solver.particles):
+        # if p.weight > highest_weight:
+        # highest_weight = p.weight
+        # self.most_probable_index = i
 
         most_probable_particle = self.solver.particles[self.most_probable_index].clone(
         )
