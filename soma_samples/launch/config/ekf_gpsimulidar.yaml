@@ -10,36 +10,26 @@ publish_tf: true
 publish_acceleration: false
 
 world_frame: m_map
-map_frame: m_map
-odom_frame: lidar_odom
+# map_frame: m_map
+odom_frame: m_odom
 base_link_frame: base_link
 
-#odom0: lidar odometry
+#odom0: wheel odometry
 odom0: odom0
 odom0_config: [false, false, false,
-               false, false, true,
-               true, true, false,
-               false, false, true,
-               false, false, false]
-odom0_differential: true
-odom0_relative: true
-
-#odom1: gps odometry
-odom1: odom1
-odom1_config: [true, true, false,
+               false, false, false,
                true, false, false,
-               false, false, false,
-               false, false, false,
+               false, false, true,
                false, false, false]
-odom1_differential: false
-odom1_relative: true
+odom0_differential: false
+odom0_relative: true
 
 #imu0: imu data
 imu0: imu_data
 imu0_config: [false, false, false,
+              true, true, true,
               false, false, false,
               false, false, false,
-              false, false, false,
-              False, false, false]
-imu0_differential: false
+              false, false, false]
+imu0_differential: true
 imu0_relative: false

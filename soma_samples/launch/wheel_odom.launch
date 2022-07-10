@@ -10,7 +10,7 @@
         <!-- output-->
         <remap from="/odometry/filtered" to="/odometry/filtered/local" />
         <!-- input-->
-        <remap from="odom0" to="/wheel/odometry" />
+        <remap from="odom0" to="/soma/wheel_odom" />
         <!-- <remap from="odom1" to="/lidar_odom" /> -->
         <remap from="imu_data" to="/imu/data" />
     </node>
@@ -20,7 +20,7 @@
         <rosparam command="load" file="$(find soma_samples)/launch/config/ekf_global.yaml" />
         <!--  -->
         <!-- input-->
-        <remap from="odom0" to="/wheel/odometry" />
+        <remap from="odom0" to="/soma/wheel_odom" />
         <!-- <remap from="odom1" to="/lidar_odom" /> -->
         <remap from="odom1" to="/odometry/gps" />
         <remap from="imu_data" to="/imu/data" />

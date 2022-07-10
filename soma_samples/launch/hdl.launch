@@ -1,0 +1,21 @@
+<launch>
+  <!-- HDL LiDAR localization -->
+  <include file="$(find soma_localization)/launch/lidar_odom_hdl_ver.launch">
+    <arg name="base_frame_id" value="base_link" />
+    <arg name="lidar_link" value="velodyne" />
+    <arg name="odom_frame_id" value="lidar_odom" />
+    <arg name="points_topic" value="/velodyne_points"/>
+    <arg name="enable_manager" value="false" doc="If you publish PointCloud2 from bagfile, set true" />
+    <arg name="nodelet_manager" value="velodyne_nodelet_manager" />
+    <arg name="enable_tf_base2lidar" value="false" />
+    <!--
+	prefiltering arguments
+	distance filter
+	down sampling (voxel grid)
+	-->
+    <arg name="use_distance_filter" value="true" />
+    <arg name="distance_near_thresh" value="0.1" />
+    <arg name="distance_far_thresh" value="20.0" />
+    <arg name="down_sampling_resolution" value="0.1" />
+  </include>
+</launch>
