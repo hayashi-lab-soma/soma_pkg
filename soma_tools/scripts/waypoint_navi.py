@@ -11,8 +11,8 @@ from math import pi
 
 class WpNavi():
     def __init__(self):
-        self.way_point = [[10.0, 0.0,0.0 * pi], [ 15.0, 10.0, 0.5 * pi], [15.0, 20.0, 1.0 * pi], [10.0, 5.0, 1.0 * pi], [0.0, 0.0, 1.0 * pi],[999, 999, 999]]
-        # self.way_point = [[10.0, 0.0,0.0 * pi], [999, 999, 999]]
+        # self.way_point = [[10.0, 0.0,0.0 * pi], [ 15.0, 10.0, 0.5 * pi], [15.0, 20.0, 1.0 * pi], [10.0, 5.0, 1.0 * pi], [0.0, 0.0, 1.0 * pi],[999, 999, 999]]
+        self.way_point = [[60.0, 30.0,1.0 * pi], [999, 999, 999]]
         self.ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.goal = MoveBaseGoal()
         rospy.on_shutdown(self.shutdown)
@@ -28,7 +28,7 @@ class WpNavi():
 
         i = 0
         while not rospy.is_shutdown():
-            self.goal.target_pose.header.frame_id = 'm_odom'
+            self.goal.target_pose.header.frame_id = 'm_map'
             self.goal.target_pose.header.stamp = rospy.Time.now()
             self.goal.target_pose.pose.position.x = self.way_point[i][0]
             self.goal.target_pose.pose.position.y = self.way_point[i][1]
