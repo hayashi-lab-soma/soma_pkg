@@ -22,5 +22,6 @@
   <include file="$(find soma_bringup)/launch/sensor/imu.launch" />
   <include file="$(find soma_bringup)/launch/sensor/gps.launch" />
 
-  <!-- HDL lidar odom -->
+  <!-- HDL LiDAR localization -->
+
 </launch>

@@ -22,7 +22,7 @@
         <!-- input-->
         <remap from="odom0" to="/soma/wheel_odom" />
         <!-- <remap from="odom1" to="/lidar_odom" /> -->
-        <remap from="odom1" to="/odometry/gps" />
+        <!-- <remap from="odom1" to="/odometry/gps" /> -->
         <remap from="imu_data" to="/imu/data" />
         <!-- output frame odom-->
         <remap from="/odometry/filtered" to="/odometry/filtered/global" />
