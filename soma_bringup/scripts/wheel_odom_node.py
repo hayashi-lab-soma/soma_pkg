@@ -42,12 +42,13 @@ def timer_callback(event):
   # _x = wheel_vel*cos(theta)*dt
   # _y = wheel_vel*sin(theta)*dt
   # _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE*dt
-  _x = wheel_vel*cos(theta)
-  _y = wheel_vel*sin(theta)
-  _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE
+  
+  _x = wheel_vel*cos(theta) #[m/sec]
+  _y = wheel_vel*sin(theta) #[m/sec]
+  _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE #[rad/sec]
 
-  x = x + _x
-  y = y + _y
+  x = x + _x*dt
+  y = y + _y*dt
   theta = theta + _theta*dt
 
   rospy.loginfo('(x, y, th)=({:.3f}, {:.3f}, {:.3f})'.format(x, y, theta))
