@@ -76,14 +76,14 @@ def timer_callback(event):
   odom.pose.covariance[35] = 0.001 #sigma_yaw,yaw
   odom_pub.publish(odom)
 
-  # broadcast wodom -> base_link
+  # broadcast soma/wheel_odom -> base_link
   transform = TransformStamped()
   transform.header.stamp = rospy.Time.now()
   transform.header.frame_id = ODOM_FRAME_ID
   transform.child_frame_id = BASE_FRAME_ID
   transform.transform.translation = odom.pose.pose.position
   transform.transform.rotation = odom.pose.pose.orientation
-  # tf_broadcaster.sendTransformMessage(transform)
+  tf_broadcaster.sendTransformMessage(transform)
 
 if __name__ == '__main__':
   global BASE_FRAME_ID
