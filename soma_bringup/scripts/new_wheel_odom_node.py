@@ -13,7 +13,7 @@ from math import sin, cos, tan, sqrt
 
 # global parameters
 WHEEL_BASE = None
-AXIS_LENGTH = 0.70 # Distance between the 2 rear wheels
+AXIS_LENGTH = 0.70  # Distance between the 2 rear wheels
 DURATION = None
 
 # global variables
@@ -68,7 +68,9 @@ def timer_callback(event):
     # set pose
     odom.pose.pose.position.x = x
     odom.pose.pose.position.y = y
-    odom.pose.pose.position.z = 0.0  # 2D
+    # odom.pose.pose.position.z = 0.0  # 2D
+    # To check theta value directly (need to be removed later)
+    odom.pose.pose.position.z = theta
     q = quaternion_from_euler(0.0, 0.0, theta)
     odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
 
