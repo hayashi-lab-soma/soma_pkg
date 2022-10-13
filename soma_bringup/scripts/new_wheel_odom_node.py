@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-
 import rospy
 from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import TwistStamped
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import TransformStamped
 from tf.transformations import quaternion_from_euler
@@ -28,10 +28,10 @@ def odom_callback(wheel_vel_data, steering_data):
     global wheel_vel, steer_phi, x, y, theta, old_time
 
     if old_time == None:
-        old_time = wheel_vel.header.stamp
-        return
-
-    new_time = wheel_vel.header.stamp
+        old_time = wheel_vel_data.header.stamp
+        # return
+    
+    new_time = wheel_vel_data.header.stamp
 
     rospy.loginfo('Time: {}'.format(new_time))
     rospy.loginfo('(v, phi)=({:.3f}, {:.3f})'.format(wheel_vel, steer_phi))
@@ -44,7 +44,7 @@ def odom_callback(wheel_vel_data, steering_data):
     old_y = y
     old_theta = theta
 
-    wheel_vel = wheel_vel_data.data
+    wheel_vel = wheel_vel_data.twist.linear.x
     steer_phi = steering_data.position
 
     if abs(steer_phi) < 1e-5:
@@ -105,18 +105,20 @@ if __name__ == '__main__':
     # arguments
     BASE_FRAME_ID = rospy.get_param('~base_frame_id', 'base_link')
     ODOM_FRAME_ID = rospy.get_param('~odom_frame_id', 'wodom')
-
+    # publishers
+    odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=5)
+    tf_broadcaster = TransformBroadcaster()  # tf1 ver.
     # subscribers (synchronized)
-    wheel_vel_sub = message_filters.Subscriber('/wheel_vel', Float32)
+    wheel_vel_sub = message_filters.Subscriber('/wheel_vel', TwistStamped)
     steering_sub = message_filters.Subscriber(
         '/maxon/steering/state', MotorState)
 
     sync = message_filters.ApproximateTimeSynchronizer(
-        [wheel_vel_sub, steering_sub], 10, 0.1, allow_headerless=True)
+        [wheel_vel_sub, steering_sub], queue_size = 1, slop = 0.5, allow_headerless=True)
     sync.registerCallback(odom_callback)
 
-    # publishers
-    odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=5)
-    tf_broadcaster = TransformBroadcaster()  # tf1 ver.
-
     rospy.spin()
+
+
+
+
