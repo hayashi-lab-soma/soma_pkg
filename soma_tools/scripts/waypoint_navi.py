@@ -11,8 +11,9 @@ from math import pi
 
 class WpNavi():
     def __init__(self):
-        # self.way_point = [[10.0, 0.0,0.0 * pi], [ 15.0, 10.0, 0.5 * pi], [15.0, 20.0, 1.0 * pi], [10.0, 5.0, 1.0 * pi], [0.0, 0.0, 1.0 * pi],[999, 999, 999]]
-        self.way_point = [[60.0, 30.0,1.0 * pi], [999, 999, 999]]
+        # self.way_point = [[5.0, 0,0*pi], [ 5.0, -2.0, 0.5*pi], [999, 999, 999]]
+        self.way_point = [[ 50.0, 0.0, 0.0*pi], [999, 999, 999]]
+        # self.way_point = [[60.0, 30.0,1.0 * pi], [999, 999, 999]]
         self.ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.goal = MoveBaseGoal()
         rospy.on_shutdown(self.shutdown)
@@ -40,7 +41,7 @@ class WpNavi():
             rospy.loginfo("Sending goal: No" + str(i+1))
             self.ac.send_goal(self.goal)
 
-            succeeded = self.ac.wait_for_result(rospy.Duration(30))
+            succeeded = self.ac.wait_for_result(rospy.Duration(100))
             state = self.ac.get_state()
             if succeeded:
                 rospy.loginfo("Succeeded: No."+str(i+1)+"("+str(state)+")")

@@ -109,17 +109,17 @@ TebLocalPlannerROS:
   feasibility_check_no_poses: 5
     
   # Robot
-          
+  gear_change_time: 2        
   max_vel_x: 0.6
-  max_vel_x_backwards: -0.6
-  max_vel_theta: 0.2
+  max_vel_x_backwards: -0.3
+  max_vel_theta: 0.4
   #max_vel_y: 0.1
   # acc_lim_x: 0.1
   acc_lim_x: 0.2
   #acc_lim_y: 0.1
   # acc_lim_theta: 0.1
   acc_lim_theta: 0.2
-  min_turning_radius: 1.0
+  min_turning_radius: 3.5
   footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
     type: "line"
     radius: 0.2 # for type "circular"
@@ -133,13 +133,13 @@ TebLocalPlannerROS:
 
   # GoalTolerance
     
-  xy_goal_tolerance: 1.0
-  yaw_goal_tolerance: 3
+  xy_goal_tolerance: 3.0
+  yaw_goal_tolerance: 3.0
   free_goal_vel: False
     
   # Obstacles
     
-  min_obstacle_dist: 0.6
+  min_obstacle_dist: 0.3
   include_costmap_obstacles: True
   costmap_obstacles_behind_robot_dist: 1.0
   obstacle_poses_affected: 30
@@ -165,7 +165,10 @@ TebLocalPlannerROS:
   weight_obstacle: 50
   weight_dynamic_obstacle: 10 # not in use yet
   alternative_time_cost: False # not in use yet
-
+  weight_gear_change: 100
+  weight_optimaltime: 100
+  weight_shortest_path: 1
+  weight_viapoint: 1
   # Homotopy Class Planner
 
   enable_homotopy_class_planning: True

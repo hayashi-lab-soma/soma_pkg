@@ -5,7 +5,7 @@ from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import TransformStamped
-from tf.transformations import quaternion_from_euler
+from tf.transformations import quaternion_from_euler,euler_from_quaternion
 from tf import TransformBroadcaster
 from maxon_epos_msgs.msg import MotorState
 from maxon_epos_msgs.msg import MotorStates
@@ -18,7 +18,7 @@ DURATION = None
 # global variables
 wheel_vel = 0.0
 steer_phi = 0.0
-x = y = theta = 0.0
+x = y = theta = 0
 
 
 def callback_wheel_vel(data):
@@ -46,8 +46,8 @@ def timer_callback(event):
   _y = wheel_vel*sin(theta)
   _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE
 
-  x = x + _x
-  y = y + _y
+  x = x + _x*dt
+  y = y + _y*dt
   theta = theta + _theta*dt
 
   rospy.loginfo('(x, y, th)=({:.3f}, {:.3f}, {:.3f})'.format(x, y, theta))
@@ -61,12 +61,18 @@ def timer_callback(event):
   odom.pose.pose.position.x = x
   odom.pose.pose.position.y = y
   odom.pose.pose.position.z = 0.0  # 2D
-  # q = quaternion_from_euler(0.0, 0.0, theta)
+  q = quaternion_from_euler(0.0, 0.0, theta)
+  # odom.pose.pose.orientation.x = q[0]
+  # odom.pose.pose.orientation.y = q[1]
+  # odom.pose.pose.orientation.z = q[2]
+  # odom.pose.pose.orientation.w = q[3]
   # odom.pose.pose.orientation = Quaternion(q[0], q[1], q[2], q[3])
+  odom.pose.pose.orientation = Quaternion(*q)
   odom.twist.twist.linear.x = wheel_vel
   # odom.twist.twist.linear.y = _y
-  q = quaternion_from_euler(0.0, 0.0, _theta)
-  odom.twist.twist.angular = Quaternion(q[0], q[1], q[2], q[3])
+  # odom.pose.pose.orientation.z = steer_phi
+  # q = quaternion_from_euler(0.0, 0.0, _theta)
+  # odom.twist.twist.angular = Quaternion(q[0], q[1], q[2], q[3])
   # set coveriance
   odom.pose.covariance[0] = 2.0 #sigma_xx
   odom.pose.covariance[7] = 2.0 #sigma_yy
