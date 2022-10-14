@@ -22,24 +22,31 @@ wheel_vel = 0.0
 steer_phi = 0.0
 x = y = theta = 0.0
 old_time = None
+old_time_float = None
 
 
 def odom_callback(wheel_vel_data, steering_data):
-    global wheel_vel, steer_phi, x, y, theta, old_time
+    global wheel_vel, steer_phi, x, y, theta, old_time, old_time_float
 
     if old_time == None:
         old_time = wheel_vel_data.header.stamp
-        # return
+        old_time_float= wheel_vel_data.header.stamp.to_sec()
+        return
     
     new_time = wheel_vel_data.header.stamp
+    new_time_float = wheel_vel_data.header.stamp.to_sec()
 
-    rospy.loginfo('Time: {}'.format(new_time))
+    rospy.loginfo('New Time: {}'.format(new_time))
+    rospy.loginfo('New Time in float: {}'.format(new_time_float))
+    rospy.loginfo('Old Time: {}'.format(old_time))
+    rospy.loginfo('Old Time in float: {}'.format(old_time_float))
     rospy.loginfo('(v, phi)=({:.3f}, {:.3f})'.format(wheel_vel, steer_phi))
 
     # calculate wheel odometry
-    dt = new_time-old_time
+    dt = new_time_float-old_time_float
     old_time = new_time
-
+    old_time_float=new_time_float
+    rospy.loginfo('(dt)=({:.3f})'.format(dt))
     old_x = x
     old_y = y
     old_theta = theta
@@ -79,8 +86,8 @@ def odom_callback(wheel_vel_data, steering_data):
     odom.twist.twist.linear.y = (y-old_y)/dt
     odom.twist.twist.linear.z = 0.0
     odom.twist.twist.angular.x = 0.0
-    odom.twist.twist.angular.x = 0.0
-    odom.twist.twist.angular.x = (theta-old_theta)/dt
+    odom.twist.twist.angular.y = 0.0
+    odom.twist.twist.angular.z = (theta-old_theta)/dt
 
     odom_pub.publish(odom)
 
