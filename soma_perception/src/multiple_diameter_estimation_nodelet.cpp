@@ -275,7 +275,7 @@ namespace soma_perception
       pcl::toROSMsg(*pc_cylinder, pc_output);
       pc_output.header.frame_id = base_link_frame;
       // NODELET_INFO("pub points size: %5d", (int)pc_cylinder->size());
-      // NODELET_INFO("radius: %5lf [m]", coeffs[6]);
+      NODELET_INFO("radius: %5lf [m]", coeffs[6]);
       // NODELET_INFO("center_x: %5lf [m]", coeffs[0]);
       // NODELET_INFO("center_y: %5lf [m]", coeffs[1]);
       // NODELET_INFO("--------------------------");
