@@ -452,8 +452,9 @@ def motion(motion_model, pose, command, noise, dt=1):
 
     return new_pose
 
-
 # Observation model (lidar)
+
+
 def observation(pose, min_visibility, max_visibility, noise):
     observation = []
     for i, f in enumerate(features):
@@ -478,8 +479,9 @@ def observation(pose, min_visibility, max_visibility, noise):
 
     return observation
 
-
 # Data association: observation -> map feature
+
+
 def correspondence(features, pose, observation, min_visibility, max_visibility, noise, correspondence_threshold, delete_threshold):
     visible = True
 
@@ -509,6 +511,7 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
     global_visible_features = []
 
     x, y, theta = pose.transpose()[0]
+
     for i, f in enumerate(features):
         mu = f[0].transpose()[0]
         xf, yf = mu
@@ -555,8 +558,10 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
     _corresponding_features.reverse()
     corresponding_likelihoods = []
     corresponding_features = []
+
     i = 0
     l = _corresponding_likelihoods[i]
+
     while i < len(_corresponding_likelihoods) and l != -1:
         corresponding_likelihoods.append(l)
         corresponding_features.append(_corresponding_features[i])
@@ -565,8 +570,8 @@ def correspondence(features, pose, observation, min_visibility, max_visibility, 
 
     return visible, global_visible_features, visible_features, invisible_features, corresponding_features, corresponding_likelihoods
 
-
 # EKF
+
 
 def h(pose, f):
     x, y, theta = pose.transpose()[0]
@@ -601,14 +606,19 @@ def H(pose, f):
                      [-(yf-y)/q, (xf-x)/q]])
 
 
-def Q(z):
+def Q(z, noise):
     d, phi = z.transpose()[0]
-    alphas = [0.05, 0, 0.0005, 0]
-    return np.array([[alphas[0]*abs(d) + alphas[1]*abs(phi), 0],
-                     [0, alphas[2]*abs(d) + alphas[3]*abs(phi)]])
-
+    d_noise, phi_noise = noise
+    d_sigma = d_noise[0]*d + \
+        d_noise[1]*abs(phi) + d_noise[2]
+    phi_sigma = phi_noise[0]*d + \
+        phi_noise[1]*abs(phi) + phi_noise[2]
+    return np.array([[d_sigma, 0],
+                     [0, phi_sigma]])
 
 # Display
+
+
 def display(step):
     plt.plot([0, 0, map_width, map_width], [
              0, map_height, 0, map_height], "y*")
@@ -667,18 +677,16 @@ def display(step):
     plt.title("Step " + str(step))
     plt.plot()
 
-
 # Error computation
+
 
 def position_error(real, particle):
     res = sqrt((real[0] - particle[0])**2 + (real[1] - particle[1])**2)
 
     return res
 
-# TODO: Correspondence threshold should be taken into account !
 
-
-def map_error(features, particle, correspondence_threshold):
+def map_error(features, particle, final_correspondence_distance):
     if len(particle[4]) == 0:
         return 0
 
@@ -691,9 +699,13 @@ def map_error(features, particle, correspondence_threshold):
                        (f1[0].transpose()[0][1] - f2[1])**2)
             if tmp < best:
                 best = tmp
-        if best >= correspondence_threshold:
+        if best >= final_correspondence_distance:
             res += best
             features_num += 1
+
+    if features_num == 0:
+        return 0
+
     res /= features_num
 
     return res
