@@ -30,9 +30,9 @@ def odom_callback(wheel_vel_data, steering_data):
 
     if old_time == None:
         old_time = wheel_vel_data.header.stamp
-        old_time_float= wheel_vel_data.header.stamp.to_sec()
+        old_time_float = wheel_vel_data.header.stamp.to_sec()
         return
-    
+
     new_time = wheel_vel_data.header.stamp
     new_time_float = wheel_vel_data.header.stamp.to_sec()
 
@@ -45,7 +45,7 @@ def odom_callback(wheel_vel_data, steering_data):
     # calculate wheel odometry
     dt = new_time_float-old_time_float
     old_time = new_time
-    old_time_float=new_time_float
+    old_time_float = new_time_float
     rospy.loginfo('(dt)=({:.3f})'.format(dt))
     old_x = x
     old_y = y
@@ -54,15 +54,19 @@ def odom_callback(wheel_vel_data, steering_data):
     wheel_vel = wheel_vel_data.twist.linear.x
     steer_phi = steering_data.position
 
-    if abs(steer_phi) < 1e-5:
+    # Straight motion
+    if abs(steer_phi) < 1e-3:
         x += wheel_vel*dt*cos(theta)
         y += wheel_vel*dt*sin(theta)
+    # Circular motion
     else:
+        # Turning left
         if steer_phi < 0:
             theta += wheel_vel*dt / \
                 sqrt((WHEEL_BASE/tan(steer_phi)+AXIS_LENGTH/2)**2+WHEEL_BASE**2)
+        # Turning right
         else:
-            theta += wheel_vel*dt / \
+            theta -= wheel_vel*dt / \
                 sqrt((WHEEL_BASE/tan(steer_phi)-AXIS_LENGTH/2)**2+WHEEL_BASE**2)
         x += WHEEL_BASE/tan(steer_phi)*(sin(theta)-sin(old_theta))
         y -= WHEEL_BASE/tan(steer_phi)*(cos(theta)-cos(old_theta))
@@ -121,11 +125,7 @@ if __name__ == '__main__':
         '/maxon/steering/state', MotorState)
 
     sync = message_filters.ApproximateTimeSynchronizer(
-        [wheel_vel_sub, steering_sub], queue_size = 1, slop = 0.5, allow_headerless=True)
+        [wheel_vel_sub, steering_sub], queue_size=1, slop=0.5, allow_headerless=True)
     sync.registerCallback(odom_callback)
 
     rospy.spin()
-
-
-
-
