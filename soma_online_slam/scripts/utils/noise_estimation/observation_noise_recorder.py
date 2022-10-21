@@ -9,7 +9,7 @@ import message_filters
 
 
 DIR = os.path.dirname(__file__)
-OBSERVATION_FILE_NAME = DIR + '/../../data/observation.txt'
+OBSERVATION_FILE_NAME = DIR + '/../../../data/noise_estimation/observation.txt'
 
 
 class ObservationNoiseRecorder:
