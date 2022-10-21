@@ -24,14 +24,23 @@ RAW_HISTORY_FILE_NAME = DIR + '/../data/raw_history.txt'
 
 # Online SLAM ROS node for Gazebo simulation
 
-# Motion noise: [[-2.62732681, 9.69055414, 0.02498358], [1.67657443e-02, 1.93710069e-02, 2.60283939e-05], [-2.690273735, 9.9430819, 0.02486511]]
+# MOTION NOISE
+# [[-2.62732681, 9.69055414, 0.02498358], [1.67657443e-02, 1.93710069e-02, 2.60283939e-05], [-2.690273735, 9.9430819, 0.02486511]]
+# Least squares: [[-1.92644922e+02, -1.74811963e+01, 6.95432923e-02], [3.70127109e-01, -4.47921910e-02, 2.23276889e-05], [-1.86110239e+02, -1.77781225e+01, 6.71839175e-02]]
+# Non-negative least squares: [[0.0, 0.0, 0.02095201], [2.09585459e-01, 0.0, 1.27092045e-05], [0.0, 0.0, 0.0203773]]
+# Non-negative least squares (10 Hz, 1000 samples): [[0.0, 0.0, 0.04380287], [9.12562546e-02, 3.30730802e-03, 6.92975380e-06], [0.0, 0.0, 0.04380158]]
+# Non-negative least squares (10 Hz, 1000 samples, remove outliers): [[0.0, 3.64294817e-01, 2.01017173e-04], [9.12562546e-02, 3.30730802e-03, 6.92975380e-06], [0.0, 3.43705501e-01, 2.07280858e-04]]
+# Non-negative least squares (10 Hz, 2000 samples, remove outliers): [[0.0, 0.05929458, 0.00022535], [2.29785633e-02, 6.30589407e-03, 3.06732306e-05], [0.0, 0.05773578, 0.00029168]]
+# [[0.005, 0.05, 0.0], [0.02, 0.005, 0.0], [0.005, 0.05, 0.0]]
 
-# Observation noise: [[0.00194033, 0.0, -0.00173727], [-7.21065378e-05, 0.0, 2.36805940e-03]]
+# OBSERVATION NOISE
+# [[0.00194033, 0.0, -0.00173727], [-7.21065378e-05, 0.0, 2.36805940e-03]]
 # Least squares: [[ 0.09879955 , -0.08296607, -0.26587525], [ 0.01150329, -0.01042548, -0.02807891]]
-# Non-negative least squares: [[0.04024353, 0.0, 0.0], [0.0048568, 0.0, 0.0]]
+# Non-negative least squares (2000 samples): [[0.04024353, 0.0, 0.0], [0.0048568, 0.0, 0.0]]
+# Non-negative least squares (2000 samples, remove outliers): [[0.00504384, 0.0, 0.0], [0.00048446, 0.0, 0.0]]
 # [[0.05, 0.0, 0.0], [0.0005, 0.0, 0.0]]
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.005, 0.05, 0.0], [0.02, 0.005, 0.0], [0.005, 0.05, 0.0]], observation_model="range_bearing", min_visibility=1.0, max_visibility=8.0, observation_noise=[[0.04024353, 0.0, 0.0], [0.0048568, 0.0, 0.0]], correspondence_threshold=10**(-8), delete_threshold=10**(-8), resampling_sigma=[[0.001, 0.0, 0.0], [0.0, 0.001, 0.0], [0.0, 0.0, 0.0001]]):
+    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.05929458, 0.00022535], [2.29785633e-02, 6.30589407e-03, 3.06732306e-05], [0.0, 0.05773578, 0.00029168]], observation_model="range_bearing", min_visibility=1.0, max_visibility=8.0, observation_noise=[[0.00504384, 0.0, 0.0], [0.00048446, 0.0, 0.0]], correspondence_threshold=10**(-8), delete_threshold=10**(-8), resampling_sigma=[[0.001, 0.0, 0.0], [0.0, 0.001, 0.0], [0.0, 0.0, 0.0001]]):
         self.real = []
         self.features = []
 
