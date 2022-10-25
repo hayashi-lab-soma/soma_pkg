@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import TwistStamped
 from geometry_msgs.msg import Quaternion
@@ -9,7 +8,6 @@ from tf.transformations import quaternion_from_euler
 from tf import TransformBroadcaster
 import message_filters
 from maxon_epos_msgs.msg import MotorState
-from maxon_epos_msgs.msg import MotorStates
 from math import sin, cos, tan, sqrt
 
 
@@ -61,13 +59,15 @@ def odom_callback(wheel_vel_data, steering_data):
     # Circular motion
     else:
         # Turning left
-        if steer_phi < 0:
-            theta += wheel_vel*dt / \
-                sqrt((WHEEL_BASE/tan(steer_phi)+AXIS_LENGTH/2)**2+WHEEL_BASE**2)
+        if wheel_vel*steer_phi > 0:
+            theta += abs(wheel_vel)*dt / \
+                sqrt((WHEEL_BASE/abs(tan(steer_phi)) +
+                     AXIS_LENGTH/2)**2+WHEEL_BASE**2)
         # Turning right
         else:
-            theta -= wheel_vel*dt / \
-                sqrt((WHEEL_BASE/tan(steer_phi)-AXIS_LENGTH/2)**2+WHEEL_BASE**2)
+            theta -= abs(wheel_vel)*dt / \
+                sqrt((WHEEL_BASE/abs(tan(steer_phi)) -
+                     AXIS_LENGTH/2)**2+WHEEL_BASE**2)
         x += WHEEL_BASE/tan(steer_phi)*(sin(theta)-sin(old_theta))
         y -= WHEEL_BASE/tan(steer_phi)*(cos(theta)-cos(old_theta))
 
