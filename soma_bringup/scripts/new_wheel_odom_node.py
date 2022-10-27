@@ -53,17 +53,17 @@ def odom_callback(wheel_vel_data, steering_data):
     steer_phi = steering_data.position
 
     # Straight motion
-    if abs(steer_phi) < 1e-3:
+    if abs(steer_phi) < 1e-2:
         x += wheel_vel*dt*cos(theta)
         y += wheel_vel*dt*sin(theta)
     # Circular motion
     else:
-        # Turning left
+        # Forward turning left or backward turning right
         if wheel_vel*steer_phi > 0:
             theta += abs(wheel_vel)*dt / \
                 sqrt((WHEEL_BASE/abs(tan(steer_phi)) +
                      AXIS_LENGTH/2)**2+WHEEL_BASE**2)
-        # Turning right
+        # Forward turning right or backward turning left
         else:
             theta -= abs(wheel_vel)*dt / \
                 sqrt((WHEEL_BASE/abs(tan(steer_phi)) -
