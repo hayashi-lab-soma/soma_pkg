@@ -4,6 +4,7 @@
 
 	<node ns="/outdoor_waypoint_nav" pkg="outdoor_waypoint_nav" type="gps_waypoint" name="gps_waypoint" output="screen" />
 	<param name="/outdoor_waypoint_nav/pkg_name" value="soma_tools" type="string" />
-	<param name="/outdoor_waypoint_nav/coordinates_file" value="/waypoint_files/test.txt" type="string" />
+	<!-- <param name="/outdoor_waypoint_nav/coordinates_file" value="/waypoint_files/test.txt" type="string" /> -->
+	<param name="/outdoor_waypoint_nav/coordinates_file" value="/waypoint_files/test2.txt" type="string" />
 
 </launch>
