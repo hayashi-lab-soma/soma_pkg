@@ -42,9 +42,10 @@ def timer_callback(event):
   # _x = wheel_vel*cos(theta)*dt
   # _y = wheel_vel*sin(theta)*dt
   # _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE*dt
-  _x = wheel_vel*cos(theta)
-  _y = wheel_vel*sin(theta)
-  _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE
+  
+  _x = wheel_vel*cos(theta) #[m/sec]
+  _y = wheel_vel*sin(theta) #[m/sec]
+  _theta = wheel_vel*tan(steer_phi)/WHEEL_BASE #[rad/sec]
 
   x = x + _x*dt
   y = y + _y*dt
@@ -82,14 +83,14 @@ def timer_callback(event):
   odom.pose.covariance[35] = 0.001 #sigma_yaw,yaw
   odom_pub.publish(odom)
 
-  # broadcast wodom -> base_link
+  # broadcast soma/wheel_odom -> base_link
   transform = TransformStamped()
   transform.header.stamp = rospy.Time.now()
   transform.header.frame_id = ODOM_FRAME_ID
   transform.child_frame_id = BASE_FRAME_ID
   transform.transform.translation = odom.pose.pose.position
   transform.transform.rotation = odom.pose.pose.orientation
-  # tf_broadcaster.sendTransformMessage(transform)
+  tf_broadcaster.sendTransformMessage(transform)
 
 if __name__ == '__main__':
   global BASE_FRAME_ID
