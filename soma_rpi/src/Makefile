@@ -4,13 +4,13 @@ CFLAGS = -Wall
 
 TARGET = soma_rpi
 
-SRCS = ./src/main.cpp
-SRCS += ./src/Clutch.cpp
-SRCS += ./src/Rotary.cpp
+SRCS = ./main.cpp
+SRCS += ./Clutch.cpp
+SRCS += ./Rotary.cpp
 
-OBJS = $(SRC:.cpp=.o)
+OBJS = $(SRCS:%.cpp=%.o)
 
-INCDIR = -I./src
+INCDIR = 
 
 LIBDIR = 
 
