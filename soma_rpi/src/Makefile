@@ -14,7 +14,8 @@ INCDIR =
 
 LIBDIR = 
 
-LIBS = 
+LIBS = -lwiringPi
+LIBS += -lpthread
 
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $^ $(LIBDIR) $(LIBS)

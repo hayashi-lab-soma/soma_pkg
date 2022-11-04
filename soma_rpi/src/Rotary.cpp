@@ -4,6 +4,7 @@ int Rotary::pulsecnt[2] = { 0, 0 };
 std::chrono::system_clock::time_point Rotary::chrono_t;
 double Rotary::t = -1.0;
 double Rotary::v = 0.0;
+double new_vel = 0.0;
 
 Rotary::Rotary()
 {
@@ -54,7 +55,7 @@ int Rotary::init()
 
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(ROTARY::SEND_PORT);
-	addr.sin_addr.s_addr = inet_addr("192.168.1.11");
+	addr.sin_addr.s_addr = inet_addr("192.168.1.11"); //nuc2でもおけ
 
 	int yes = 1;
 	if (setsockopt(sock, SOL_SOCKET,
@@ -87,26 +88,30 @@ int Rotary::init()
 	return 0;
 }
 
-void Rotary::interrupt()
+void Rotary::interrupt() //パルスの立ち上がり検出
 {
 	//printf("%s:Interrupt!\n", __FUNCTION__);
 	int v = digitalRead(ROTARY::PIN_CONFIG::IN);
 	if (v != HIGH) return;
 
-	//���ݎ��Ԏ擾
+	//���ݎ��Ԏ擾
 	std::chrono::system_clock::time_point n = std::chrono::system_clock::now();
-	//�O��Ƃ̍����v�Z
+	//�O��Ƃ̍����v�Z
 	t = std::chrono::duration_cast<std::chrono::milliseconds>(n - chrono_t).count();
 
-	if (t < 10.0) {
+	if (t < 10.0) { // あまりにもみじかすぎるとノイズだから除去するため　電磁クラッチとかのバチバチ
 		printf("chataling?\n");
 		return; //chataling protection
 	}
 
 	//pulsecnt[1] = pulsecnt[0];
 	pulsecnt[0]++;
-
-	//�V�t�g
+	new_vel = (0.09424778*1000)/(t);
+	new_vel*= ROTARY::TIRE_R / ROTARY::SENSOR_R;
+	if (global_clutch == CLUTCH::STATE::BACKWARD) {
+				new_vel = -1.0 * new_vel;
+			}
+	//�V�t�g
 	chrono_t = n;
 	return;
 }
@@ -125,9 +130,10 @@ void Rotary::calcVelocity()
 		long incr = pulsecnt[0] - pulsecnt[1];
 
 		if (incr > 0) {	//positive
+		//ここの計算が大事
 			double delta = (double)(incr)*(ROTARY::SENSOR_R*3.1415 / 4.0); // m/s
 			v = delta/((double)timecnt*(double)(dt)/1000.0);
-			v *= ROTARY::TIRE_R / ROTARY::SENSOR_R;
+			v *= ROTARY::TIRE_R / ROTARY::SENSOR_R; //タイヤ半径とセンサの位置がちがったから
 
 			if (global_clutch == CLUTCH::STATE::BACKWARD) {
 				v = -1.0 * v;
@@ -136,18 +142,21 @@ void Rotary::calcVelocity()
 			pulsecnt[1] = pulsecnt[0];
 			timecnt = 1;
 		}
-		else if (incr == 0) { //�����Ȃ�
+		else if (incr == 0) { //�����Ȃ�
 			timecnt++;
 		}
-		else if (incr < 0) { //�J�E���^�����Z�b�g����Ă���
+		else if (incr < 0) { //�J�E���^�����Z�b�g����Ă���
 			pulsecnt[1] = 0;
 			timecnt = 1;
 		}
 
 
-		if (timecnt >= (lim_T / (double)dt)) v = 0.0;
+		if (timecnt >= (lim_T / (double)dt)) v = 0.0; //パルスが入ってこなくなたとき
 
 		delay(dt);
+
+		if(t>500)
+			new_vel = 0;
 	}
 }
 
@@ -180,7 +189,8 @@ void Rotary::send()
 	} send;
 
 	send.pulse_cnt = pulsecnt[0];
-	send.velocity = v;
+	// send.velocity = v;
+	send.velocity = new_vel;
 
 	int s = sendto(sock, (char*)&send, sizeof(Send_t), 0,
 		(struct sockaddr*)&addr, sizeof(addr));
@@ -190,6 +200,6 @@ void Rotary::send()
 		return;
 	}
 
-	//printf("sent:%dbyte, (%d)\n", s, send.pulse_cnt);
+	// printf("sent:%dbyte, (%f)\n", s, send.pulse_cnt);
 	return;
 }
