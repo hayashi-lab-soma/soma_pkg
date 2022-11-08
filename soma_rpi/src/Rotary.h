@@ -14,6 +14,7 @@
 #include <errno.h>
 
 #include <thread>
+#include <mutex>
 
 #include "Clutch.h"
 
@@ -39,6 +40,7 @@ private:
 	struct sockaddr_in addr_recv;
 
 	std::thread *th_calcVelo;
+	std::mutex mtx;
 	bool isCalcVelocity;
 
 	static int pulsecnt[2];

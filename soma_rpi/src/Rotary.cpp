@@ -106,13 +106,15 @@ void Rotary::interrupt() //パルスの立ち上がり検出
 
 	//pulsecnt[1] = pulsecnt[0];
 	pulsecnt[0]++;
+	std::lock_guard<std::mutex> lock(mtx);
 	new_vel = (0.09424778*1000)/(t);
 	new_vel*= ROTARY::TIRE_R / ROTARY::SENSOR_R;
 	if (global_clutch == CLUTCH::STATE::BACKWARD) {
 				new_vel = -1.0 * new_vel;
 			}
 	//�V�t�g
-	chrono_t = n;
+	std::lock_guard<std::mutex> unlock(mtx);
+	chrono_t = n;	
 	return;
 }
 
@@ -190,7 +192,9 @@ void Rotary::send()
 
 	send.pulse_cnt = pulsecnt[0];
 	// send.velocity = v;
+	std::lock_guard<std::mutex> lock(mtx);
 	send.velocity = new_vel;
+	std::lock_guard<std::mutex> unlock(mtx);
 
 	int s = sendto(sock, (char*)&send, sizeof(Send_t), 0,
 		(struct sockaddr*)&addr, sizeof(addr));
