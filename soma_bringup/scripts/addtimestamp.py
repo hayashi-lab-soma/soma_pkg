@@ -9,12 +9,32 @@ from tf import TransformBroadcaster
 from maxon_epos_msgs.msg import MotorState
 from maxon_epos_msgs.msg import MotorStates
 from math import sin, cos, tan, sqrt
+import iir_filter
+from scipy import signal
+
+y_old=0
 
 def callback_wheel_vel(data):
     vel= TwistStamped()
     vel.header.stamp = rospy.Time.now()
-    vel.twist.linear.x=data.data
+    f0 = 48.0
+    f1 = 52.0
+    f2 = 100
+    fs = 1000.0
+    sos1 = signal.butter(4, f2/fs*2, output='sos')
+    iir1 = iir_filter.IIR_filter(sos1)
+    vel.twist.linear.x= iir1.filter(data.data)
+
+    # vel.twist.linear.x=data.data
     vel_pub.publish(vel)
+    vel1= TwistStamped()
+    vel1=vel
+    alpha = 0.5
+    global y_old
+    y = alpha * y_old + (1 - alpha) * data.data
+    y_old = y
+    vel1.twist.linear.x= y
+    vel1_pub.publish(vel1)
 
 def callback_steering_state(data):
     steer= MotorState()
@@ -33,5 +53,6 @@ if __name__ == '__main__':
 
     # publishers
     vel_pub = rospy.Publisher('/soma/wheel_vel_new', TwistStamped, queue_size=1)
+    vel1_pub = rospy.Publisher('/soma/wheel_vel_filtered2', TwistStamped, queue_size=1)
     steer_pub = rospy.Publisher('/soma/steering_angle', MotorState, queue_size=1)
     rospy.spin()
