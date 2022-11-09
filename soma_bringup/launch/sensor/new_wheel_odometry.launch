@@ -2,7 +2,7 @@
 <launch>
 	<node name="republish" pkg="soma_bringup" type="addtimestamp.py" />
 	<node name="wheel_odometry" pkg="soma_bringup" type="new_wheel_odom.py" output="screen">
-		<remap from="/wheel_vel" to="/soma/wheel_vel_new" />
+		<remap from="/wheel_vel" to="/soma/wheel_vel_filtered2" />
 		<remap from="/maxon/steering/state" to="/soma/steering_angle" />
 		<param name="wheel_base" value="1.04" />
 		<param name="publish_duration" value="0.1" />
