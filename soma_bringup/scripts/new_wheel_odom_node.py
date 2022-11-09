@@ -50,7 +50,9 @@ def odom_callback(wheel_vel_data, steering_data):
     old_theta = theta
 
     wheel_vel = wheel_vel_data.twist.linear.x
-    steer_phi = steering_data.position
+    motor_phi = steering_data.position
+    motor_to_wheel = 0.68
+    steer_phi = motor_phi*0.68
 
     # Straight motion
     if abs(steer_phi) < 1e-2:
