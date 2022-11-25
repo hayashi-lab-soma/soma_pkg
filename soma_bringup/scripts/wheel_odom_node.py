@@ -90,7 +90,7 @@ def timer_callback(event):
   transform.child_frame_id = BASE_FRAME_ID
   transform.transform.translation = odom.pose.pose.position
   transform.transform.rotation = odom.pose.pose.orientation
-  tf_broadcaster.sendTransformMessage(transform)
+  # tf_broadcaster.sendTransformMessage(transform)
 
 if __name__ == '__main__':
   global BASE_FRAME_ID

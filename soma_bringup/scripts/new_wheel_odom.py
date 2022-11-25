@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import Float32
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import TwistStamped
 from geometry_msgs.msg import Quaternion
@@ -9,7 +8,6 @@ from tf.transformations import quaternion_from_euler
 from tf import TransformBroadcaster
 import message_filters
 from maxon_epos_msgs.msg import MotorState
-from maxon_epos_msgs.msg import MotorStates
 from math import sin, cos, tan, sqrt
 
 
@@ -30,9 +28,9 @@ def odom_callback(wheel_vel_data, steering_data):
 
     if old_time == None:
         old_time = wheel_vel_data.header.stamp
-        old_time_float= wheel_vel_data.header.stamp.to_sec()
+        old_time_float = wheel_vel_data.header.stamp.to_sec()
         return
-    
+
     new_time = wheel_vel_data.header.stamp
     new_time_float = wheel_vel_data.header.stamp.to_sec()
 
@@ -45,18 +43,22 @@ def odom_callback(wheel_vel_data, steering_data):
     # calculate wheel odometry
     dt = new_time_float-old_time_float
     old_time = new_time
-    old_time_float=new_time_float
+    old_time_float = new_time_float
     rospy.loginfo('(dt)=({:.3f})'.format(dt))
     old_x = x
     old_y = y
     old_theta = theta
 
     wheel_vel = wheel_vel_data.twist.linear.x
-    steer_phi = steering_data.position
+    motor_phi = steering_data.position
+    motor_to_wheel = 0.5
+    steer_phi = motor_phi*motor_to_wheel
 
+    # Straight motion
     if abs(steer_phi) < 1e-2:
         x += wheel_vel*dt*cos(theta)
         y += wheel_vel*dt*sin(theta)
+    # Circular motion
     else:
         # Forward turning left or backward turning right
         if wheel_vel*steer_phi > 0:
@@ -102,7 +104,7 @@ def odom_callback(wheel_vel_data, steering_data):
     transform.child_frame_id = BASE_FRAME_ID
     transform.transform.translation = odom.pose.pose.position
     transform.transform.rotation = odom.pose.pose.orientation
-    tf_broadcaster.sendTransformMessage(transform)
+    # tf_broadcaster.sendTransformMessage(transform)
 
     return
 
@@ -125,11 +127,7 @@ if __name__ == '__main__':
         '/maxon/steering/state', MotorState)
 
     sync = message_filters.ApproximateTimeSynchronizer(
-        [wheel_vel_sub, steering_sub], queue_size = 1, slop = 0.5, allow_headerless=True)
+        [wheel_vel_sub, steering_sub], queue_size=1, slop=0.5, allow_headerless=True)
     sync.registerCallback(odom_callback)
 
     rospy.spin()
-
-
-
-
