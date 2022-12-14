@@ -29,12 +29,12 @@
   <arg name="motor_topics" default="/maxon_bringup/steering/get_state /maxon_bringup/rear_brake/get_state /maxon_bringup/front_brake/get_state /maxon_bringup/throttle/get_state" if="$(arg is_motor_topics)" />
   <arg name="motor_topics" default="" unless="$(arg is_motor_topics)" />
   <!-- Odometry topics -->
-  <arg name="odom_topics" default="/soma /lidar_odom /vodom /odom" doc="" />
-  <arg name="odom_topics" default="/fix/gps /soma/wheel_odom /odometry/filtered/global /odometry/filtered/local /odometry/gps" doc="" />
+  <!-- <arg name="odom_topics" default="/vodom /odom" doc="" /> -->
+  <arg name="odom_topics" default="/soma/steering_angle /soma/wheel_odom /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle /fix/gps /soma/wheel_odom /odometry/filtered/global /odometry/filtered/local /odometry/gps" doc="" />
   <!-- soma topics -->
   <arg name="soma_topics" default="/soma /soma/status tf tf_static" />
   <!-- odom topics -->
-  <!-- <arg name="odom_topics" default="/soma/wheel_odom /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle" if="$(arg is_odom_topics)" /> -->
+  <!-- <arg name="odom_topics" default="/soma/steering_angle /soma/wheel_odom /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle" if="$(arg is_odom_topics)" /> -->
   <!-- <arg name="odom_topics" default="" unless="$(arg is_odom_topics)" /> -->
   <!-- marge topics -->
   <arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg odom_topics) $(arg soma_topics) $(arg imu_topics)" />
