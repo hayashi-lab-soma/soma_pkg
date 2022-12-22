@@ -30,9 +30,9 @@ def odom_callback(wheel_vel_data, steering_data):
 
     if old_time == None:
         old_time = wheel_vel_data.header.stamp
-        old_time_float= wheel_vel_data.header.stamp.to_sec()
+        old_time_float = wheel_vel_data.header.stamp.to_sec()
         return
-    
+
     new_time = wheel_vel_data.header.stamp
     new_time_float = wheel_vel_data.header.stamp.to_sec()
 
@@ -45,16 +45,17 @@ def odom_callback(wheel_vel_data, steering_data):
     # calculate wheel odometry
     dt = new_time_float-old_time_float
     old_time = new_time
-    old_time_float=new_time_float
+    old_time_float = new_time_float
     rospy.loginfo('(dt)=({:.3f})'.format(dt))
     old_x = x
     old_y = y
     old_theta = theta
 
-    wheel_vel = wheel_vel_data.twist.linear.x
+    keep_vel = 0.8
+    wheel_vel = wheel_vel_data.twist.linear.x*keep_vel
     motor_phi = steering_data.position
-    motor_to_wheel = 0.68
-    steer_phi = motor_phi*0.68
+    motor_to_wheel = 0.34
+    steer_phi = motor_phi*motor_to_wheel
 
     if abs(steer_phi) < 1e-2:
         x += wheel_vel*dt*cos(theta)
@@ -122,16 +123,13 @@ if __name__ == '__main__':
     odom_pub = rospy.Publisher('/soma/wheel_odom', Odometry, queue_size=5)
     tf_broadcaster = TransformBroadcaster()  # tf1 ver.
     # subscribers (synchronized)
-    wheel_vel_sub = message_filters.Subscriber('/wheel_vel', TwistStamped)
+    wheel_vel_sub = message_filters.Subscriber(
+        '/soma/wheel_vel_filtered2', TwistStamped)
     steering_sub = message_filters.Subscriber(
-        '/maxon/steering/state', MotorState)
+        '/soma/steering_angle', MotorState)
 
     sync = message_filters.ApproximateTimeSynchronizer(
-        [wheel_vel_sub, steering_sub], queue_size = 1, slop = 0.5, allow_headerless=True)
+        [wheel_vel_sub, steering_sub], queue_size=1, slop=0.5, allow_headerless=True)
     sync.registerCallback(odom_callback)
 
     rospy.spin()
-
-
-
-
