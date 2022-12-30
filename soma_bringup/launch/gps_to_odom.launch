@@ -1,0 +1,16 @@
+<!-- Conversion from GPS to odometry -->
+
+<launch>
+    <!-- Arguments -->
+    <arg name="gps_topic" default="/fix/gps"/>
+    <arg name="odom_topic" default="/gps_odom"/>
+
+    <node name="gps_to_odom" pkg="gps_common" type="utm_odometry_node">
+        <remap from="fix" to="$(arg gps_topic)"/>
+        <remap from="odom" to="$(arg odom_topic)"/>
+        <param name="~frame_id" value="wodom"/>
+        <param name="~child_frame_id" value="base_link"/>
+    </node>
+
+    <node name="gps_relative_odom" pkg="soma_bringup" type="gps_relative_odom.py" output="screen"/>
+</launch>
