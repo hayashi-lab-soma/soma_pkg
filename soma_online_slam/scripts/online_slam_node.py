@@ -1,14 +1,12 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import rospy
 import numpy as np
 import os
 from datetime import datetime
 from geometry_msgs.msg import PoseArray, Twist
 import message_filters
-from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
-from gazebo_msgs.msg import ModelStates, LinkStates
+from gazebo_msgs.msg import ModelStates
 from tf.transformations import euler_from_quaternion
 from math import sqrt, atan2, pi, cos, sin
 import matplotlib.pyplot as plt
@@ -39,8 +37,27 @@ RAW_HISTORY_FILE_NAME = DIR + '/../data/raw_history.txt'
 # Non-negative least squares (2000 samples): [[0.04024353, 0.0, 0.0], [0.0048568, 0.0, 0.0]]
 # Non-negative least squares (2000 samples, remove outliers): [[0.00504384, 0.0, 0.0], [0.00048446, 0.0, 0.0]]
 # [[0.05, 0.0, 0.0], [0.0005, 0.0, 0.0]]
+
+# PARAMETERS
+particles_num = 10
+motion_model = "odometry"
+motion_noise = [[0.0, 0.05929458, 0.00022535],
+                [2.29785633e-2, 6.30589407e-3, 3.06732306e-5],
+                [0.0, 0.05773578, 0.00029168]]
+observation_model = "range_bearing"
+min_visibility = 1.0
+max_visibility = 8.0
+observation_noise = [[0.00504384, 0.0, 0.0],
+                     [0.00048446, 0.0, 0.0]]
+correspondence_threshold = 1e-8
+delete_threshold = 1e-8
+resampling_sigma = [[0.001, 0.0, 0.0],
+                    [0.0, 0.001, 0.0],
+                    [0.0, 0.0, 0.0001]]
+
+
 class OnlineSLAMNode:
-    def __init__(self, particles_num=10, motion_model="odometry", motion_noise=[[0.0, 0.05929458, 0.00022535], [2.29785633e-02, 6.30589407e-03, 3.06732306e-05], [0.0, 0.05773578, 0.00029168]], observation_model="range_bearing", min_visibility=1.0, max_visibility=8.0, observation_noise=[[0.00504384, 0.0, 0.0], [0.00048446, 0.0, 0.0]], correspondence_threshold=10**(-8), delete_threshold=10**(-8), resampling_sigma=[[0.001, 0.0, 0.0], [0.0, 0.001, 0.0], [0.0, 0.0, 0.0001]]):
+    def __init__(self, particles_num=particles_num, motion_model=motion_model, motion_noise=motion_noise, observation_model=observation_model, min_visibility=min_visibility, max_visibility=max_visibility, observation_noise=observation_noise, correspondence_threshold=correspondence_threshold, delete_threshold=delete_threshold, resampling_sigma=resampling_sigma):
         self.real = []
         self.features = []
 
@@ -312,8 +329,6 @@ class OnlineSLAMNode:
         return self.real_ln, self.min_visibility_ln, self.max_visibility_ln, self.trees_ln, self.particles_ln, self.most_probable_ln, self.particle_min_visibility_ln, self.particle_max_visibility_ln, self.features_ln
 
     def update_plot(self, frame):
-        # if self.motion_mutex or self.observation_mutex:
-        #     return
         if self.update_mutex:
             return
 
@@ -342,7 +357,6 @@ class OnlineSLAMNode:
 
     # Update
 
-    # def real_update(self, real, imu):
     def real_update(self, data):
         # FOREST WITH UNEVEN GROUND
         # soma_index = 11
@@ -364,51 +378,17 @@ class OnlineSLAMNode:
         trees_start_index = 1
         trees_stop_index = 17
 
-        # old_real_x = self.real_x_data
-        # old_real_y = self.real_y_data
-        # old_real_theta = self.real_theta_data
-
-        # self.real_x_data = round(real.pose[soma_index].position.x, 3)
-        # self.real_y_data = round(real.pose[soma_index].position.y, 3)
-        # self.real_theta_data = round(euler_from_quaternion([
-        # real.pose[soma_index].orientation.x, real.pose[soma_index].orientation.y, real.pose[soma_index].orientation.z, real.pose[soma_index].orientation.w])[2], 3)
-        # self.real_theta_data = round(euler_from_quaternion(
-        # [imu.orientation.x, imu.orientation.y, imu.orientation.z, imu.orientation.w])[2], 7)
-
         self.real_theta_data = euler_from_quaternion([
             data.pose[soma_index].orientation.x, data.pose[soma_index].orientation.y, data.pose[soma_index].orientation.z, data.pose[soma_index].orientation.w])[2]
         self.real_x_data = data.pose[soma_index].position.x
         self.real_y_data = data.pose[soma_index].position.y
         self.real = [self.real_x_data, self.real_y_data, self.real_theta_data]
 
-        # if old_real_theta != None:
-        #     trans = sqrt((old_real_x-self.real_x_data)**2 +
-        #                  (old_real_y-self.real_y_data)**2)
-        #     if trans == 0:
-        #         rot1 = 0.0
-        #     else:
-        #         rot1 = atan2(self.real_y_data - old_real_y,
-        #                      self.real_x_data - old_real_x) - old_real_theta
-        #     if rot1 <= -pi/2:
-        #         trans *= -1
-        #         rot1 += pi
-        #     elif rot1 > pi/2:
-        #         trans *= -1
-        #         rot1 -= pi
-        #     rot2 = self.real_theta_data - old_real_theta - rot1
-
-        #     command = [rot1, trans, rot2]
-
         if self.first:
             for p in self.solver.particles:
                 p.pose[0][0] = self.real_x_data
                 p.pose[1][0] = self.real_y_data
                 p.pose[2][0] = self.real_theta_data
-
-            # self.trees_x_data = [
-            #     real.pose[i].position.x for i in range(trees_start_index, trees_stop_index)]
-            # self.trees_y_data = [
-            #     real.pose[i].position.y for i in range(trees_start_index, trees_stop_index)]
 
             self.trees_x_data = [
                 data.pose[i].position.x for i in range(trees_start_index, trees_stop_index)]
@@ -581,17 +561,6 @@ if __name__ == '__main__':
     sync = message_filters.ApproximateTimeSynchronizer(
         [odom_sub, lidar_sub], 10, 0.1, allow_headerless=True)
     sync.registerCallback(node.solver_update)
-
-    # rospy.Subscriber('/imu', Imu, callback=node.real_update, queue_size=1)
-
-    # real_sub = message_filters.Subscriber(
-    #     '/gazebo/model_states', LinkStates)
-    # imu_sub = message_filters.Subscriber(
-    #     '/imu', Imu):
-
-    # sync = message_filters.ApproximateTimeSynchronizer(
-    #     [real_sub, imu_sub], 10, 0.1, allow_headerless=True)
-    # sync.registerCallback(node.real_update)
 
     ani = FuncAnimation(node.fig, node.update_plot, init_func=node.plot_init)
     plt.show(block=True)
