@@ -63,7 +63,7 @@ if __name__ == '__main__':
 
     # arguments
     BASE_FRAME_ID = rospy.get_param('~base_frame_id', 'gps')
-    ODOM_FRAME_ID = rospy.get_param('~odom_frame_id', 'wodom')
+    ODOM_FRAME_ID = rospy.get_param('~odom_frame_id', 'm_odom')
     # publishers
     odom_pub = rospy.Publisher('/gps_relative_odom', Odometry, queue_size=5)
     tf_broadcaster = TransformBroadcaster()

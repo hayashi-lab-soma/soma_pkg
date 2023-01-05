@@ -5,7 +5,7 @@
     <arg name="lidar_link" value="velodyne" />
     <arg name="odom_frame_id" value="lidar_odom" />
     <arg name="points_topic" value="/velodyne_points"/>
-    <arg name="enable_manager" value="false" doc="If you publish PointCloud2 from bagfile, set true" />
+    <arg name="enable_manager" value="true" doc="If you publish PointCloud2 from bagfile, set true" />
     <arg name="nodelet_manager" value="velodyne_nodelet_manager" />
     <arg name="enable_tf_base2lidar" value="false" />
     <!--

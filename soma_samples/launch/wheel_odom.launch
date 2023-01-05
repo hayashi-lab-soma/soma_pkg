@@ -2,7 +2,8 @@
 <launch>
     <!-- Azure camera -->
     <include file="$(find soma_bringup)/launch/sensor/rotary_wheel_vel.launch" />
-    <include file="$(find soma_bringup)/launch/sensor/wheel_odometry.launch" />
+    <!-- <include file="$(find soma_bringup)/launch/sensor/wheel_odometry.launch" /> -->
+    <include file="$(find soma_bringup)/launch/sensor/new_wheel_odometry.launch" />
 
     <node name="ekf_local" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
         <!-- load yaml file -->
@@ -21,8 +22,8 @@
         <!--  -->
         <!-- input-->
         <remap from="odom0" to="/soma/wheel_odom" />
-        <!-- <remap from="odom1" to="/lidar_odom" /> -->
-        <!-- <remap from="odom1" to="/odometry/gps" /> -->
+        <remap from="odom1" to="/odometry/gps" />
+        <!-- <remap from="odom2" to="/lidar_odom" /> -->
         <remap from="imu_data" to="/imu/data" />
         <!-- output frame odom-->
         <remap from="/odometry/filtered" to="/odometry/filtered/global" />

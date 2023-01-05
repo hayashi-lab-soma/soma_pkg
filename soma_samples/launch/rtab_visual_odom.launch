@@ -1,0 +1,37 @@
+<launch>
+    <!-- RGB-D Odometry -->
+    <arg name="rgb_topic" value="/rgb/image_raw" />
+    <arg name="depth_topic" value="/depth_to_rgb/image_raw" />
+    <arg name="camera_info_topic" value="/rgb/camera_info" />
+    <arg name="odom_topic" value="visual_odom" />
+    <!-- <arg name="approx_sync" value="true" /> -->
+    <arg name="frame_id" value="base_link" />
+    <arg name="vo_frame_id" value="m_odom" />
+
+    <node pkg="rtabmap_ros" type="rgbd_odometry" name="rgbd_odometry" output="screen" >
+        <remap from="rgb/image"       to="$(arg rgb_topic)"/>
+        <remap from="depth/image"     to="$(arg depth_topic)"/>
+        <remap from="rgb/camera_info" to="$(arg camera_info_topic)"/>
+        <remap from="odom"            to="$(arg odom_topic)"/>
+        <!-- <remap from="imu"             to="$(arg imu_topic)"/> -->
+    
+        <param name="frame_id"                    type="string" value="$(arg frame_id)"/>
+        <param name="odom_frame_id"               type="string" value="$(arg vo_frame_id)"/>
+        <!-- <param name="publish_tf"                  type="bool"   value="$(arg publish_tf_odom)"/>
+        <param name="ground_truth_frame_id"       type="string" value="$(arg ground_truth_frame_id)"/>
+        <param name="ground_truth_base_frame_id"  type="string" value="$(arg ground_truth_base_frame_id)"/>
+        <param name="wait_for_transform_duration" type="double" value="$(arg wait_for_transform)"/>
+        <param name="wait_imu_to_init"            type="bool"   value="$(arg wait_imu_to_init)"/>
+        <param name="approx_sync"                 type="bool"   value="$(arg approx_sync)"/>
+        <param name="approx_sync_max_interval"    type="double" value="$(arg approx_sync_max_interval)"/>
+        <param name="config_path"                 type="string" value="$(arg cfg)"/>
+        <param name="queue_size"                  type="int"    value="$(arg queue_size)"/>
+        <param name="subscribe_rgbd"              type="bool"   value="$(arg subscribe_rgbd)"/>
+        <param name="guess_frame_id"              type="string" value="$(arg odom_guess_frame_id)"/>
+        <param name="guess_min_translation"       type="double" value="$(arg odom_guess_min_translation)"/>
+        <param name="guess_min_rotation"          type="double" value="$(arg odom_guess_min_rotation)"/>
+        <param name="expected_update_rate"        type="double" value="$(arg odom_expected_rate)"/>
+        <param name="max_update_rate"             type="double" value="$(arg odom_max_rate)"/>
+        <param name="keep_color"                  type="bool"   value="$(arg use_odom_features)"/> -->
+    </node>
+</launch>
