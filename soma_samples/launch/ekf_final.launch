@@ -1,12 +1,15 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="gps_imu" default="true"/>
-    <arg name="wheel_gps_imu" default="false"/>
+    <arg name="gps_imu" default="false"/>
+    <arg name="wheel_gps_imu" default="true"/>
+    <arg name="visual_wheel_gps_imu" default="false"/>
+    <arg name="lidar_wheel_gps_imu" default="false"/>
 
     
     <include file="$(find soma_bringup)/launch/sensor/new_wheel_odometry.launch" />
 	<include file="$(find soma_bringup)/launch/gps_to_odom.launch" />
     <include file="$(find soma_samples)/launch/hdl.launch" />
+    <include file="$(find soma_samples)/launch/rtab_visual_odom.launch" />
 
     <group if="$(arg gps_imu)">
         <node name="ekf_gps_imu" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
@@ -30,6 +33,34 @@
             <remap from="imu_data" to="/imu/data" />
             <!-- output -->
             <remap from="/odometry/filtered" to="/ekf/wheel_gps_imu_odom" />
+        </node>
+    </group>
+
+    <group if="$(arg visual_wheel_gps_imu)">
+        <node name="ekf_visual_wheel_gps_imu" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+            <!-- load yaml file -->
+            <rosparam command="load" file="$(find soma_samples)/launch/config/ekf_final/ekf_visual_wheel_gps_imu.yaml" />
+            <!-- input -->
+            <remap from="odom0" to="/visual_odom" />
+            <remap from="odom1" to="/soma/wheel_odom" />
+            <remap from="odom2" to="/gps_relative_odom" />
+            <remap from="imu_data" to="/imu/data" />
+            <!-- output -->
+            <remap from="/odometry/filtered" to="/ekf/visual_wheel_gps_imu" />
+        </node>
+    </group>
+
+    <group if="$(arg lidar_wheel_gps_imu)">
+        <node name="ekf_lidar_wheel_gps_imu" pkg="robot_localization" type="ekf_localization_node" clear_params="true" output="screen">
+            <!-- load yaml file -->
+            <rosparam command="load" file="$(find soma_samples)/launch/config/ekf_final/ekf_lidar_wheel_gps_imu.yaml" />
+            <!-- input -->
+            <remap from="odom0" to="/lidar_odom" />
+            <remap from="odom1" to="/soma/wheel_odom" />
+            <remap from="odom2" to="/gps_relative_odom" />
+            <remap from="imu_data" to="/imu/data" />
+            <!-- output -->
+            <remap from="/odometry/filtered" to="/ekf/lidar_wheel_gps_imu" />
         </node>
     </group>
 
