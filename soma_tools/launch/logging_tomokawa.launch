@@ -13,7 +13,7 @@
 	...
 	-->
   <!-- lidar topics -->
-  <arg name="lidar_topics" default="/filtered_points" if="$(arg is_lidar_topics)" />
+  <arg name="lidar_topics" default="/velodyne_points" if="$(arg is_lidar_topics)" />
   <arg name="lidar_topics" default="" unless="$(arg is_lidar_topics)" />
   <!-- rgbd camera topics -->
   <arg name="rgb_image_topics" default="/rgb/image_raw " />
@@ -30,14 +30,15 @@
   <arg name="motor_topics" default="" unless="$(arg is_motor_topics)" />
   <!-- Odometry topics -->
   <!-- <arg name="odom_topics" default="/vodom /odom" doc="" /> -->
-  <arg name="odom_topics" default="/soma/steering_angle /soma/wheel_odom /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle /fix/gps /soma/wheel_odom /odometry/filtered/global /odometry/filtered/local /odometry/gps" doc="" />
+  <arg name="odom_topics" default="/teleop/cmd_vel /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle /fix/gps /odometry/filtered/global /odometry/filtered/local /odometry/gps" doc="" />
+  <!-- <arg name="odom_topics" default="/teleop/cmd_vel /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle /fix/gps" doc="" /> -->
   <!-- soma topics -->
   <arg name="soma_topics" default="/soma /soma/status tf tf_static" />
   <!-- odom topics -->
   <!-- <arg name="odom_topics" default="/soma/steering_angle /soma/wheel_odom /soma/wheel_vel /soma/wheel_vel_new /soma/wheel_vel_filtered2 /soma/steering_angle" if="$(arg is_odom_topics)" /> -->
   <!-- <arg name="odom_topics" default="" unless="$(arg is_odom_topics)" /> -->
   <!-- marge topics -->
-  <arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg odom_topics) $(arg soma_topics) $(arg imu_topics)" />
+  <arg name="topics" default="$(arg lidar_topics) $(arg camera_topics) $(arg odom_topics) $(arg soma_topics) $(arg imu_topics) $(arg motor_topics)" />
   <!--  -->
   <!--
 	Run logging
