@@ -12,7 +12,7 @@ from math import pi
 class WpNavi():
     def __init__(self):
         # self.way_point = [[5.0, 0,0*pi], [ 5.0, -2.0, 0.5*pi], [999, 999, 999]]
-        self.way_point = [[ 30.0, 0.0, 0.0*pi], [999, 999, 999]]
+        self.way_point = [[ 20.0, 0.0, 0.0*pi], [999, 999, 999]]
         # self.way_point = [[60.0, 30.0,1.0 * pi], [999, 999, 999]]
         self.ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         self.goal = MoveBaseGoal()
