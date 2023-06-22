@@ -10,7 +10,7 @@
     <include file="$(find soma_bringup)/launch/sensor/rotary_wheel_vel.launch" />
     <include file="$(find soma_bringup)/launch/sensor/new_wheel_odometry.launch" />
     <include file="$(find soma_bringup)/launch/gps_to_odom.launch" />
-    <include file="$(find soma_samples)/launch/hdl.launch" />
+    <!-- <include file="$(find soma_samples)/launch/hdl.launch" /> -->
     <!-- <include file="$(find soma_samples)/launch/rtab_visual_odom.launch" /> -->
 
     <group if="$(arg gps_imu)">

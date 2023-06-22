@@ -9,7 +9,7 @@ print_diagnostics: true
 publish_tf: true
 publish_acceleration: false
 
-world_frame: m_odom
+world_frame: m_map
 map_frame: m_map
 odom_frame: m_odom
 base_link_frame: base_link

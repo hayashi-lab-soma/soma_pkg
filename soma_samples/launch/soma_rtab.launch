@@ -15,7 +15,7 @@
         <!-- Launch rtabmap icp odometry node -->
         <!--arg name="imu_topic" value="/imu/data"/> -->        <!-- only used with VIO approaches -->
         <arg name="odom_frame_id" value="m_odom"/>
-        <arg name="publish_tf_map" value="false"/>
+        <arg name="publish_tf_map" value="true"/>
         <arg name="map_frame_id" value="m_map"/>
         <arg name="subscribe_scan_cloud" value="true"/>
         <arg name="scan_cloud_topic" value="/velodyne_points"/>
